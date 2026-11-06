@@ -20,7 +20,13 @@ jobs:
           go-version-file: go.mod
           cache: true
       - name: Format check
-        run: test -z "$(gofmt -l ./cmd ./internal)"
+        run: |
+          unformatted="$(gofmt -l ./cmd ./internal)"
+          if [ -n "$unformatted" ]; then
+            echo "::error::The following Go files need gofmt:"
+            printf '%s\\n' "$unformatted"
+            exit 1
+          fi
       - name: Test
         run: go test ./...
       - name: Vet
