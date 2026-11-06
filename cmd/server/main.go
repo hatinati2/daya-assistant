@@ -1107,11 +1107,11 @@ func main() {
 	if user == "" || pass == "" {
 		log.Fatal("DAYA_ADMIN_USER و DAYA_ADMIN_PASS باید تنظیم شوند")
 	}
-	addr := env("DAYA_ADDR", "0.0.0.0:8098")
+	addr := env("DAYA_ADDR", "0.0.0.0:8100")
 	if strings.TrimSpace(addr) == "" {
 		log.Fatal("DAYA_ADDR خالی است")
 	}
-	dataDir := env("DAYA_DATA_DIR", "./data")
+	dataDir := env("DAYA_DATA_DIR", "/var/lib/daya-assistant")
 	if err := os.MkdirAll(dataDir, 0700); err != nil {
 		log.Fatal(err)
 	}
@@ -1210,7 +1210,7 @@ func main() {
 		case "batch_saved":
 			count, _ := strconv.Atoi(r.URL.Query().Get("count"))
 			if r.URL.Query().Get("mode") == executionModeAPI {
-				data.Notice = fmt.Sprintf("%d سفارش مستقل با مسیر API زمان‌بندی شدند؛ هر سفارش در زمان تعیین‌شده جداگانه به دایا ارسال می‌شود.", count)
+				data.Notice = fmt.Sprintf("%d سفارش مستقل با مسیر API زمان‌بندی شدند؛ ارسال خودکار برای دایا هنوز فعال نشده است؛ قرارداد API باید ابتدا تأیید شود.", count)
 			} else {
 				data.Notice = fmt.Sprintf("%d سفارش مستقل بدون API زمان‌بندی شدند.", count)
 			}

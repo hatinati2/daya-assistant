@@ -1,8 +1,32 @@
-/.env
-/.env.*
-!/.env.example
-/bin/
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+*credentials*.txt
+*.key
+*.pem
+*.p12
+*.pfx
+
+# Local state and data
+/data/
+/logs/
 /dist/
-/coverage.out
+/bin/
+orders.json
+*.db
+*.sqlite
+*.sqlite3
 *.log
+*storage_state*
+/browser-profile/
+
+# Compiled binaries
+/daya-assistant
+/daya-assistant-preview
+/server
+
+# Editor and OS files
 .DS_Store
+.idea/
+.vscode/

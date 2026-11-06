@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 )
 
 func newTestCredentialStore(t *testing.T) *DayaCredentialStore {
@@ -114,5 +115,18 @@ func TestDayaCredentialStoreRejectsTamperedCiphertext(t *testing.T) {
 	}
 	if _, _, err := store.Status(); err == nil {
 		t.Fatal("tampered credential file was accepted")
+	}
+
+func TestDayaCredentialStoreTreatsExpiredSessionAsMissing(t *testing.T) {
+	store := newTestCredentialStore(t)
+	if err := store.SaveAccessTokenUntil("expired-session-token", time.Now().Add(-time.Minute)); err != nil {
+		t.Fatal(err)
+	}
+	token, _, err := store.LoadAccessToken()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if token != "" {
+		t.Fatal("expired Daya session was returned as active")
 	}
 }

@@ -300,3 +300,11 @@ func TestClearHistoryPreservesActiveAndAmbiguousOrders(t *testing.T) {
 		t.Errorf("these active/ambiguous statuses were removed: %#v", want)
 	}
 }
+
+
+func TestDayaLiveOrderSubmissionRemainsDisabledUntilContractIsVerified(t *testing.T) {
+	t.Setenv("DAYA_ENABLE_LIVE_ORDER_SUBMISSION", "true")
+	if dayaOrderAPICapable() {
+		t.Fatal("Daya live order submission must remain disabled until its request contract is verified")
+	}
+}

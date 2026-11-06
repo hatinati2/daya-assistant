@@ -31,5 +31,7 @@ jobs:
         run: go test ./...
       - name: Vet
         run: go vet ./...
+      - name: Shell syntax
+        run: bash -n install-public.sh install-preview-public.sh deploy/install.sh deploy/install-preview.sh
       - name: Build
         run: go build ./cmd/server
