@@ -1,29 +1,25 @@
-# Daya Assistant — initial architecture
+# Daya Assistant architecture
 
 ## Isolation boundary
 
-Daya Assistant is a separate application and repository. It must not import, deploy, restart, or modify Rabin Assistant. It will use its own service account, systemd unit, port, environment file, credentials, session store, and order data directory.
+Daya Assistant is independent from Rabin Assistant in repository, process, configuration, credentials, session storage, order data, and deployment. It must never import, deploy, restart, or modify Rabin.
 
-## Initial runtime
+## Application modules
 
-- Language: Go
-- HTTP server: Go standard library
-- Default listen address: `:8100`
-- Health endpoint: `GET /healthz`
-- UI placeholder: `GET /`
+- `cmd/server`: HTTP server, Persian responsive UI, scheduling, and request handlers.
+- `internal/jalaali`: local Solar Hijri date conversion and formatting.
+- `daya_credentials.go`: AES-256-GCM encrypted account credentials and session cookie storage.
+- `daya_login.go`: Daya-only CAPTCHA and OMS login adapter.
+- `daya_order.go`: broker order capability gate; stays disabled until the Daya order contract is verified.
+- `daya_order_batch.go`, `daya_order_plan.go`, `daya_order_store.go`: broker-independent order planning and lifecycle functions.
+- `symbol_catalog.go`: TSE symbol catalog and exact symbol/ISIN matching.
 
-## Planned modules
+## Security and operations
 
-- `internal/daya`: Daya HTTP client and API contracts
-- `internal/auth`: authentication lifecycle and secure session handling
-- `internal/orders`: order model, validation, scheduling, and state transitions
-- `internal/store`: persistent storage with atomic writes and backups
-- `internal/web`: HTTP handlers and UI assets
-
-## Safety and operational boundaries
-
-- No broker credentials, cookies, access tokens, or CAPTCHA answers in Git.
-- No live order submission in initial scaffold.
-- Authentication diagnostics must not create or submit orders.
-- Preview and production must use separate configuration and data paths.
-- Any future deployment must target Daya-only paths and a Daya-only systemd service.
+- The Daya CAPTCHA image and challenge ID are fetched together; its session cookie is held server-side in short-lived memory.
+- CAPTCHA answer is manually entered and is not stored.
+- Daya's HttpOnly token cookie is encrypted with AES-256-GCM using a separate 32-byte key file.
+- Passwords, cookies, tokens, and CAPTCHA answers must never be committed to Git or printed in logs.
+- Manual order workflow is available. Live API dispatch remains disabled until Daya's actual order request/response contract has been captured and tested with mock HTTP tests.
+- No order endpoint is called during health checks, CI, diagnostics, or authentication tests.
+- Preview and production must have separate configs, keys, data directories, and systemd units.

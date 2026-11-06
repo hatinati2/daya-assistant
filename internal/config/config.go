@@ -6,9 +6,9 @@ import (
 )
 
 type Config struct {
-	Addr               string
-	ReadHeaderTimeout  time.Duration
-	ShutdownTimeout    time.Duration
+	Addr              string
+	ReadHeaderTimeout time.Duration
+	ShutdownTimeout   time.Duration
 }
 
 func Load() Config {

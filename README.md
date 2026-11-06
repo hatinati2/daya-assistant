@@ -1,26 +1,32 @@
 # Daya Assistant
 
-Independent assistant for Daya brokerage.
+پنل فارسی مستقل برای تعریف، زمان‌بندی و مدیریت سفارش‌های خرید و فروش کارگزاری دایا. مدل سفارش و گردش‌کار عملیاتی از قابلیت‌های Rabin Assistant الگو گرفته، اما اتصال و احراز هویت کارگزاری به‌صورت مستقل برای دایا پیاده‌سازی می‌شود.
 
-## Project status
+## امکانات فعلی
 
-Initial repository scaffold. No production deployment or broker integration is configured yet.
+- سفارش خرید و فروش با قیمت، تعداد، نماد و ISIN
+- ذخیره پایدار سفارش‌ها، زمان‌بندی و انتقال خودکار به وضعیت «آماده بررسی»
+- تقویم شمسی، ساعت تهران و دقت میلی‌ثانیه
+- جست‌وجو و پیشنهاد نماد با استفاده از فهرست بازار و تطبیق دقیق ISIN
+- برنامه‌ریز نوبت‌های سرخطی تا ۵۰۰۰ سفارش، با فاصله زمانی قابل تنظیم
+- تعیین تعداد هر نوبت یا تقسیم تعداد کل بین نوبت‌ها
+- تاریخچه، کپی سفارش، لغو تکی، لغو همه سفارش‌های زمان‌بندی‌شده و پاک‌کردن تاریخچه
+- ورود اختصاصی دایا با تصویر CAPTCHA، پاسخ دستی و ذخیره رمزنگاری‌شده نشست
 
-## Principles
+## وضعیت اتصال به دایا
 
-- Independent from `rabin-assistant` in code, configuration, data, credentials, and deployment.
-- Never place broker credentials or session cookies in source control.
-- Keep broker authentication and order execution behind explicit interfaces.
-- Do not submit live orders during development or diagnostics.
+قرارداد ورود از Network مرورگر استخراج شده است: دریافت تصویر از `GET /captcha` و ورود با `POST /oms-login`. تصویر CAPTCHA در پنل نمایش داده می‌شود و پاسخ را کاربر وارد می‌کند. نشست دریافت‌شده به‌صورت رمزنگاری‌شده ذخیره می‌شود.
 
-## Planned components
+**ارسال سفارش از API فعلاً غیرفعال است.** هنوز درخواست واقعی ثبت سفارش دایا، payload و مقادیر side/validity و پاسخ کارگزاری تأیید نشده‌اند. مسیر دستی و کل امکانات مدیریت و زمان‌بندی در دسترس است؛ پس از مشاهده قرارداد واقعی سفارش می‌توان آداپتر API دایا را تکمیل کرد. هیچ endpoint حدسی فراخوانی نمی‌شود.
 
-- Go backend service
-- Responsive web interface
-- Daya authentication/session adapter
-- Order scheduling and lifecycle management
-- Separate preview and production configurations
+## اجرای محلی
 
-## Development
+Go 1.23 یا جدیدتر:
 
-Implementation instructions will be added as the project structure is established.
+```bash
+cp .env.example .env
+make test
+make build
+```
+
+تنظیمات اجرایی از متغیرهای محیطی خوانده می‌شوند. مقادیر واقعی `DAYA_ADMIN_USER` و `DAYA_ADMIN_PASS` و مسیر کلید رمزنگاری را در محیط امن سرور تنظیم کنید؛ فایل `.env` را وارد Git نکنید.
