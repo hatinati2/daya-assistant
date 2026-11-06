@@ -116,6 +116,7 @@ func TestDayaCredentialStoreRejectsTamperedCiphertext(t *testing.T) {
 	if _, _, err := store.Status(); err == nil {
 		t.Fatal("tampered credential file was accepted")
 	}
+}
 
 func TestDayaCredentialStoreTreatsExpiredSessionAsMissing(t *testing.T) {
 	store := newTestCredentialStore(t)
