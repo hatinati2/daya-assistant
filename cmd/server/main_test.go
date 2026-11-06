@@ -301,7 +301,6 @@ func TestClearHistoryPreservesActiveAndAmbiguousOrders(t *testing.T) {
 	}
 }
 
-
 func TestDayaLiveOrderSubmissionRemainsDisabledUntilContractIsVerified(t *testing.T) {
 	t.Setenv("DAYA_ENABLE_LIVE_ORDER_SUBMISSION", "true")
 	if dayaOrderAPICapable() {
