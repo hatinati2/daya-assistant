@@ -23,9 +23,9 @@ import (
 )
 
 const (
-	statusScheduled     = "scheduled"
-	statusReady         = "ready"
-	statusCancelled     = "cancelled"
+	statusScheduled         = "scheduled"
+	statusReady             = "ready"
+	statusCancelled         = "cancelled"
 	statusManualDone        = "manual_done"
 	statusSubmitting        = "submitting"
 	statusSubmitted         = "submitted"
@@ -36,20 +36,20 @@ const (
 )
 
 type Order struct {
-	ID             string    `json:"id"`
-	Symbol         string    `json:"symbol"`
-	ISIN           string    `json:"isin,omitempty"`
-	Side           string    `json:"side"`
-	Price          int64     `json:"price"`
-	Quantity       int64     `json:"quantity"`
-	ExecuteAt      time.Time `json:"execute_at"`
-	ExecutionMode  string    `json:"execution_mode,omitempty"`
-	Status         string    `json:"status"`
-	BrokerOrderID  string    `json:"broker_order_id,omitempty"`
-	BrokerMessage  string    `json:"broker_message,omitempty"`
-	AttemptedAt    time.Time `json:"attempted_at,omitempty"`
-	CreatedAt      time.Time `json:"created_at"`
-	UpdatedAt      time.Time `json:"updated_at"`
+	ID            string    `json:"id"`
+	Symbol        string    `json:"symbol"`
+	ISIN          string    `json:"isin,omitempty"`
+	Side          string    `json:"side"`
+	Price         int64     `json:"price"`
+	Quantity      int64     `json:"quantity"`
+	ExecuteAt     time.Time `json:"execute_at"`
+	ExecutionMode string    `json:"execution_mode,omitempty"`
+	Status        string    `json:"status"`
+	BrokerOrderID string    `json:"broker_order_id,omitempty"`
+	BrokerMessage string    `json:"broker_message,omitempty"`
+	AttemptedAt   time.Time `json:"attempted_at,omitempty"`
+	CreatedAt     time.Time `json:"created_at"`
+	UpdatedAt     time.Time `json:"updated_at"`
 }
 
 type Store struct {
@@ -427,18 +427,18 @@ func validateOrder(r *http.Request, now time.Time) (Order, error) {
 }
 
 type PageData struct {
-	Orders        []Order
-	Error, Notice string
-	Now           string
-	JYear         int
-	JMonth        int
-	JDay          int
-	History              bool
-	APIAvailable         bool
-	PreviewMode          bool
-	HasScheduledOrders   bool
-	Symbols              []MarketSymbol
-	SymbolCatalogStatus  string
+	Orders              []Order
+	Error, Notice       string
+	Now                 string
+	JYear               int
+	JMonth              int
+	JDay                int
+	History             bool
+	APIAvailable        bool
+	PreviewMode         bool
+	HasScheduledOrders  bool
+	Symbols             []MarketSymbol
+	SymbolCatalogStatus string
 }
 
 func currentJalaliParts(t time.Time) (int, int, int) {
@@ -473,7 +473,7 @@ func buildCalendar(year, month int) (CalendarResponse, error) {
 	return CalendarResponse{
 		Year: year, Month: month,
 		MonthName: jalaali.Month(month).String(),
-		Days: days, FirstWeekday: weekday,
+		Days:      days, FirstWeekday: weekday,
 	}, nil
 }
 
@@ -1143,7 +1143,7 @@ func main() {
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.Header().Set("Cache-Control", "no-store, no-cache, must-revalidate")
 		_ = json.NewEncoder(w).Encode(struct {
-			UnixMillis int64 `json:"unix_millis"`
+			UnixMillis int64  `json:"unix_millis"`
 			Timezone   string `json:"timezone"`
 		}{UnixMillis: time.Now().In(tehran()).UnixMilli(), Timezone: "Asia/Tehran"})
 	})
@@ -1402,12 +1402,14 @@ func main() {
 		quantity, quantityErr := strconv.ParseInt(r.FormValue("quantity"), 10, 64)
 		quantities, err := allocateBatchQuantities(quantity, count, mode)
 		if quantityErr != nil || err != nil {
-			if err == nil { err = errors.New("تعداد سهم معتبر نیست") }
+			if err == nil {
+				err = errors.New("تعداد سهم معتبر نیست")
+			}
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 		firstMS := targetMS - leadMilliseconds
-		r.Form.Set("execute_at", dateText + " " + formatOrderPlanClock(firstMS))
+		r.Form.Set("execute_at", dateText+" "+formatOrderPlanClock(firstMS))
 		now := time.Now().In(tehran())
 		baseOrder, err := validateOrder(r, now)
 		if err != nil {
@@ -1502,13 +1504,13 @@ func renderError(w http.ResponseWriter, store *Store, message string) {
 			}
 			return false
 		}(),
-		Now: formatJalaliDateTime(time.Now().In(tehran())),
-		JYear: func() int { y, _, _ := currentJalaliParts(time.Now().In(tehran())); return y }(),
-		JMonth: func() int { _, m, _ := currentJalaliParts(time.Now().In(tehran())); return m }(),
-		JDay: func() int { _, _, d := currentJalaliParts(time.Now().In(tehran())); return d }(),
-		APIAvailable: dayaOrderAPICapable(),
-		PreviewMode: strings.EqualFold(env("DAYA_PREVIEW_MODE", "false"), "true"),
-		Symbols: defaultMarketSymbols(),
+		Now:                 formatJalaliDateTime(time.Now().In(tehran())),
+		JYear:               func() int { y, _, _ := currentJalaliParts(time.Now().In(tehran())); return y }(),
+		JMonth:              func() int { _, m, _ := currentJalaliParts(time.Now().In(tehran())); return m }(),
+		JDay:                func() int { _, _, d := currentJalaliParts(time.Now().In(tehran())); return d }(),
+		APIAvailable:        dayaOrderAPICapable(),
+		PreviewMode:         strings.EqualFold(env("DAYA_PREVIEW_MODE", "false"), "true"),
+		Symbols:             defaultMarketSymbols(),
 		SymbolCatalogStatus: "در صورت عدم دسترسی به منبع، فهرست پشتیبان خودرو نمایش داده می‌شود.",
 	})
 }

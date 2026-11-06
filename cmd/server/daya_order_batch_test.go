@@ -37,8 +37,8 @@ func TestAllocateBatchQuantitiesTotalWithRemainder(t *testing.T) {
 func TestAllocateBatchQuantitiesRejectsInvalidInput(t *testing.T) {
 	for _, tc := range []struct {
 		quantity int64
-		count int
-		mode string
+		count    int
+		mode     string
 	}{
 		{0, 2, "each"}, {5, 0, "each"}, {1, 2, "total"}, {10, 2, "unknown"},
 	} {
@@ -124,4 +124,3 @@ func TestStoreCancelAllScheduledPreservesNonScheduledOrders(t *testing.T) {
 		t.Fatalf("second cancellation should be a no-op, count=%d err=%v", cancelled, err)
 	}
 }
-

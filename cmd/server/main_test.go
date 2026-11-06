@@ -215,7 +215,6 @@ func TestSameOriginRejectsCrossSiteRequests(t *testing.T) {
 	}
 }
 
-
 func TestCancelAllScheduledOnlyCancelsScheduledOrdersAtomically(t *testing.T) {
 	path := t.TempDir() + "/orders.json"
 	store, err := newStore(path)

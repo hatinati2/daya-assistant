@@ -247,10 +247,10 @@ func (s *DayaCredentialStore) Save(username, password string) error {
 	plain := []byte(username + "\x00" + password)
 	ciphertext := gcm.Seal(nil, nonce, plain, []byte(credentialAAD))
 	record := encryptedDayaCredentials{
-		Version: 1,
-		Nonce: base64.StdEncoding.EncodeToString(nonce),
+		Version:    1,
+		Nonce:      base64.StdEncoding.EncodeToString(nonce),
 		Ciphertext: base64.StdEncoding.EncodeToString(ciphertext),
-		UpdatedAt: time.Now().UTC(),
+		UpdatedAt:  time.Now().UTC(),
 	}
 	encoded, err := json.MarshalIndent(record, "", "  ")
 	if err != nil {
@@ -336,11 +336,11 @@ func (s *DayaCredentialStore) SaveAccessTokenUntil(token string, expiresAt time.
 	}
 	ciphertext := gcm.Seal(nil, nonce, []byte(token), []byte("daya-assistant/daya-session/v1"))
 	record := encryptedDayaCredentials{
-		Version: 1,
-		Nonce: base64.StdEncoding.EncodeToString(nonce),
+		Version:    1,
+		Nonce:      base64.StdEncoding.EncodeToString(nonce),
 		Ciphertext: base64.StdEncoding.EncodeToString(ciphertext),
-		UpdatedAt: time.Now().UTC(),
-		ExpiresAt: expiresAt,
+		UpdatedAt:  time.Now().UTC(),
+		ExpiresAt:  expiresAt,
 	}
 	encoded, err := json.MarshalIndent(record, "", "  ")
 	if err != nil {
@@ -463,12 +463,12 @@ func (s *DayaCredentialStore) Render(w http.ResponseWriter, errorMessage, notice
 		loginAtText = formatJalaliDateTime(loginAt.In(tehran()))
 	}
 	data := DayaSettingsPageData{
-		Username: username,
-		Saved: saved,
+		Username:   username,
+		Saved:      saved,
 		HasSession: hasSession,
-		LoginAt: loginAtText,
-		Error: errorMessage,
-		Notice: notice,
+		LoginAt:    loginAtText,
+		Error:      errorMessage,
+		Notice:     notice,
 	}
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.Header().Set("Cache-Control", "no-store")

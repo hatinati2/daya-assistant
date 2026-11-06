@@ -33,7 +33,7 @@ func TestBuildOrderPlanRoundsUpAndStopsBeforeTarget(t *testing.T) {
 
 func TestBuildOrderPlanRejectsInvalidOrUnsafeInputs(t *testing.T) {
 	tests := []struct {
-		name                       string
+		name                      string
 		targetMS, leadMS, everyMS int64
 	}{
 		{name: "target outside day", targetMS: 86_400_000, leadMS: 1000, everyMS: 100},

@@ -6,11 +6,11 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
-	"net/url"
 )
 
 func TestTSESymbolClientFetchesCashAndETF(t *testing.T) {
@@ -125,7 +125,6 @@ func TestMarketSymbolCatalogKeepsLastGoodListOnRefreshFailure(t *testing.T) {
 	}
 }
 
-
 func TestLookupMarketSymbolExactMatchAndPersianNormalization(t *testing.T) {
 	symbols := []MarketSymbol{
 		{Symbol: "خودرو", ISIN: "IRO1IKCO0001"},
@@ -173,7 +172,6 @@ func TestLookupMarketSymbolRequiresExactTicker(t *testing.T) {
 	}
 }
 
-
 func TestMarketSymbolLookupHandler(t *testing.T) {
 	catalog := &MarketSymbolCatalog{symbols: []MarketSymbol{
 		{Symbol: "خودرو", ISIN: "IRO1IKCO0001"},
@@ -206,7 +204,6 @@ func TestMarketSymbolLookupHandler(t *testing.T) {
 		t.Fatalf("ambiguous lookup status = %d, want %d", ambiguousRecorder.Code, http.StatusConflict)
 	}
 }
-
 
 func TestSuggestMarketSymbolsReturnsPrefixAndSubstringMatches(t *testing.T) {
 	symbols := []MarketSymbol{

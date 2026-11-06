@@ -19,16 +19,14 @@ jobs:
         with:
           go-version-file: go.mod
           cache: true
-      - name: Format and export Go files
+      - name: Format check
         run: |
-          files="$(gofmt -l ./cmd ./internal)"
-          while IFS= read -r file; do
-            [ -z "$file" ] && continue
-            gofmt -w "$file"
-            echo "BEGIN_GO_FILE:$file"
-            base64 -w0 "$file" | fold -w 40000
-            echo "END_GO_FILE:$file"
-          done <<< "$files"
+          unformatted="$(gofmt -l ./cmd ./internal)"
+          if [ -n "$unformatted" ]; then
+            echo "::error::The following Go files need gofmt:"
+            printf '%s\n' "$unformatted"
+            exit 1
+          fi
       - name: Test
         run: go test ./...
       - name: Vet

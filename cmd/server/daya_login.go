@@ -123,7 +123,7 @@ func (c *DayaLoginClient) FetchCaptcha(ctx context.Context) (DayaCaptchaChalleng
 	c.challenges[captchaID] = dayaCaptchaState{Cookie: cookieHeader, ExpiresAt: now.Add(4 * time.Minute)}
 	c.mu.Unlock()
 	return DayaCaptchaChallenge{
-		CaptchaID: captchaID,
+		CaptchaID:    captchaID,
 		ImageDataURL: "data:image/png;base64," + base64.StdEncoding.EncodeToString(imageBytes),
 	}, nil
 }

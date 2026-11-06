@@ -20,11 +20,11 @@ import (
 )
 
 const (
-	tseGatewayBaseURL       = "https://webgw.tse.ir"
-	tseMarketWatchCashPath  = "/InstrumentProvider/api/v1/MarketWatch/MarketWatchCash/fa"
-	tseMarketWatchETFPath   = "/InstrumentProvider/api/v1/MarketWatch/MarketWatchEtf/fa"
+	tseGatewayBaseURL         = "https://webgw.tse.ir"
+	tseMarketWatchCashPath    = "/InstrumentProvider/api/v1/MarketWatch/MarketWatchCash/fa"
+	tseMarketWatchETFPath     = "/InstrumentProvider/api/v1/MarketWatch/MarketWatchEtf/fa"
 	tseInstrumentShortcutPath = "/InstrumentProvider/api/v1/Instrument/InstrumentShortcut/fa"
-	tseMaxResponseBytes     = 16 << 20
+	tseMaxResponseBytes       = 16 << 20
 )
 
 var marketISINPattern = regexp.MustCompile(`^[A-Z]{2}[A-Z0-9]{9}[0-9]$`)
@@ -38,8 +38,8 @@ type MarketSymbol struct {
 
 type tseMarketWatchResponse struct {
 	Items []struct {
-		InstrumentID      string `json:"instrumentId"`
-		InstrumentName    string `json:"instrumentName"`
+		InstrumentID       string `json:"instrumentId"`
+		InstrumentName     string `json:"instrumentName"`
 		CompanyNamePersian string `json:"companyNamePersian"`
 	} `json:"Items"`
 }
@@ -51,15 +51,15 @@ type TSESymbolClient struct {
 
 type tseInstrumentShortcutResponse struct {
 	Items []struct {
-		InstrumentIDLower  string `json:"instrumentid"`
-		InstrumentIDCamel  string `json:"instrumentId"`
-		InstrumentNameKey  string `json:"instrument_Name"`
+		InstrumentIDLower   string `json:"instrumentid"`
+		InstrumentIDCamel   string `json:"instrumentId"`
+		InstrumentNameKey   string `json:"instrument_Name"`
 		InstrumentNameCamel string `json:"instrumentName"`
-		CompanyNameKey     string `json:"company_Name_Persian"`
-		CompanyNameCamel   string `json:"companyNamePersian"`
-		MarketCategoryName string `json:"marketcategoryname"`
-		MarketTypeName     string `json:"markettypename"`
-		MarketName         string `json:"marketname"`
+		CompanyNameKey      string `json:"company_Name_Persian"`
+		CompanyNameCamel    string `json:"companyNamePersian"`
+		MarketCategoryName  string `json:"marketcategoryname"`
+		MarketTypeName      string `json:"markettypename"`
+		MarketName          string `json:"marketname"`
 	} `json:"items"`
 }
 
@@ -162,7 +162,6 @@ func (c TSESymbolClient) SearchSymbols(ctx context.Context, query string, pageSi
 	})
 	return result, nil
 }
-
 
 // FetchSymbols reads the current cash-market shares and ETF lists from TSE's
 // public gateway. It only issues GET requests and never interacts with Rabin.
@@ -270,7 +269,7 @@ func (c TSESymbolClient) fetchMarketWatch(ctx context.Context, client *http.Clie
 }
 
 type marketSymbolCache struct {
-	UpdatedAt time.Time     `json:"updated_at"`
+	UpdatedAt time.Time      `json:"updated_at"`
 	Symbols   []MarketSymbol `json:"symbols"`
 }
 
@@ -408,7 +407,6 @@ func marketSymbolCatalogStatus(catalog *MarketSymbolCatalog) ([]MarketSymbol, st
 	return items, "در حال دریافت فهرست نمادها از درگاه TSE؛ در صورت نبود دسترسی، فهرست پشتیبان نمایش داده می‌شود."
 }
 
-
 // normalizeMarketSymbol handles common Arabic/Persian keyboard variants while
 // keeping punctuation that may be part of a ticker.
 func normalizeMarketSymbol(value string) string {
@@ -444,7 +442,6 @@ func lookupMarketSymbol(symbols []MarketSymbol, query string) (MarketSymbol, boo
 	return match, found, false
 }
 
-
 func marketSymbolLookupHandler(catalog *MarketSymbolCatalog) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		query := strings.TrimSpace(r.URL.Query().Get("symbol"))
@@ -470,7 +467,6 @@ func marketSymbolLookupHandler(catalog *MarketSymbolCatalog) http.HandlerFunc {
 	}
 }
 
-
 const marketSymbolSuggestionLimit = 12
 
 // suggestMarketSymbols ranks ticker-prefix matches first, then ticker substring
@@ -485,9 +481,9 @@ func suggestMarketSymbols(symbols []MarketSymbol, query string, limit int) []Mar
 	}
 
 	type rankedSymbol struct {
-		item  MarketSymbol
-		rank  int
-		key   string
+		item MarketSymbol
+		rank int
+		key  string
 	}
 	ranked := make([]rankedSymbol, 0)
 	for _, item := range symbols {
