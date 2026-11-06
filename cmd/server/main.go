@@ -8,7 +8,6 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
 	"github.com/hatinati2/daya-assistant/internal/config"
 )
@@ -49,5 +48,4 @@ func main() {
 		log.Printf("graceful shutdown failed: %v", err)
 		_ = server.Close()
 	}
-	_ = time.Second // keep time imported for explicit duration semantics in this scaffold
 }
