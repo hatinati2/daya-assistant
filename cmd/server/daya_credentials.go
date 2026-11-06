@@ -106,8 +106,8 @@ button{border:0;border-radius:8px;background:#175cd3;color:#fff;padding:10px 14p
     button.textContent = "در حال دریافت تصویر…";
     try {
       const response = await fetch("/api/daya/captcha", {cache: "no-store", headers: {"Accept": "application/json"}});
-      const payload = await response.json();
-      if (!response.ok) throw new Error(payload.error || payload.message || "دریافت CAPTCHA ناموفق بود");
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(payload.error || payload.message || "دریافت CAPTCHA ناموفق بود (HTTP " + response.status + ")");
       document.getElementById("daya-captcha-id").value = payload.captcha_id;
       const image = document.getElementById("daya-captcha-image");
       image.src = payload.image_data_url;
@@ -124,7 +124,7 @@ button{border:0;border-radius:8px;background:#175cd3;color:#fff;padding:10px 14p
   });
 })();
 </script>
-<div class="foot">این دکمه فقط ورود عادی و دریافت نشست را آزمایش می‌کند؛ هیچ سفارش خرید یا فروشی ارسال نمی‌شود. در این نسخه فیلد یا مرحله‌ای برای رمز دومرحله‌ای وجود ندارد.</div>
+<div class="foot">این بخش فقط ورود به دایا و دریافت نشست را انجام می‌دهد؛ هیچ سفارش خرید یا فروشی ارسال نمی‌شود.</div>
 <div class="foot">رمز عبور در صفحه دوباره نمایش داده نمی‌شود. پس از ثبت، برای حفظ رمز قبلی کادر رمز را خالی بگذارید. برای جایگزینی رمز، رمز جدید را وارد کنید.</div>
 </section></main></body></html>`))
 

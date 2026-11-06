@@ -68,3 +68,13 @@ make run
 ```
 
 مقادیر واقعی `DAYA_ADMIN_USER`، `DAYA_ADMIN_PASS` و کلید رمزنگاری را در محیط امن قرار دهید. رمزها، توکن‌ها و کوکی‌ها نباید در Git ثبت شوند.
+
+## Capturing the Daya order API contract
+
+The authenticated order endpoint is not yet verified. To capture it without sharing raw credentials or account data, export a HAR locally and run:
+
+```bash
+python3 tools/sanitize_daya_har.py /path/to/network.har > daya-order-contract-sanitized.json
+```
+
+The sanitizer keeps endpoint paths, methods, field names/types, order enum values, response status and response shape, while redacting cookies, tokens, credentials, CAPTCHA values, account identifiers, order IDs, symbols, ISINs, prices and quantities. Review the resulting file before sharing it. Full instructions: [docs/capturing-order-contract.md](docs/capturing-order-contract.md).

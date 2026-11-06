@@ -18,6 +18,7 @@ orders.json
 *.sqlite
 *.sqlite3
 *.log
+*.har
 *storage_state*
 /browser-profile/
 
