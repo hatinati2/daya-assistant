@@ -13,9 +13,9 @@ import (
 // transport or dispatch function: building/decoding a contract must never
 // submit an order. Live submission remains disabled until separately reviewed.
 const (
-	dayaOrderEndpoint       = dayaAPIOrigin + "/orders"
-	dayaOrderSideBuy        = "BUY"
-	dayaOrderSideSell       = "SELL"
+	dayaOrderEndpoint      = dayaAPIOrigin + "/orders"
+	dayaOrderSideBuy       = "BUY"
+	dayaOrderSideSell      = "SELL"
 	dayaOrderValidityToday = "JUST_TODAY"
 )
 
