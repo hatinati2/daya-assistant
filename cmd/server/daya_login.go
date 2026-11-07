@@ -25,14 +25,14 @@ type DayaCaptchaChallenge struct {
 }
 
 type DayaLoginResult struct {
-	Token string
+	Token     string
 	ExpiresAt time.Time
-	Cookies []DayaSessionCookie
+	Cookies   []DayaSessionCookie
 }
 
 type dayaCaptchaState struct {
-	Cookie string
-	Session DayaSessionCookie
+	Cookie    string
+	Session   DayaSessionCookie
 	ExpiresAt time.Time
 }
 
@@ -106,7 +106,9 @@ func (c *DayaLoginClient) FetchCaptcha(ctx context.Context) (DayaCaptchaChalleng
 		return DayaCaptchaChallenge{}, errors.New("کوکی نشست CAPTCHA در پاسخ دایا وجود ندارد")
 	}
 	sessionCookieData, ok := dayaSessionCookieFromHTTP(sessionCookie)
-	if !ok { return DayaCaptchaChallenge{}, errors.New("کوکی CAPTCHA دایا معتبر نیست") }
+	if !ok {
+		return DayaCaptchaChallenge{}, errors.New("کوکی CAPTCHA دایا معتبر نیست")
+	}
 	cookieHeader := sessionCookie.Name + "=" + sessionCookie.Value
 	c.mu.Lock()
 	if c.challenges == nil {
@@ -190,17 +192,33 @@ func (c *DayaLoginClient) Login(ctx context.Context, username, password, captcha
 	cookies := []DayaSessionCookie{state.Session}
 	for _, cookie := range resp.Cookies() {
 		safeCookie, valid := dayaSessionCookieFromHTTP(cookie)
-		if !valid { continue }
+		if !valid {
+			continue
+		}
 		switch safeCookie.Name {
 		case "cookiesession1":
 			replaced := false
-			for i := range cookies { if cookies[i].Name == "cookiesession1" { cookies[i] = safeCookie; replaced = true } }
-			if !replaced { cookies = append(cookies, safeCookie) }
+			for i := range cookies {
+				if cookies[i].Name == "cookiesession1" {
+					cookies[i] = safeCookie
+					replaced = true
+				}
+			}
+			if !replaced {
+				cookies = append(cookies, safeCookie)
+			}
 		case "token":
 			tokenCookie = cookie
 			replaced := false
-			for i := range cookies { if cookies[i].Name == "token" { cookies[i] = safeCookie; replaced = true } }
-			if !replaced { cookies = append(cookies, safeCookie) }
+			for i := range cookies {
+				if cookies[i].Name == "token" {
+					cookies[i] = safeCookie
+					replaced = true
+				}
+			}
+			if !replaced {
+				cookies = append(cookies, safeCookie)
+			}
 		}
 	}
 	if tokenCookie == nil {
