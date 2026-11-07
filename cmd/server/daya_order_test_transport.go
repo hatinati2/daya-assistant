@@ -40,9 +40,18 @@ func postDayaOrderToTestServer(ctx context.Context, client *http.Client, baseURL
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Content-Type", "application/json")
 	if client == nil {
-		client = &http.Client{Timeout: 5 * time.Second}
+		client = &http.DefaultClient
 	}
-	resp, err := client.Do(req)
+	// Clone the supplied client so this helper cannot mutate shared client
+	// configuration, and refuse redirects to keep the loopback boundary intact.
+	safeClient := *client
+	safeClient.CheckRedirect = func(_ *http.Request, _ []*http.Request) error {
+		return http.ErrUseLastResponse
+	}
+	if safeClient.Timeout <= 0 {
+		safeClient.Timeout = 5 * time.Second
+	}
+	resp, err := safeClient.Do(req)
 	if err != nil {
 		return 0, nil, fmt.Errorf("ارسال به سرور آزمایشی محلی: %w", err)
 	}
