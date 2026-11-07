@@ -64,6 +64,17 @@ func dayaRandomInterval() (time.Duration, error) {
 	return dayaMonitorMin + time.Duration(n%span)*time.Second, nil
 }
 
+// dayaMonitorWindow uses Tehran local time: 15:30 inclusive until 02:00 exclusive.
+func dayaMonitorWindow(now time.Time) (bool, time.Duration) {
+	local := now.In(tehran())
+	minutes := local.Hour()*60 + local.Minute()
+	if minutes >= 15*60+30 || minutes < 2*60 {
+		return true, 0
+	}
+	nextStart := time.Date(local.Year(), local.Month(), local.Day(), 15, 30, 0, 0, tehran())
+	return false, nextStart.Sub(local)
+}
+
 func (m *DayaSessionMonitor) Start(parent context.Context, session DayaSession) error {
 	if session.Token == "" {
 		return errors.New("نشست دایا خالی است")
@@ -104,10 +115,25 @@ func (m *DayaSessionMonitor) Snapshot() DayaMonitorSnapshot {
 
 func (m *DayaSessionMonitor) run(ctx context.Context, session DayaSession) {
 	for {
-		delay, err := m.interval()
-		if err != nil {
-			m.Stop(false, "تولید فاصله بررسی ناموفق بود")
-			return
+		now := time.Now()
+		inWindow, delay := dayaMonitorWindow(now)
+		if inWindow {
+			var err error
+			delay, err = m.interval()
+			if err != nil {
+				m.Stop(false, "تولید فاصله بررسی ناموفق بود")
+				return
+			}
+		}
+		if !session.ExpiresAt.IsZero() {
+			untilExpiry := time.Until(session.ExpiresAt)
+			if untilExpiry <= 0 {
+				m.Stop(true, "زمان اعتبار نشست به پایان رسیده است؛ ورود دستی لازم است")
+				return
+			}
+			if delay <= 0 || untilExpiry < delay {
+				delay = untilExpiry
+			}
 		}
 		m.mu.Lock()
 		m.state.NextCheck = time.Now().Add(delay)
@@ -123,6 +149,10 @@ func (m *DayaSessionMonitor) run(ctx context.Context, session DayaSession) {
 			m.Stop(true, "زمان اعتبار نشست به پایان رسیده است؛ ورود دستی لازم است")
 			return
 		}
+		inWindow, _ = dayaMonitorWindow(time.Now())
+		if !inWindow {
+			continue
+		}
 
 		req, err := http.NewRequestWithContext(ctx, http.MethodGet, dayaOrdersURL, nil)
 		if err != nil {
@@ -136,7 +166,7 @@ func (m *DayaSessionMonitor) run(ctx context.Context, session DayaSession) {
 			}
 		}
 		resp, err := m.http.Do(req)
-		now := time.Now().UTC()
+		now = time.Now().UTC()
 		if err != nil {
 			if ctx.Err() != nil {
 				return

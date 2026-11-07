@@ -186,3 +186,32 @@ func TestDayaApplySessionCookiesIgnoresUnrelatedCookies(t *testing.T) {
 		t.Fatalf("unexpected unrelated cookie handling: changed=%v err=%v", changed, err)
 	}
 }
+
+
+func TestDayaMonitorWindowUsesTehranTime(t *testing.T) {
+	location := tehran()
+	tests := []struct {
+		name string
+		hour int
+		minute int
+		open bool
+	}{
+		{name: "before closing boundary", hour: 1, minute: 59, open: true},
+		{name: "closing boundary", hour: 2, minute: 0, open: false},
+		{name: "before opening boundary", hour: 15, minute: 29, open: false},
+		{name: "opening boundary", hour: 15, minute: 30, open: true},
+		{name: "evening", hour: 22, minute: 0, open: true},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			now := time.Date(2026, time.November, 7, test.hour, test.minute, 0, 0, location)
+			open, wait := dayaMonitorWindow(now)
+			if open != test.open {
+				t.Fatalf("window open=%v, want %v", open, test.open)
+			}
+			if !open && wait <= 0 {
+				t.Fatalf("closed window must return positive wait, got %v", wait)
+			}
+		})
+	}
+}
