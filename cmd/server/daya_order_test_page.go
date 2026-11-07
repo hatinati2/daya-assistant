@@ -23,13 +23,13 @@ type dayaLocalOrderTestResult struct {
 }
 
 type dayaLocalOrderTestPageData struct {
-	ISIN          string
-	Side          string
-	Price         string
-	Quantity      string
-	MockResponse  string
-	Error         string
-	Result        *dayaLocalOrderTestResult
+	ISIN         string
+	Side         string
+	Price        string
+	Quantity     string
+	MockResponse string
+	Error        string
+	Result       *dayaLocalOrderTestResult
 }
 
 var dayaLocalOrderTestPage = template.Must(template.New("daya-local-order-test").Parse(`<!doctype html>
@@ -111,10 +111,10 @@ func registerDayaLocalOrderTestRoutes(mux *http.ServeMux, previewMode bool) {
 		}
 
 		data := dayaLocalOrderTestPageData{
-			ISIN: strings.TrimSpace(r.FormValue("isin")),
-			Side: strings.TrimSpace(r.FormValue("side")),
-			Price: strings.TrimSpace(r.FormValue("price")),
-			Quantity: strings.TrimSpace(r.FormValue("quantity")),
+			ISIN:         strings.TrimSpace(r.FormValue("isin")),
+			Side:         strings.TrimSpace(r.FormValue("side")),
+			Price:        strings.TrimSpace(r.FormValue("price")),
+			Quantity:     strings.TrimSpace(r.FormValue("quantity")),
 			MockResponse: strings.TrimSpace(r.FormValue("mock_response")),
 		}
 		price, priceErr := strconv.ParseInt(data.Price, 10, 64)
