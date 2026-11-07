@@ -1122,6 +1122,14 @@ func main() {
 
 	credentials := NewDayaCredentialStore(dataDir, env("DAYA_CREDENTIALS_KEY_FILE", "/etc/daya-assistant.key"))
 	dayaAuth := &DayaLoginClient{}
+	sessionMonitor := NewDayaSessionMonitor(nil)
+	if token, _, loadErr := credentials.LoadAccessToken(); loadErr != nil {
+		log.Printf("Daya session monitor not started: stored session could not be loaded")
+	} else if token != "" {
+		if err := sessionMonitor.Start(context.Background(), token, time.Time{}); err != nil {
+			log.Printf("Daya session monitor not started: %v", err)
+		}
+	}
 	symbolCatalog := NewMarketSymbolCatalog(filepath.Join(dataDir, "symbols.json"))
 	startMarketSymbolRefresh(symbolCatalog, TSESymbolClient{})
 	if err := store.recoverInterruptedAPIOrders(time.Now().In(tehran())); err != nil {
@@ -1272,6 +1280,11 @@ func main() {
 		http.Redirect(w, r, "/settings?notice=daya_deleted", http.StatusSeeOther)
 	})
 
+	mux.HandleFunc("GET /api/daya/session-monitor", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.Header().Set("Cache-Control", "no-store")
+		_ = json.NewEncoder(w).Encode(sessionMonitor.Snapshot())
+	})
 	mux.HandleFunc("GET /api/daya/captcha", func(w http.ResponseWriter, r *http.Request) {
 		ctx, cancel := context.WithTimeout(r.Context(), 12*time.Second)
 		defer cancel()
@@ -1312,6 +1325,10 @@ func main() {
 		}
 		if err := credentials.SaveAccessTokenUntil(result.Token, result.ExpiresAt); err != nil {
 			credentials.Render(w, "ورود موفق بود، اما ذخیره امن نشست انجام نشد.", "")
+			return
+		}
+		if err := sessionMonitor.Start(context.Background(), result.Token, result.ExpiresAt); err != nil {
+			credentials.Render(w, "نشست ذخیره شد، اما پایش خودکار شروع نشد.", "")
 			return
 		}
 		http.Redirect(w, r, "/settings?notice=daya_login_ok", http.StatusSeeOther)
