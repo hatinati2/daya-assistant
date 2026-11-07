@@ -47,3 +47,29 @@ func TestDayaTestTransportRejectsNonLoopbackBeforeNetwork(t *testing.T) {
 		}
 	}
 }
+
+func TestDayaTestTransportDoesNotFollowRedirects(t *testing.T) {
+	destinationHit := false
+	destination := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		destinationHit = true
+		w.WriteHeader(http.StatusCreated)
+	}))
+	defer destination.Close()
+
+	redirector := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, destination.URL+"/orders", http.StatusFound)
+	}))
+	defer redirector.Close()
+
+	order := Order{ISIN: "IRO3SIMC0001", Side: "buy", Price: 1, Quantity: 1, ExecutionMode: executionModeAPI}
+	status, _, err := postDayaOrderToTestServer(context.Background(), redirector.Client(), redirector.URL, order)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if status != http.StatusFound {
+		t.Fatalf("status=%d, want %d", status, http.StatusFound)
+	}
+	if destinationHit {
+		t.Fatal("test transport followed redirect to a different destination")
+	}
+}
