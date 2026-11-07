@@ -187,14 +187,13 @@ func TestDayaApplySessionCookiesIgnoresUnrelatedCookies(t *testing.T) {
 	}
 }
 
-
 func TestDayaMonitorWindowUsesTehranTime(t *testing.T) {
 	location := tehran()
 	tests := []struct {
-		name string
-		hour int
+		name   string
+		hour   int
 		minute int
-		open bool
+		open   bool
 	}{
 		{name: "before closing boundary", hour: 1, minute: 59, open: true},
 		{name: "closing boundary", hour: 2, minute: 0, open: false},
