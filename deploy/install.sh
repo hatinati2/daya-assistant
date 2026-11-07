@@ -31,7 +31,7 @@ case "$MODE" in
     KEY=/etc/daya-assistant-preview.key
     SERVICE=daya-assistant-preview
     SERVICE_USER=daya-assistant-preview
-    ADDR=0.0.0.0:8101
+    ADDR=0.0.0.0:8102
     PREVIEW=true
     CREDENTIALS_FILE=/root/daya-assistant-preview-credentials.txt
     UNIT_SOURCE=daya-assistant-preview.service
@@ -101,6 +101,10 @@ if ! grep -qE '^DAYA_ADMIN_PASS=.+' "$CONF"; then
   echo "اطلاعات ورود در $CREDENTIALS_FILE ذخیره شد."
 fi
 set_default DAYA_ADDR "$ADDR"
+# Migrate the previous Daya Preview default without overwriting a custom bind address.
+if [[ "$MODE" == "preview" ]] && grep -q '^DAYA_ADDR=0\.0\.0\.0:8101$' "$CONF"; then
+  sed -i 's/^DAYA_ADDR=0\.0\.0\.0:8101$/DAYA_ADDR=0.0.0.0:8102/' "$CONF"
+fi
 set_default DAYA_DATA_DIR "$DATA"
 set_default DAYA_CREDENTIALS_KEY_FILE "$KEY"
 
@@ -139,4 +143,4 @@ echo "تنظیمات: $CONF"
 echo "داده‌ها: $DATA"
 echo "کلید مستقل: $KEY"
 echo "منطقه زمانی: Asia/Tehran"
-echo "پنل: http://SERVER_IP:$([[ "$MODE" == "preview" ]] && echo 8101 || echo 8100)"
+echo "پنل: http://SERVER_IP:$([[ "$MODE" == "preview" ]] && echo 8102 || echo 8100)"

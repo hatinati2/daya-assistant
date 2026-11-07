@@ -31,12 +31,14 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/hatinati2/daya-assistant
 
 | مورد | Production | Preview |
 |---|---|---|
-| پورت | 8100 | 8101 |
+| پورت | 8100 | 8102 |
 | سرویس | `daya-assistant.service` | `daya-assistant-preview.service` |
 | پوشه برنامه | `/opt/daya-assistant` | `/opt/daya-assistant-preview` |
 | داده‌ها | `/var/lib/daya-assistant` | `/var/lib/daya-assistant-preview` |
 | تنظیمات | `/etc/daya-assistant.env` | `/etc/daya-assistant-preview.env` |
 | کلید | `/etc/daya-assistant.key` | `/etc/daya-assistant-preview.key` |
+
+پورت‌های Daya به‌صورت مستقل از رابین تنظیم شده‌اند: Production روی 8100 و Preview روی 8102. Preview مسیر داده، فایل تنظیمات، کلید رمزنگاری، کاربر سیستم و سرویس جداگانه دارد. نصب‌کننده Preview مقدار پیش‌فرض قدیمی 8101 را نیز به 8102 منتقل می‌کند، اما آدرس سفارشی موجود را تغییر نمی‌دهد.
 
 اطلاعات ورود اولیه در فایل root-only ذخیره می‌شود: `/root/daya-assistant-credentials.txt` یا `/root/daya-assistant-preview-credentials.txt`. تنظیمات قبلی در به‌روزرسانی حفظ می‌شوند.
 
