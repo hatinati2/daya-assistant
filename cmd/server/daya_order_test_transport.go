@@ -40,7 +40,7 @@ func postDayaOrderToTestServer(ctx context.Context, client *http.Client, baseURL
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Content-Type", "application/json")
 	if client == nil {
-		client = &http.DefaultClient
+		client = http.DefaultClient
 	}
 	// Clone the supplied client so this helper cannot mutate shared client
 	// configuration, and refuse redirects to keep the loopback boundary intact.
