@@ -12,10 +12,15 @@ for command_name in curl tar; do
   fi
 done
 
+ref="${DAYA_INSTALL_REF:-main}"
+if [[ ! "$ref" =~ ^[A-Za-z0-9._/-]+$ || "$ref" == *".."* ]]; then
+  echo "مقدار DAYA_INSTALL_REF معتبر نیست." >&2
+  exit 1
+fi
 tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT
-echo "دریافت نسخه main از GitHub..."
-curl -fsSL "https://api.github.com/repos/hatinati2/daya-assistant/tarball/main" -o "$tmp/source.tar.gz"
+echo "دریافت نسخه ${ref} از GitHub..."
+curl -fsSL "https://api.github.com/repos/hatinati2/daya-assistant/tarball/${ref}" -o "$tmp/source.tar.gz"
 mkdir "$tmp/source"
 tar -xzf "$tmp/source.tar.gz" --strip-components=1 -C "$tmp/source"
 echo "شروع نصب Daya Assistant Preview..."

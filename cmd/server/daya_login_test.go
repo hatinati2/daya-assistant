@@ -57,6 +57,9 @@ func TestDayaLoginUsesCaptchaCookieAndObservedPayload(t *testing.T) {
 	if result.Token != "header.payload.signature" || result.ExpiresAt.Before(time.Now().Add(50*time.Minute)) {
 		t.Fatalf("unexpected session result: %#v", result)
 	}
+	if len(result.Cookies) != 2 || result.Cookies[0].Name != "cookiesession1" {
+		t.Fatalf("challenge cookie was not carried into session: %#v", result.Cookies)
+	}
 	if !loginCookieSeen || !payloadSeen {
 		t.Fatalf("captcha cookie=%v payload=%v", loginCookieSeen, payloadSeen)
 	}
