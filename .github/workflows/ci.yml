@@ -25,6 +25,9 @@ jobs:
           if [ -n "$unformatted" ]; then
             echo "::error::The following Go files need gofmt:"
             printf '%s\n' "$unformatted"
+            echo "::group::gofmt diff"
+            gofmt -d ./cmd ./internal
+            echo "::endgroup::"
             exit 1
           fi
       - name: Test
