@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"strings"
+	"sync/atomic"
 	"testing"
 )
 
@@ -49,9 +50,9 @@ func TestDayaTestTransportRejectsNonLoopbackBeforeNetwork(t *testing.T) {
 }
 
 func TestDayaTestTransportDoesNotFollowRedirects(t *testing.T) {
-	destinationHit := false
+	var destinationHit atomic.Bool
 	destination := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		destinationHit = true
+		destinationHit.Store(true)
 		w.WriteHeader(http.StatusCreated)
 	}))
 	defer destination.Close()
@@ -69,7 +70,7 @@ func TestDayaTestTransportDoesNotFollowRedirects(t *testing.T) {
 	if status != http.StatusFound {
 		t.Fatalf("status=%d, want %d", status, http.StatusFound)
 	}
-	if destinationHit {
+	if destinationHit.Load() {
 		t.Fatal("test transport followed redirect to a different destination")
 	}
 }
