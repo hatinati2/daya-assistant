@@ -1123,10 +1123,11 @@ func main() {
 	credentials := NewDayaCredentialStore(dataDir, env("DAYA_CREDENTIALS_KEY_FILE", "/etc/daya-assistant.key"))
 	dayaAuth := &DayaLoginClient{}
 	sessionMonitor := NewDayaSessionMonitor(nil)
-	if token, _, loadErr := credentials.LoadAccessToken(); loadErr != nil {
+	sessionMonitor.SetSessionUpdater(credentials.SaveAccessSession)
+	if session, _, loadErr := credentials.LoadAccessSession(); loadErr != nil {
 		log.Printf("Daya session monitor not started: stored session could not be loaded")
-	} else if token != "" {
-		if err := sessionMonitor.Start(context.Background(), token, time.Time{}); err != nil {
+	} else if session.Token != "" {
+		if err := sessionMonitor.Start(context.Background(), session); err != nil {
 			log.Printf("Daya session monitor not started: %v", err)
 		}
 	}
@@ -1250,7 +1251,7 @@ func main() {
 		} else if r.URL.Query().Get("notice") == "daya_login_ok" {
 			notice = "ورود عادی به دایا موفق بود و نشست رمزنگاری‌شده ذخیره شد."
 		}
-		credentials.Render(w, "", notice)
+		credentials.RenderWithMonitor(w, "", notice, sessionMonitor.Snapshot())
 	})
 	mux.HandleFunc("POST /settings/daya-credentials", func(w http.ResponseWriter, r *http.Request) {
 		if !sameOrigin(r) {
@@ -1263,9 +1264,10 @@ func main() {
 			return
 		}
 		if err := credentials.Save(r.FormValue("username"), r.FormValue("password")); err != nil {
-			credentials.Render(w, err.Error(), "")
+			credentials.RenderWithMonitor(w, err.Error(), "", sessionMonitor.Snapshot())
 			return
 		}
+		sessionMonitor.Stop(false, "اطلاعات ورود تغییر کرد؛ ورود مجدد لازم است")
 		http.Redirect(w, r, "/settings?notice=daya_saved", http.StatusSeeOther)
 	})
 	mux.HandleFunc("POST /settings/daya-credentials/delete", func(w http.ResponseWriter, r *http.Request) {
@@ -1274,9 +1276,10 @@ func main() {
 			return
 		}
 		if err := credentials.Delete(); err != nil {
-			credentials.Render(w, "حذف اطلاعات ورود انجام نشد.", "")
+			credentials.RenderWithMonitor(w, "حذف اطلاعات ورود انجام نشد.", "", sessionMonitor.Snapshot())
 			return
 		}
+		sessionMonitor.Stop(false, "نشست و اطلاعات ورود حذف شدند")
 		http.Redirect(w, r, "/settings?notice=daya_deleted", http.StatusSeeOther)
 	})
 
@@ -1323,12 +1326,13 @@ func main() {
 			credentials.Render(w, err.Error(), "")
 			return
 		}
-		if err := credentials.SaveAccessTokenUntil(result.Token, result.ExpiresAt); err != nil {
-			credentials.Render(w, "ورود موفق بود، اما ذخیره امن نشست انجام نشد.", "")
+		session := DayaSession{Token: result.Token, Cookies: result.Cookies, ExpiresAt: result.ExpiresAt}
+		if err := credentials.SaveAccessSession(session); err != nil {
+			credentials.RenderWithMonitor(w, "ورود موفق بود، اما ذخیره امن نشست انجام نشد.", "", sessionMonitor.Snapshot())
 			return
 		}
-		if err := sessionMonitor.Start(context.Background(), result.Token, result.ExpiresAt); err != nil {
-			credentials.Render(w, "نشست ذخیره شد، اما پایش خودکار شروع نشد.", "")
+		if err := sessionMonitor.Start(context.Background(), session); err != nil {
+			credentials.RenderWithMonitor(w, "نشست ذخیره شد، اما پایش خودکار شروع نشد.", "", sessionMonitor.Snapshot())
 			return
 		}
 		http.Redirect(w, r, "/settings?notice=daya_login_ok", http.StatusSeeOther)
