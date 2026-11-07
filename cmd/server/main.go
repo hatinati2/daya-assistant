@@ -780,7 +780,7 @@ th{font-size:10px;color:#667085}.tablewrap{overflow:auto}.tablewrap tbody td{fon
           "زمان تهران: " + result.execute_at,
           "ارزش اسمی: " + result.notional + " ریال",
           "وضعیت: هیچ درخواستی به کارگزاری ارسال نشد و سفارشی ذخیره نشد."
-        ].join("\\n");
+        ].join("\n");
       } catch (error) {
         dryRunResult.classList.add("error");
         dryRunResult.textContent = "اعتبارسنجی ناموفق: " + error.message;
