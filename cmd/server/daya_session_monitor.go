@@ -28,13 +28,13 @@ type DayaMonitorSnapshot struct {
 }
 
 type DayaSessionMonitor struct {
-	mu       sync.Mutex
-	http     *http.Client
-	state    DayaMonitorSnapshot
-	cancel   context.CancelFunc
-	interval     func() (time.Duration, error)
+	mu          sync.Mutex
+	http        *http.Client
+	state       DayaMonitorSnapshot
+	cancel      context.CancelFunc
+	interval    func() (time.Duration, error)
 	windowCheck func(time.Time) (bool, time.Duration)
-	update       func(DayaSession) error
+	update      func(DayaSession) error
 }
 
 func NewDayaSessionMonitor(client *http.Client) *DayaSessionMonitor {
