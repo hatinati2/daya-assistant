@@ -44,6 +44,7 @@ type DayaSession struct {
 	Cookies   []DayaSessionCookie `json:"cookies"`
 	ExpiresAt time.Time           `json:"expires_at,omitempty"`
 }
+
 const dayaSessionAADv1 = "daya-assistant/daya-session/v1"
 const dayaSessionAADv2 = "daya-assistant/daya-session/v2"
 

@@ -135,7 +135,6 @@ func TestDayaCredentialStoreTreatsExpiredSessionAsMissing(t *testing.T) {
 	}
 }
 
-
 func TestDayaCredentialStoreEncryptsAndRestoresBothSessionCookies(t *testing.T) {
 	store := newTestCredentialStore(t)
 	expires := time.Now().Add(time.Hour).UTC().Truncate(time.Second)
