@@ -28,6 +28,36 @@ type encryptedDayaCredentials struct {
 	ExpiresAt  time.Time `json:"expires_at,omitempty"`
 }
 
+type DayaSessionCookie struct {
+	Name string `json:"name"`
+	Value string `json:"value"`
+	Domain string `json:"domain,omitempty"`
+	Path string `json:"path,omitempty"`
+	Expires time.Time `json:"expires,omitempty"`
+	MaxAge int `json:"max_age,omitempty"`
+	Secure bool `json:"secure,omitempty"`
+	HTTPOnly bool `json:"http_only,omitempty"`
+	SameSite http.SameSite `json:"same_site,omitempty"`
+}
+type DayaSession struct {
+	Token string `json:"token"`
+	Cookies []DayaSessionCookie `json:"cookies"`
+	ExpiresAt time.Time `json:"expires_at,omitempty"`
+}
+const dayaSessionAADv1 = "daya-assistant/daya-session/v1"
+const dayaSessionAADv2 = "daya-assistant/daya-session/v2"
+
+func dayaSessionCookieFromHTTP(cookie *http.Cookie) (DayaSessionCookie, bool) {
+	if cookie == nil || (cookie.Name != "token" && cookie.Name != "cookiesession1") || cookie.Value == "" || len(cookie.Value) > 32<<10 {
+		return DayaSessionCookie{}, false
+	}
+	return DayaSessionCookie{Name: cookie.Name, Value: cookie.Value, Domain: cookie.Domain, Path: cookie.Path, Expires: cookie.Expires, MaxAge: cookie.MaxAge, Secure: cookie.Secure, HTTPOnly: cookie.HttpOnly, SameSite: cookie.SameSite}, true
+}
+
+func (c DayaSessionCookie) httpCookie() *http.Cookie {
+	return &http.Cookie{Name: c.Name, Value: c.Value, Domain: c.Domain, Path: c.Path, Expires: c.Expires, MaxAge: c.MaxAge, Secure: c.Secure, HttpOnly: c.HTTPOnly, SameSite: c.SameSite}
+}
+
 type DayaCredentialStore struct {
 	mu          sync.Mutex
 	path        string
@@ -36,12 +66,13 @@ type DayaCredentialStore struct {
 }
 
 type DayaSettingsPageData struct {
-	Username   string
-	Saved      bool
+	Username string
+	Saved bool
 	HasSession bool
-	LoginAt    string
-	Error      string
-	Notice     string
+	LoginAt string
+	Monitor DayaMonitorSnapshot
+	Error string
+	Notice string
 }
 
 var dayaSettingsPage = template.Must(template.New("daya-settings").Parse(`<!doctype html>
@@ -311,127 +342,86 @@ func (s *DayaCredentialStore) Load() (string, string, error) {
 func (s *DayaCredentialStore) SaveAccessToken(token string) error {
 	return s.SaveAccessTokenUntil(token, time.Now().Add(7*time.Hour))
 }
-
 func (s *DayaCredentialStore) SaveAccessTokenUntil(token string, expiresAt time.Time) error {
+	return s.SaveAccessSession(DayaSession{Token: token, ExpiresAt: expiresAt, Cookies: []DayaSessionCookie{{Name: "token", Value: token, Path: "/"}}})
+}
+func (s *DayaCredentialStore) SaveAccessSession(session DayaSession) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	if token == "" || len(token) > 64<<10 || strings.ContainsRune(token, '\x00') {
-		return errors.New("توکن دریافتی دایا معتبر نیست")
+	if session.Token == "" || len(session.Token) > 64<<10 || strings.ContainsRune(session.Token, '\x00') { return errors.New("توکن دریافتی دایا معتبر نیست") }
+	if !session.ExpiresAt.IsZero() && !session.ExpiresAt.After(time.Now()) { return errors.New("نشست دایا منقضی شده است") }
+	cookies := make([]DayaSessionCookie, 0, len(session.Cookies)+1)
+	seen := make(map[string]bool)
+	for _, cookie := range session.Cookies {
+		if cookie.Name != "token" && cookie.Name != "cookiesession1" { return errors.New("نوع کوکی نشست دایا پشتیبانی نمی‌شود") }
+		if cookie.Value == "" || len(cookie.Value) > 32<<10 || strings.ContainsAny(cookie.Value, "\r\n;") { return errors.New("مقدار کوکی نشست دایا معتبر نیست") }
+		if !seen[cookie.Name] { seen[cookie.Name] = true; cookies = append(cookies, cookie) }
 	}
-	key, err := s.readKey()
-	if err != nil {
-		return err
+	if !seen["token"] { cookies = append(cookies, DayaSessionCookie{Name: "token", Value: session.Token, Path: "/"}) } else {
+		for i := range cookies { if cookies[i].Name == "token" { cookies[i].Value = session.Token } }
 	}
-	block, err := aes.NewCipher(key)
-	if err != nil {
-		return err
-	}
-	gcm, err := cipher.NewGCM(block)
-	if err != nil {
-		return err
-	}
+	session.Cookies = cookies
+	key, err := s.readKey(); if err != nil { return err }
+	block, err := aes.NewCipher(key); if err != nil { return err }
+	gcm, err := cipher.NewGCM(block); if err != nil { return err }
 	nonce := make([]byte, gcm.NonceSize())
-	if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
-		return fmt.Errorf("تولید nonce نشست: %w", err)
-	}
-	ciphertext := gcm.Seal(nil, nonce, []byte(token), []byte("daya-assistant/daya-session/v1"))
-	record := encryptedDayaCredentials{
-		Version:    1,
-		Nonce:      base64.StdEncoding.EncodeToString(nonce),
-		Ciphertext: base64.StdEncoding.EncodeToString(ciphertext),
-		UpdatedAt:  time.Now().UTC(),
-		ExpiresAt:  expiresAt,
-	}
-	encoded, err := json.MarshalIndent(record, "", "  ")
-	if err != nil {
-		return err
-	}
-	if err := os.MkdirAll(filepath.Dir(s.sessionPath), 0700); err != nil {
-		return err
-	}
+	if _, err := io.ReadFull(rand.Reader, nonce); err != nil { return fmt.Errorf("تولید nonce نشست: %w", err) }
+	plain, err := json.Marshal(session); if err != nil { return err }
+	ciphertext := gcm.Seal(nil, nonce, plain, []byte(dayaSessionAADv2))
+	record := encryptedDayaCredentials{Version: 2, Nonce: base64.StdEncoding.EncodeToString(nonce), Ciphertext: base64.StdEncoding.EncodeToString(ciphertext), UpdatedAt: time.Now().UTC(), ExpiresAt: session.ExpiresAt}
+	encoded, err := json.MarshalIndent(record, "", "  "); if err != nil { return err }
+	if err := os.MkdirAll(filepath.Dir(s.sessionPath), 0700); err != nil { return err }
 	tmp := s.sessionPath + ".tmp"
-	f, err := os.OpenFile(tmp, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
-	if err != nil {
-		return err
-	}
-	_, writeErr := f.Write(encoded)
-	if writeErr == nil {
-		writeErr = f.Sync()
-	}
-	closeErr := f.Close()
-	if writeErr != nil {
-		_ = os.Remove(tmp)
-		return writeErr
-	}
-	if closeErr != nil {
-		_ = os.Remove(tmp)
-		return closeErr
-	}
-	if err := os.Rename(tmp, s.sessionPath); err != nil {
-		_ = os.Remove(tmp)
-		return err
-	}
-	if dir, err := os.Open(filepath.Dir(s.sessionPath)); err == nil {
-		_ = dir.Sync()
-		_ = dir.Close()
-	}
+	f, err := os.OpenFile(tmp, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600); if err != nil { return err }
+	_, writeErr := f.Write(encoded); if writeErr == nil { writeErr = f.Sync() }; closeErr := f.Close()
+	if writeErr != nil { _ = os.Remove(tmp); return writeErr }; if closeErr != nil { _ = os.Remove(tmp); return closeErr }
+	if err := os.Rename(tmp, s.sessionPath); err != nil { _ = os.Remove(tmp); return err }
+	if dir, err := os.Open(filepath.Dir(s.sessionPath)); err == nil { _ = dir.Sync(); _ = dir.Close() }
 	return nil
 }
-
 func (s *DayaCredentialStore) LoadAccessToken() (string, time.Time, error) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
+	session, updatedAt, err := s.LoadAccessSession()
+	if err != nil { return "", time.Time{}, err }
+	return session.Token, updatedAt, nil
+}
+func (s *DayaCredentialStore) LoadAccessSession() (DayaSession, time.Time, error) {
+	s.mu.Lock(); defer s.mu.Unlock()
 	data, err := os.ReadFile(s.sessionPath)
-	if errors.Is(err, os.ErrNotExist) {
-		return "", time.Time{}, nil
-	}
-	if err != nil {
-		return "", time.Time{}, fmt.Errorf("خواندن نشست دایا: %w", err)
-	}
+	if errors.Is(err, os.ErrNotExist) { return DayaSession{}, time.Time{}, nil }
+	if err != nil { return DayaSession{}, time.Time{}, fmt.Errorf("خواندن نشست دایا: %w", err) }
 	var record encryptedDayaCredentials
-	if err := json.Unmarshal(data, &record); err != nil {
-		return "", time.Time{}, errors.New("ساختار فایل نشست دایا معتبر نیست")
+	if err := json.Unmarshal(data, &record); err != nil { return DayaSession{}, time.Time{}, errors.New("ساختار فایل نشست دایا معتبر نیست") }
+	if record.Version != 1 && record.Version != 2 { return DayaSession{}, time.Time{}, errors.New("نسخه فایل نشست دایا پشتیبانی نمی‌شود") }
+	if !record.ExpiresAt.IsZero() && !record.ExpiresAt.After(time.Now()) { return DayaSession{}, record.UpdatedAt, nil }
+	nonce, err := base64.StdEncoding.DecodeString(record.Nonce); if err != nil { return DayaSession{}, time.Time{}, errors.New("nonce نشست دایا نامعتبر است") }
+	ciphertext, err := base64.StdEncoding.DecodeString(record.Ciphertext); if err != nil { return DayaSession{}, time.Time{}, errors.New("داده نشست دایا نامعتبر است") }
+	key, err := s.readKey(); if err != nil { return DayaSession{}, time.Time{}, err }
+	block, err := aes.NewCipher(key); if err != nil { return DayaSession{}, time.Time{}, err }
+	gcm, err := cipher.NewGCM(block); if err != nil { return DayaSession{}, time.Time{}, err }
+	if len(nonce) != gcm.NonceSize() { return DayaSession{}, time.Time{}, errors.New("اندازه nonce نشست دایا نامعتبر است") }
+	aad := []byte(dayaSessionAADv1); if record.Version == 2 { aad = []byte(dayaSessionAADv2) }
+	plain, err := gcm.Open(nil, nonce, ciphertext, aad); if err != nil { return DayaSession{}, time.Time{}, errors.New("رمزگشایی نشست دایا ناموفق بود") }
+	var session DayaSession
+	if record.Version == 1 {
+		session = DayaSession{Token: string(plain), ExpiresAt: record.ExpiresAt, Cookies: []DayaSessionCookie{{Name: "token", Value: string(plain), Path: "/"}}}
+	} else if err := json.Unmarshal(plain, &session); err != nil { return DayaSession{}, time.Time{}, errors.New("محتوای نشست دایا معتبر نیست") }
+	if session.Token == "" || len(session.Token) > 64<<10 { return DayaSession{}, time.Time{}, errors.New("توکن نشست دایا خالی یا نامعتبر است") }
+	if session.ExpiresAt.IsZero() { session.ExpiresAt = record.ExpiresAt }
+	if !session.ExpiresAt.IsZero() && !session.ExpiresAt.After(time.Now()) { return DayaSession{}, record.UpdatedAt, nil }
+	foundToken := false
+	for _, cookie := range session.Cookies {
+		if cookie.Name == "token" && cookie.Value == session.Token { foundToken = true }
+		if cookie.Name != "token" && cookie.Name != "cookiesession1" { return DayaSession{}, time.Time{}, errors.New("نوع کوکی در نشست ذخیره‌شده معتبر نیست") }
 	}
-	if record.Version != 1 {
-		return "", time.Time{}, errors.New("نسخه فایل نشست دایا پشتیبانی نمی‌شود")
-	}
-	if !record.ExpiresAt.IsZero() && !record.ExpiresAt.After(time.Now()) {
-		return "", record.UpdatedAt, nil
-	}
-	nonce, err := base64.StdEncoding.DecodeString(record.Nonce)
-	if err != nil {
-		return "", time.Time{}, errors.New("nonce نشست دایا نامعتبر است")
-	}
-	ciphertext, err := base64.StdEncoding.DecodeString(record.Ciphertext)
-	if err != nil {
-		return "", time.Time{}, errors.New("داده نشست دایا نامعتبر است")
-	}
-	key, err := s.readKey()
-	if err != nil {
-		return "", time.Time{}, err
-	}
-	block, err := aes.NewCipher(key)
-	if err != nil {
-		return "", time.Time{}, err
-	}
-	gcm, err := cipher.NewGCM(block)
-	if err != nil {
-		return "", time.Time{}, err
-	}
-	if len(nonce) != gcm.NonceSize() {
-		return "", time.Time{}, errors.New("اندازه nonce نشست دایا نامعتبر است")
-	}
-	plain, err := gcm.Open(nil, nonce, ciphertext, []byte("daya-assistant/daya-session/v1"))
-	if err != nil {
-		return "", time.Time{}, errors.New("رمزگشایی نشست دایا ناموفق بود")
-	}
-	if len(plain) == 0 {
-		return "", time.Time{}, errors.New("توکن نشست دایا خالی است")
-	}
-	return string(plain), record.UpdatedAt, nil
+	if !foundToken { session.Cookies = append(session.Cookies, DayaSessionCookie{Name: "token", Value: session.Token, Path: "/"}) }
+	return session, record.UpdatedAt, nil
+}
+func (s *DayaCredentialStore) SessionStatus() (time.Time, bool, error) {
+	token, updatedAt, err := s.LoadAccessToken()
+	return updatedAt, token != "", err
 }
 
-func (s *DayaCredentialStore) SessionStatus() (time.Time, bool, error) {
+func (s *DayaCredentialStore) SessionStatus()func (s *DayaCredentialStore) SessionStatus() (time.Time, bool, error) {
 	token, updatedAt, err := s.LoadAccessToken()
 	return updatedAt, token != "", err
 }
@@ -450,6 +440,9 @@ func (s *DayaCredentialStore) Delete() error {
 }
 
 func (s *DayaCredentialStore) Render(w http.ResponseWriter, errorMessage, notice string) {
+	s.RenderWithMonitor(w, errorMessage, notice, DayaMonitorSnapshot{})
+}
+func (s *DayaCredentialStore) RenderWithMonitor(w http.ResponseWriter, errorMessage, notice string, monitor DayaMonitorSnapshot) {
 	username, saved, err := s.Status()
 	if err != nil && errorMessage == "" {
 		errorMessage = "خواندن اطلاعات ذخیره‌شده ممکن نشد: " + err.Error()
@@ -466,8 +459,9 @@ func (s *DayaCredentialStore) Render(w http.ResponseWriter, errorMessage, notice
 		Username:   username,
 		Saved:      saved,
 		HasSession: hasSession,
-		LoginAt:    loginAtText,
-		Error:      errorMessage,
+		LoginAt: loginAtText,
+		Monitor: monitor,
+		Error: errorMessage,
 		Notice:     notice,
 	}
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")

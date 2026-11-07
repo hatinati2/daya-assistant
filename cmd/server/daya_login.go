@@ -25,12 +25,14 @@ type DayaCaptchaChallenge struct {
 }
 
 type DayaLoginResult struct {
-	Token     string
+	Token string
 	ExpiresAt time.Time
+	Cookies []DayaSessionCookie
 }
 
 type dayaCaptchaState struct {
-	Cookie    string
+	Cookie string
+	Session DayaSessionCookie
 	ExpiresAt time.Time
 }
 
@@ -103,6 +105,8 @@ func (c *DayaLoginClient) FetchCaptcha(ctx context.Context) (DayaCaptchaChalleng
 	if sessionCookie == nil || sessionCookie.Value == "" {
 		return DayaCaptchaChallenge{}, errors.New("کوکی نشست CAPTCHA در پاسخ دایا وجود ندارد")
 	}
+	sessionCookieData, ok := dayaSessionCookieFromHTTP(sessionCookie)
+	if !ok { return DayaCaptchaChallenge{}, errors.New("کوکی CAPTCHA دایا معتبر نیست") }
 	cookieHeader := sessionCookie.Name + "=" + sessionCookie.Value
 	c.mu.Lock()
 	if c.challenges == nil {
@@ -120,7 +124,7 @@ func (c *DayaLoginClient) FetchCaptcha(ctx context.Context) (DayaCaptchaChalleng
 			break
 		}
 	}
-	c.challenges[captchaID] = dayaCaptchaState{Cookie: cookieHeader, ExpiresAt: now.Add(4 * time.Minute)}
+	c.challenges[captchaID] = dayaCaptchaState{Cookie: cookieHeader, Session: sessionCookieData, ExpiresAt: now.Add(4 * time.Minute)}
 	c.mu.Unlock()
 	return DayaCaptchaChallenge{
 		CaptchaID:    captchaID,
@@ -183,10 +187,20 @@ func (c *DayaLoginClient) Login(ctx context.Context, username, password, captcha
 		return DayaLoginResult{}, dayaLoginResponseError(resp.StatusCode, body)
 	}
 	var tokenCookie *http.Cookie
+	cookies := []DayaSessionCookie{state.Session}
 	for _, cookie := range resp.Cookies() {
-		if strings.EqualFold(cookie.Name, "token") && cookie.Value != "" {
+		safeCookie, valid := dayaSessionCookieFromHTTP(cookie)
+		if !valid { continue }
+		switch safeCookie.Name {
+		case "cookiesession1":
+			replaced := false
+			for i := range cookies { if cookies[i].Name == "cookiesession1" { cookies[i] = safeCookie; replaced = true } }
+			if !replaced { cookies = append(cookies, safeCookie) }
+		case "token":
 			tokenCookie = cookie
-			break
+			replaced := false
+			for i := range cookies { if cookies[i].Name == "token" { cookies[i] = safeCookie; replaced = true } }
+			if !replaced { cookies = append(cookies, safeCookie) }
 		}
 	}
 	if tokenCookie == nil {
@@ -204,7 +218,7 @@ func (c *DayaLoginClient) Login(ctx context.Context, username, password, captcha
 	if expiresAt.IsZero() || !expiresAt.After(time.Now()) {
 		return DayaLoginResult{}, errors.New("زمان اعتبار کوکی نشست دایا قابل تشخیص نیست")
 	}
-	return DayaLoginResult{Token: tokenCookie.Value, ExpiresAt: expiresAt}, nil
+	return DayaLoginResult{Token: tokenCookie.Value, ExpiresAt: expiresAt, Cookies: cookies}, nil
 }
 
 func dayaLoginResponseError(status int, body []byte) error {
