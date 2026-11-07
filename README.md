@@ -29,6 +29,8 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/hatinati2/daya-assistant
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/hatinati2/daya-assistant/main/install-preview-public.sh)"
 ```
 
+برای نصب نسخهٔ آزمایشی شاخهٔ توسعه، مقدار `DAYA_INSTALL_REF=feature/project-scaffold` را به محیط همان فرمان بده؛ پس از ادغام PR می‌توانی مقدار پیش‌فرض `main` را استفاده کنی.
+
 | مورد | Production | Preview |
 |---|---|---|
 | پورت | 8100 | 8102 |
@@ -49,7 +51,7 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/hatinati2/daya-assistant
 - `POST https://mg.dayatrader.ir/oms-login`: فیلدهای `username`، `password`، `captchaAnswer` و `captchaId` همراه هدر `x-client-type: WEB_CLIENT` و همان کوکی CAPTCHA.
 - پاسخ موفق، کوکی HttpOnly با نام `token` و زمان اعتبار تقریبی هفت ساعت می‌دهد.
 
-پنل تصویر CAPTCHA را نمایش می‌دهد و عدد آن را کاربر وارد می‌کند. پاسخ CAPTCHA ذخیره نمی‌شود. کوکی نشست با AES-256-GCM و کلیدی خارج از پوشه داده رمزنگاری می‌شود؛ نشست منقضی‌شده فعال تلقی نمی‌شود.
+پنل تصویر CAPTCHA را نمایش می‌دهد و عدد آن را کاربر وارد می‌کند. پاسخ CAPTCHA ذخیره نمی‌شود. کوکی‌های `token` و `cookiesession1` با AES-256-GCM و کلیدی خارج از پوشه داده رمزنگاری می‌شوند. قالب v2 نشست، فایل‌های رمزنگاری‌شدهٔ v1 (توکن‌محور) را نیز می‌خواند. پایش نشست فقط درخواست `GET /orders` می‌فرستد؛ کوکی تازه تنها در صورت دریافت `Set-Cookie` معتبر ذخیره می‌شود و بدون شواهد، انقضای توکن تمدید نمی‌شود. پاسخ 401/403 به ورود دستی CAPTCHA نیاز دارد و پاسخ 429 پایش را متوقف می‌کند.
 
 ## وضعیت API سفارش دایا
 
