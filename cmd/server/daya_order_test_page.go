@@ -167,7 +167,7 @@ func executeDayaLocalOrderTest(ctx context.Context, order Order, scenario string
 		return dayaLocalOrderTestResult{}, errors.New("نوع پاسخ آزمایشی معتبر نیست")
 	}
 
-	var captured []byte
+	captured := make(chan []byte, 1)
 	mock := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost || r.URL.Path != "/orders" {
 			http.Error(w, "unexpected mock request", http.StatusNotFound)
@@ -182,7 +182,10 @@ func executeDayaLocalOrderTest(ctx context.Context, order Order, scenario string
 			http.Error(w, "invalid mock request body", http.StatusBadRequest)
 			return
 		}
-		captured = body
+		select {
+		case captured <- body:
+		default:
+		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(status)
 		errorMessage := ""
@@ -204,11 +207,14 @@ func executeDayaLocalOrderTest(ctx context.Context, order Order, scenario string
 	if err != nil {
 		return dayaLocalOrderTestResult{}, err
 	}
-	if len(captured) == 0 {
+	var requestBody []byte
+	select {
+	case requestBody = <-captured:
+	default:
 		return dayaLocalOrderTestResult{}, errors.New("سرور ساختگی درخواست JSON را دریافت نکرد")
 	}
 	var pretty bytes.Buffer
-	if err := json.Indent(&pretty, captured, "", "  "); err != nil {
+	if err := json.Indent(&pretty, requestBody, "", "  "); err != nil {
 		return dayaLocalOrderTestResult{}, fmt.Errorf("قالب‌بندی JSON آزمایشی: %w", err)
 	}
 	return dayaLocalOrderTestResult{
