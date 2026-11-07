@@ -33,6 +33,7 @@ type DayaSessionMonitor struct {
 	state    DayaMonitorSnapshot
 	cancel   context.CancelFunc
 	interval func() (time.Duration, error)
+	update   func(DayaSession) error
 }
 
 func NewDayaSessionMonitor(client *http.Client) *DayaSessionMonitor {
@@ -47,6 +48,12 @@ func NewDayaSessionMonitor(client *http.Client) *DayaSessionMonitor {
 	return &DayaSessionMonitor{http: client, interval: dayaRandomInterval}
 }
 
+func (m *DayaSessionMonitor) SetSessionUpdater(update func(DayaSession) error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.update = update
+}
+
 func dayaRandomInterval() (time.Duration, error) {
 	var b [8]byte
 	if _, err := rand.Read(b[:]); err != nil {
@@ -57,11 +64,11 @@ func dayaRandomInterval() (time.Duration, error) {
 	return dayaMonitorMin + time.Duration(n%span)*time.Second, nil
 }
 
-func (m *DayaSessionMonitor) Start(parent context.Context, token string, expires time.Time) error {
-	if token == "" {
+func (m *DayaSessionMonitor) Start(parent context.Context, session DayaSession) error {
+	if session.Token == "" {
 		return errors.New("نشست دایا خالی است")
 	}
-	if !expires.IsZero() && !expires.After(time.Now()) {
+	if !session.ExpiresAt.IsZero() && !session.ExpiresAt.After(time.Now()) {
 		return errors.New("نشست دایا منقضی شده است")
 	}
 	m.mu.Lock()
@@ -72,7 +79,7 @@ func (m *DayaSessionMonitor) Start(parent context.Context, token string, expires
 	m.cancel = cancel
 	m.state = DayaMonitorSnapshot{Running: true}
 	m.mu.Unlock()
-	go m.run(ctx, token, expires)
+	go m.run(ctx, session)
 	return nil
 }
 
@@ -95,7 +102,7 @@ func (m *DayaSessionMonitor) Snapshot() DayaMonitorSnapshot {
 	return m.state
 }
 
-func (m *DayaSessionMonitor) run(ctx context.Context, token string, expires time.Time) {
+func (m *DayaSessionMonitor) run(ctx context.Context, session DayaSession) {
 	for {
 		delay, err := m.interval()
 		if err != nil {
@@ -112,17 +119,22 @@ func (m *DayaSessionMonitor) run(ctx context.Context, token string, expires time
 			return
 		case <-timer.C:
 		}
-		if !expires.IsZero() && !time.Now().Before(expires) {
+		if !session.ExpiresAt.IsZero() && !time.Now().Before(session.ExpiresAt) {
 			m.Stop(true, "زمان اعتبار نشست به پایان رسیده است؛ ورود دستی لازم است")
 			return
 		}
+
 		req, err := http.NewRequestWithContext(ctx, http.MethodGet, dayaOrdersURL, nil)
 		if err != nil {
 			m.Stop(false, "ساخت درخواست بررسی نشست ناموفق بود")
 			return
 		}
 		req.Header.Set("Accept", "application/json")
-		req.AddCookie(&http.Cookie{Name: "token", Value: token})
+		for _, cookie := range session.Cookies {
+			if (cookie.Name == "token" || cookie.Name == "cookiesession1") && cookie.Value != "" {
+				req.AddCookie(cookie.httpCookie())
+			}
+		}
 		resp, err := m.http.Do(req)
 		now := time.Now().UTC()
 		if err != nil {
@@ -136,14 +148,28 @@ func (m *DayaSessionMonitor) run(ctx context.Context, token string, expires time
 			m.mu.Unlock()
 			continue
 		}
+
 		_, _ = io.Copy(io.Discard, io.LimitReader(resp.Body, 2<<20))
 		_ = resp.Body.Close()
+		rotated, rotateErr := dayaApplySessionCookies(&session, resp.Cookies(), now)
 		m.mu.Lock()
 		m.state.LastCheck = now
 		m.state.LastStatus = resp.StatusCode
 		m.state.Checks++
 		m.state.LastError = ""
+		update := m.update
 		m.mu.Unlock()
+		if rotateErr != nil {
+			m.Stop(true, "کوکی بازگشتی از دایا معتبر نبود؛ ورود دستی لازم است")
+			return
+		}
+		if rotated && update != nil {
+			if err := update(session); err != nil {
+				m.Stop(false, "ذخیره امن تغییر نشست انجام نشد؛ پایش متوقف شد")
+				return
+			}
+		}
+
 		switch resp.StatusCode {
 		case http.StatusUnauthorized, http.StatusForbidden:
 			m.Stop(true, "نشست توسط دایا پذیرفته نشد؛ ورود دستی با CAPTCHA لازم است")
@@ -156,6 +182,59 @@ func (m *DayaSessionMonitor) run(ctx context.Context, token string, expires time
 			m.mu.Lock()
 			m.state.LastError = "خطای موقت سرویس دایا"
 			m.mu.Unlock()
+		} else if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+			m.mu.Lock()
+			m.state.LastError = "پاسخ غیرمنتظره از سرویس دایا"
+			m.mu.Unlock()
 		}
 	}
+}
+
+func dayaApplySessionCookies(session *DayaSession, received []*http.Cookie, now time.Time) (bool, error) {
+	changed := false
+	for _, raw := range received {
+		cookie, ok := dayaSessionCookieFromHTTP(raw)
+		if !ok {
+			continue
+		}
+		found := false
+		for i := range session.Cookies {
+			if session.Cookies[i].Name != cookie.Name {
+				continue
+			}
+			found = true
+			if session.Cookies[i] != cookie {
+				session.Cookies[i] = cookie
+				changed = true
+			}
+			break
+		}
+		if !found {
+			session.Cookies = append(session.Cookies, cookie)
+			changed = true
+		}
+		if cookie.Name == "token" {
+			if cookie.Value != session.Token {
+				session.Token = cookie.Value
+				changed = true
+			}
+			if cookie.MaxAge > 0 {
+				newExpiry := now.Add(time.Duration(cookie.MaxAge) * time.Second)
+				if newExpiry.After(now) && !newExpiry.Equal(session.ExpiresAt) {
+					session.ExpiresAt = newExpiry
+					changed = true
+				}
+			} else if !cookie.Expires.IsZero() && cookie.Expires.After(now) && !cookie.Expires.Equal(session.ExpiresAt) {
+				session.ExpiresAt = cookie.Expires
+				changed = true
+			} else if jwtExpiry := dayaJWTExpiry(cookie.Value); jwtExpiry.After(now) && jwtExpiry.After(session.ExpiresAt) {
+				session.ExpiresAt = jwtExpiry
+				changed = true
+			}
+		}
+	}
+	if session.Token == "" || session.ExpiresAt.IsZero() || !session.ExpiresAt.After(now) {
+		return changed, errors.New("session token or expiry is invalid")
+	}
+	return changed, nil
 }

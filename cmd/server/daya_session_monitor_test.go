@@ -15,48 +15,106 @@ func (f roundTripFunc) RoundTrip(r *http.Request) (*http.Response, error) {
 	return f(r)
 }
 
+func monitorTestClient(server *httptest.Server) *http.Client {
+	return &http.Client{Transport: roundTripFunc(func(req *http.Request) (*http.Response, error) {
+		clone := req.Clone(req.Context())
+		clone.URL.Scheme = "http"
+		clone.URL.Host = strings.TrimPrefix(server.URL, "http://")
+		return http.DefaultTransport.RoundTrip(clone)
+	})}
+}
+
+func waitForMonitor(t *testing.T, m *DayaSessionMonitor, predicate func(DayaMonitorSnapshot) bool) DayaMonitorSnapshot {
+	t.Helper()
+	deadline := time.Now().Add(time.Second)
+	for time.Now().Before(deadline) {
+		snapshot := m.Snapshot()
+		if predicate(snapshot) { return snapshot }
+		time.Sleep(time.Millisecond)
+	}
+	t.Fatalf("monitor condition not met; snapshot=%#v", m.Snapshot())
+	return DayaMonitorSnapshot{}
+}
+
+func monitorSession() DayaSession {
+	return DayaSession{Token: "test-token", ExpiresAt: time.Now().Add(time.Hour), Cookies: []DayaSessionCookie{
+		{Name: "token", Value: "test-token"}, {Name: "cookiesession1", Value: "captcha-session"},
+	}}
+}
+
 func TestDayaRandomIntervalBounds(t *testing.T) {
 	for i := 0; i < 100; i++ {
 		d, err := dayaRandomInterval()
-		if err != nil {
-			t.Fatal(err)
-		}
-		if d < time.Minute || d > 7*time.Minute {
-			t.Fatalf("interval out of bounds: %v", d)
-		}
+		if err != nil { t.Fatal(err) }
+		if d < time.Minute || d > 7*time.Minute { t.Fatalf("interval out of bounds: %v", d) }
 	}
 }
 
-func TestDayaMonitorStopsOnUnauthorized(t *testing.T) {
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet || r.URL.Path != "/orders" {
-			t.Errorf("unexpected request %s %s", r.Method, r.URL.Path)
-		}
-		if c, err := r.Cookie("token"); err != nil || c.Value != "test-token" {
-			t.Errorf("token cookie missing")
-		}
+func TestDayaMonitorSendsBothCookiesAndStopsOnUnauthorized(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet || r.URL.Path != "/orders" { t.Errorf("unexpected request %s %s", r.Method, r.URL.Path) }
+		if c, err := r.Cookie("token"); err != nil || c.Value != "test-token" { t.Error("token cookie missing") }
+		if c, err := r.Cookie("cookiesession1"); err != nil || c.Value != "captcha-session" { t.Error("captcha session cookie missing") }
 		w.WriteHeader(http.StatusUnauthorized)
 	}))
-	defer srv.Close()
-	client := &http.Client{
-		Transport: roundTripFunc(func(req *http.Request) (*http.Response, error) {
-			clone := req.Clone(req.Context())
-			clone.URL.Scheme = "http"
-			clone.URL.Host = strings.TrimPrefix(srv.URL, "http://")
-			return http.DefaultTransport.RoundTrip(clone)
-		}),
-	}
-	m := NewDayaSessionMonitor(client)
+	defer server.Close()
+	m := NewDayaSessionMonitor(monitorTestClient(server))
 	m.interval = func() (time.Duration, error) { return time.Millisecond, nil }
-	if err := m.Start(context.Background(), "test-token", time.Now().Add(time.Hour)); err != nil {
-		t.Fatal(err)
-	}
-	deadline := time.Now().Add(time.Second)
-	for time.Now().Before(deadline) {
-		if m.Snapshot().NeedsLogin {
-			return
+	if err := m.Start(context.Background(), monitorSession()); err != nil { t.Fatal(err) }
+	snapshot := waitForMonitor(t, m, func(s DayaMonitorSnapshot) bool { return s.NeedsLogin })
+	if snapshot.LastStatus != http.StatusUnauthorized || snapshot.Running { t.Fatalf("unexpected 401 state: %#v", snapshot) }
+}
+
+func TestDayaMonitorPersistsRotatedToken(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.SetCookie(w, &http.Cookie{Name: "token", Value: "rotated-token", Path: "/", MaxAge: 1800, HttpOnly: true})
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer server.Close()
+	saved := make(chan DayaSession, 1)
+	m := NewDayaSessionMonitor(monitorTestClient(server))
+	m.interval = func() (time.Duration, error) { return time.Millisecond, nil }
+	m.SetSessionUpdater(func(session DayaSession) error { saved <- session; return nil })
+	if err := m.Start(context.Background(), monitorSession()); err != nil { t.Fatal(err) }
+	select {
+	case session := <-saved:
+		m.Stop(false, "test done")
+		if session.Token != "rotated-token" || session.ExpiresAt.Before(time.Now().Add(29*time.Minute)) || session.ExpiresAt.After(time.Now().Add(31*time.Minute)) {
+			t.Fatalf("rotated session not saved: token=%q expiry=%v", session.Token, session.ExpiresAt)
 		}
-		time.Sleep(time.Millisecond)
+	case <-time.After(time.Second):
+		t.Fatal("session rotation was not persisted")
 	}
-	t.Fatal("monitor did not stop for 401")
+}
+
+func TestDayaMonitorDoesNotExtendExpiryWithoutCookieRotation(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusOK) }))
+	defer server.Close()
+	saved := make(chan DayaSession, 1)
+	m := NewDayaSessionMonitor(monitorTestClient(server))
+	m.interval = func() (time.Duration, error) { return time.Millisecond, nil }
+	m.SetSessionUpdater(func(session DayaSession) error { saved <- session; return nil })
+	if err := m.Start(context.Background(), monitorSession()); err != nil { t.Fatal(err) }
+	waitForMonitor(t, m, func(s DayaMonitorSnapshot) bool { return s.Checks > 0 })
+	select {
+	case <-saved: t.Fatal("unchanged session must not be persisted or extended")
+	default:
+	}
+	m.Stop(false, "test done")
+}
+
+func TestDayaMonitorStopsOnRateLimit(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusTooManyRequests) }))
+	defer server.Close()
+	m := NewDayaSessionMonitor(monitorTestClient(server))
+	m.interval = func() (time.Duration, error) { return time.Millisecond, nil }
+	if err := m.Start(context.Background(), monitorSession()); err != nil { t.Fatal(err) }
+	s := waitForMonitor(t, m, func(s DayaMonitorSnapshot) bool { return !s.Running && s.LastStatus == http.StatusTooManyRequests })
+	if s.NeedsLogin { t.Fatal("429 should stop monitor without declaring expired login") }
+}
+
+func TestDayaApplySessionCookiesIgnoresUnrelatedCookies(t *testing.T) {
+	session := monitorSession()
+	changed, err := dayaApplySessionCookies(&session, []*http.Cookie{{Name: "unrelated", Value: "private"}}, time.Now())
+	if err != nil || changed || len(session.Cookies) != 2 { t.Fatalf("unexpected unrelated cookie handling: changed=%v err=%v", changed, err) }
 }
