@@ -1,0 +1,42 @@
+name: Go CI
+
+on:
+  push:
+    branches: [main, "feature/**"]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+      - name: Format check
+        run: |
+          unformatted="$(gofmt -l ./cmd ./internal)"
+          if [ -n "$unformatted" ]; then
+            echo "::error::The following Go files need gofmt:"
+            printf '%s\n' "$unformatted"
+            echo "::group::gofmt diff"
+            gofmt -d ./cmd ./internal
+            echo "::endgroup::"
+            exit 1
+          fi
+      - name: Test
+        run: go test ./...
+      - name: Vet
+        run: go vet ./...
+      - name: Shell syntax
+        run: bash -n install-public.sh install-preview-public.sh deploy/install.sh deploy/install-preview.sh
+      - name: HAR sanitizer tests
+        run: python3 -m unittest discover -s tools -p 'test_*.py'
+      - name: Build
+        run: go build ./cmd/server
