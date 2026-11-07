@@ -219,7 +219,6 @@ func TestDayaMonitorWindowUsesTehranTime(t *testing.T) {
 	}
 }
 
-
 func TestDayaMonitorWaitsForWindowThenChecks(t *testing.T) {
 	requests := make(chan struct{}, 1)
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
