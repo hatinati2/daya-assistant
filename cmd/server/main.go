@@ -510,6 +510,7 @@ th{font-size:10px;color:#667085}.tablewrap{overflow:auto}.tablewrap tbody td{fon
 .symbol-suggestion-main{display:flex;flex-direction:column;gap:4px;min-width:0}.symbol-suggestion-name{font-weight:bold}.symbol-suggestion-company{font-size:11px;color:#667085;white-space:normal}.symbol-suggestion-isin{direction:ltr;font-size:10px;color:#475467;white-space:nowrap}
 .datebox{position:relative}.datebar{display:flex;gap:8px}.datebar input{flex:1}.datebar button{white-space:nowrap}.calendar{margin-top:8px;padding:12px;border:1px solid #d0d5dd;border-radius:10px;background:#fff}.cal-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:12px}.cal-nav{background:#f2f4f7;color:#344054;padding:7px 10px}.cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;text-align:center}.cal-grid span{padding:7px 0;color:#667085;font-size:11px}.cal-day{background:#f8fafc;color:#182230;padding:9px 2px;border-radius:7px}.cal-day:hover,.cal-day.selected{background:#175cd3;color:#fff}.cal-day.today{outline:2px solid #84adff}.cal-empty{min-height:34px}
 .batch-planner{grid-column:1/-1;margin:4px 0;border:1px solid #d0d5dd;border-radius:9px;padding:7px 9px;background:#f8fafc}.batch-planner>summary{cursor:pointer;font-size:11px;font-weight:bold;color:#344054}.batch-planner-body{padding-top:7px}.batch-planner-note{font-size:10px;line-height:1.55;color:#667085;margin-bottom:6px}.batch-plan-controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 10px}.batch-plan-controls label{font-size:10px;margin:4px 0}.batch-plan-controls input{min-height:32px;padding:5px 8px;font-size:12px}.batch-plan-calc{margin-top:7px;font-size:11px;padding:7px 10px}.batch-plan-error{margin-top:6px;color:#b42318;font-size:10px}.batch-plan-result{margin-top:7px;padding:7px;background:#fff;border:1px solid #e4e7ec;border-radius:8px}.batch-plan-summary{display:flex;gap:10px;flex-wrap:wrap;font-size:10px}.batch-plan-table-wrap{max-height:140px;overflow:auto;margin-top:6px}.batch-plan-table{font-size:10px}.batch-plan-table th,.batch-plan-table td{padding:4px 6px}
+.dry-run{width:100%;margin-top:7px;background:#eff8ff;color:#175cd3;border:1px solid #b2ddff}.dry-run-result{margin-top:7px;padding:9px 11px;border:1px solid #b2ddff;border-radius:9px;background:#f5faff;color:#1849a9;line-height:1.7;white-space:pre-wrap}.dry-run-result.error{background:#fef3f2;border-color:#fecdca;color:#b42318}
 @media(max-width:900px){.grid{grid-template-columns:1fr}.head{align-items:flex-start;gap:10px;flex-direction:column}}@media(max-width:560px){.form-grid{grid-template-columns:1fr}.form-field.wide,.form-grid>.wide{grid-column:auto}.batch-plan-controls{grid-template-columns:1fr}}
 </style></head><body data-jyear="{{.JYear}}" data-jmonth="{{.JMonth}}" data-jday="{{.JDay}}"><main class="wrap">
 <div class="head"><div><h1>دستیار دایا</h1><div class="muted" style="margin-top:7px">مدیریت سفارش‌ها · ساعت تهران</div></div><div class="nav"><a class="{{if not .History}}active{{end}}" href="/">سفارش‌های فعال</a><a class="{{if .History}}active{{end}}" href="/history">تاریخچه</a><a href="/settings">اتصال به دایا</a></div><span class="tag">{{if .APIAvailable}}ارسال واقعی API فعال است{{else}}ارسال واقعی API غیرفعال است{{end}}</span></div>
@@ -535,7 +536,7 @@ th{font-size:10px;color:#667085}.tablewrap{overflow:auto}.tablewrap tbody td{fon
 <div class="batch-plan-error" id="batch-plan-error" role="alert" hidden></div>
 <div class="batch-plan-result" id="batch-plan-result" hidden aria-live="polite"><div class="batch-plan-summary"><span>تعداد نوبت‌ها: <b id="batch-plan-count">—</b></span><span>اولین نوبت: <b id="batch-plan-first" dir="ltr">—</b></span><span>آخرین نوبت: <b id="batch-plan-last" dir="ltr">—</b></span><span>تعداد سهم هر سفارش: <b id="batch-plan-quantity">—</b></span></div><div class="batch-plan-table-wrap"><table class="batch-plan-table"><thead><tr><th>شماره</th><th>زمان نوبت (تهران)</th></tr></thead><tbody id="batch-plan-rows"></tbody></table></div></div>
 </div></details>
-<button class="submit wide" type="submit">ذخیره سفارش</button></div></form>
+<button class="submit wide" type="submit">ذخیره سفارش زمان‌بندی‌شده</button><button class="dry-run wide" type="button" id="order-dry-run">اعتبارسنجی سفارش آزمایشی (بدون ارسال و ذخیره)</button><div class="dry-run-result wide" id="order-dry-run-result" role="status" aria-live="polite" hidden></div></div></form>
 <div class="foot">قیمت به ریال و تعداد به عدد سهم وارد شود. در مسیر API، ISIN دقیق نماد الزامی است.</div></section>{{end}}
 <section class="card"><div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap"><h2 style="margin:0">{{if .History}}تاریخچه سفارش‌ها{{else}}سفارش‌های فعال{{end}} ({{len .Orders}})</h2>{{if .History}}<form method="post" action="/history/clear" onsubmit="return confirm('تمام موارد تاریخچه برای همیشه پاک شوند؟ سفارش‌های زمان‌بندی‌شده فعال دست‌نخورده می‌مانند.')"><button type="submit" class="cancel">پاک کردن تاریخچه</button></form>{{else if .HasScheduledOrders}}<form method="post" action="/orders/cancel-all" onsubmit="return confirm('تمام سفارش‌های زمان‌بندی‌شده لغو شوند؟ سفارش‌های آماده ارسال، درحال ارسال و ثبت‌شده دست‌نخورده می‌مانند. این عملیات قابل بازگشت نیست.')"><button type="submit" class="cancel">لغو همه</button></form>{{end}}</div><div class="tablewrap"><table>
 <thead><tr><th>نماد</th><th>نوع</th><th>قیمت</th><th>تعداد</th><th>زمان تهران</th><th>مسیر</th><th>وضعیت</th><th>عملیات</th></tr></thead><tbody>
@@ -753,6 +754,40 @@ th{font-size:10px;color:#667085}.tablewrap{overflow:auto}.tablewrap tbody td{fon
     } else if (symbolInput && symbolInput.value) {
       showSymbolLookupStatus("پیش‌نویس قبلی بازیابی شد؛ نماد را بررسی کن.");
     }
+  }
+  const dryRunButton = $("order-dry-run");
+  const dryRunResult = $("order-dry-run-result");
+  if (dryRunButton && orderForm && dryRunResult) {
+    dryRunButton.addEventListener("click", async () => {
+      dryRunButton.disabled = true;
+      dryRunResult.hidden = false;
+      dryRunResult.classList.remove("error");
+      dryRunResult.textContent = "در حال اعتبارسنجی محلی سفارش آزمایشی…";
+      try {
+        const response = await fetch("/api/orders/dry-run", {
+          method: "POST",
+          headers: {"Content-Type": "application/x-www-form-urlencoded", "Accept": "application/json"},
+          body: new URLSearchParams(new FormData(orderForm))
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || "اعتبارسنجی سفارش انجام نشد.");
+        dryRunResult.textContent = [
+          "✓ اعتبارسنجی موفق — فقط شبیه‌سازی",
+          "نماد: " + result.symbol,
+          "نوع: " + (result.side === "buy" ? "خرید" : "فروش"),
+          "قیمت: " + result.price + " ریال",
+          "تعداد: " + result.quantity,
+          "زمان تهران: " + result.execute_at,
+          "ارزش اسمی: " + result.notional + " ریال",
+          "وضعیت: هیچ درخواستی به کارگزاری ارسال نشد و سفارشی ذخیره نشد."
+        ].join("\\n");
+      } catch (error) {
+        dryRunResult.classList.add("error");
+        dryRunResult.textContent = "اعتبارسنجی ناموفق: " + error.message;
+      } finally {
+        dryRunButton.disabled = false;
+      }
+    });
   }
   if (orderForm) {
     restoreOrderDraft();
@@ -1455,6 +1490,22 @@ func main() {
 			Count int    `json:"count"`
 			Mode  string `json:"mode"`
 		}{Count: len(orders), Mode: baseOrder.ExecutionMode})
+	})
+	mux.HandleFunc("POST /api/orders/dry-run", func(w http.ResponseWriter, r *http.Request) {
+		if !sameOrigin(r) {
+			http.Error(w, `{"error":"درخواست نامعتبر"}`, http.StatusForbidden)
+			return
+		}
+		r.Body = http.MaxBytesReader(w, r.Body, 8<<10)
+		result, err := validateOrderDryRun(r, time.Now().In(tehran()))
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.Header().Set("Cache-Control", "no-store")
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			_ = json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+			return
+		}
+		_ = json.NewEncoder(w).Encode(result)
 	})
 	mux.HandleFunc("POST /orders", func(w http.ResponseWriter, r *http.Request) {
 		if !sameOrigin(r) {
