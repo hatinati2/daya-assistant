@@ -72,8 +72,8 @@ func TestBuildDayaOrderPayloadRejectsInvalidInputs(t *testing.T) {
 		ExecutionMode: executionModeAPI,
 	}
 	tests := []struct {
-		name  string
-		edit  func(*Order)
+		name string
+		edit func(*Order)
 	}{
 		{name: "manual mode", edit: func(o *Order) { o.ExecutionMode = executionModeManual }},
 		{name: "invalid instrument", edit: func(o *Order) { o.ISIN = "bad" }},
