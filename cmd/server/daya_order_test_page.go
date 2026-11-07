@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -202,14 +203,12 @@ func executeDayaLocalOrderTest(ctx context.Context, order Order, scenario string
 	if len(captured) == 0 {
 		return dayaLocalOrderTestResult{}, errors.New("سرور ساختگی درخواست JSON را دریافت نکرد")
 	}
-	var pretty strings.Builder
-	var indented []byte
+	var pretty bytes.Buffer
 	if err := json.Indent(&pretty, captured, "", "  "); err != nil {
 		return dayaLocalOrderTestResult{}, fmt.Errorf("قالب‌بندی JSON آزمایشی: %w", err)
 	}
-	indented = []byte(pretty.String())
 	return dayaLocalOrderTestResult{
-		RequestJSON: string(indented), ResponseBody: strings.TrimSpace(string(responseBody)),
+		RequestJSON: pretty.String(), ResponseBody: strings.TrimSpace(string(responseBody)),
 		HTTPStatus: httpStatus, ScenarioLabel: label,
 	}, nil
 }
