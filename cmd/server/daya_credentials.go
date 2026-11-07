@@ -114,7 +114,14 @@ button{border:0;border-radius:8px;background:#175cd3;color:#fff;padding:10px 14p
 <div class="row"><button class="danger" type="submit">حذف اطلاعات ذخیره‌شده</button></div>
 </form>
 {{end}}
-{{if .HasSession}}<div class="msg">آخرین ورود عادی دایا با موفقیت انجام شد: {{.LoginAt}}. توکن نشست نیز به‌صورت رمزنگاری‌شده روی سرور ذخیره شده است.</div>{{else}}<div class="note">اطلاعات ورود در سرور به‌صورت رمزنگاری‌شده نگهداری می‌شوند. هنوز ورود موفقی برای این حساب ثبت نشده است.</div>{{end}}
+{{if .HasSession}}<div class="msg">آخرین ورود عادی دایا با موفقیت انجام شد: {{.LoginAt}}. کوکی‌های نشست به‌صورت رمزنگاری‌شده روی سرور ذخیره شده‌اند.</div>{{else}}<div class="note">اطلاعات ورود در سرور به‌صورت رمزنگاری‌شده نگهداری می‌شوند. هنوز ورود موفقی برای این حساب ثبت نشده است.</div>{{end}}
+<section class="card" id="daya-monitor" style="margin:14px 0">
+<h2>پایش نشست دایا</h2>
+<p id="daya-monitor-state" class="muted">{{if .Monitor.Running}}پایش فعال است؛ درخواست فقط‌خواندنی GET /orders ارسال می‌شود.{{else if .Monitor.NeedsLogin}}ورود دستی با CAPTCHA لازم است.{{else}}پایش فعال نیست.{{end}}</p>
+<div class="foot">تعداد بررسی‌ها: <b id="daya-monitor-checks">{{.Monitor.Checks}}</b> · آخرین HTTP: <b id="daya-monitor-http">{{if .Monitor.LastStatus}}{{.Monitor.LastStatus}}{{else}}—{{end}}</b></div>
+<div class="foot">آخرین بررسی: <time id="daya-monitor-last">{{if not .Monitor.LastCheck.IsZero}}{{.Monitor.LastCheck.Format "2006-01-02 15:04:05 MST"}}{{else}}—{{end}}</time></div>
+<p id="daya-monitor-error" class="foot">{{.Monitor.LastError}}</p>
+</section>
 <section class="note">
 برای ورود به دایا، تصویر CAPTCHA را دریافت کن و عدد داخل تصویر را خودت وارد کن. پاسخ CAPTCHA در سرور ذخیره نمی‌شود.
 </section>
@@ -129,6 +136,28 @@ button{border:0;border-radius:8px;background:#175cd3;color:#fff;padding:10px 14p
 <div class="row"><button type="submit" {{if not .Saved}}disabled title="ابتدا اطلاعات ورود را ذخیره کنید"{{end}}>ورود به دایا</button></div>
 </form>
 <script>
+(() => {
+  const state = document.getElementById("daya-monitor-state");
+  const checks = document.getElementById("daya-monitor-checks");
+  const status = document.getElementById("daya-monitor-http");
+  const last = document.getElementById("daya-monitor-last");
+  const error = document.getElementById("daya-monitor-error");
+  async function refreshMonitor() {
+    try {
+      const response = await fetch("/api/daya/session-monitor", {cache: "no-store", headers: {"Accept": "application/json"}});
+      if (!response.ok) return;
+      const data = await response.json();
+      state.textContent = data.running ? "پایش فعال است؛ بررسی فقط‌خواندنی GET /orders انجام می‌شود." :
+        (data.needs_login ? "نشست معتبر نیست؛ ورود دستی با CAPTCHA لازم است." : "پایش فعال نیست.");
+      checks.textContent = String(data.checks || 0);
+      status.textContent = data.last_status ? String(data.last_status) : "—";
+      last.textContent = data.last_check ? new Date(data.last_check).toLocaleString("fa-IR") : "—";
+      error.textContent = data.last_error || "";
+    } catch (_) {}
+  }
+  refreshMonitor();
+  window.setInterval(refreshMonitor, 15000);
+})();
 (() => {
   const button = document.getElementById("load-daya-captcha");
   if (!button) return;
@@ -349,7 +378,6 @@ func (s *DayaCredentialStore) SaveAccessSession(session DayaSession) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if session.Token == "" || len(session.Token) > 64<<10 || strings.ContainsRune(session.Token, '\x00') { return errors.New("توکن دریافتی دایا معتبر نیست") }
-	if !session.ExpiresAt.IsZero() && !session.ExpiresAt.After(time.Now()) { return errors.New("نشست دایا منقضی شده است") }
 	cookies := make([]DayaSessionCookie, 0, len(session.Cookies)+1)
 	seen := make(map[string]bool)
 	for _, cookie := range session.Cookies {

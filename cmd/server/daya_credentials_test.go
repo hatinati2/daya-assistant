@@ -2,6 +2,9 @@ package main
 
 import (
 	"bytes"
+	"crypto/aes"
+	"crypto/cipher"
+	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
 	"os"
@@ -130,4 +133,50 @@ func TestDayaCredentialStoreTreatsExpiredSessionAsMissing(t *testing.T) {
 	if token != "" {
 		t.Fatal("expired Daya session was returned as active")
 	}
+}
+
+
+func TestDayaCredentialStoreEncryptsAndRestoresBothSessionCookies(t *testing.T) {
+	store := newTestCredentialStore(t)
+	expires := time.Now().Add(time.Hour).UTC().Truncate(time.Second)
+	session := DayaSession{Token: "private-token-value", ExpiresAt: expires, Cookies: []DayaSessionCookie{
+		{Name: "token", Value: "private-token-value", Path: "/", Secure: true, HTTPOnly: true},
+		{Name: "cookiesession1", Value: "private-captcha-cookie", Path: "/", Secure: true, HTTPOnly: true},
+	}}
+	if err := store.SaveAccessSession(session); err != nil { t.Fatal(err) }
+	loaded, _, err := store.LoadAccessSession()
+	if err != nil { t.Fatal(err) }
+	if loaded.Token != session.Token || !loaded.ExpiresAt.Equal(expires) || len(loaded.Cookies) != 2 {
+		t.Fatalf("session round trip mismatch: token=%v expiry=%v cookies=%d", loaded.Token == session.Token, loaded.ExpiresAt, len(loaded.Cookies))
+	}
+	data, err := os.ReadFile(store.sessionPath)
+	if err != nil { t.Fatal(err) }
+	for _, secret := range []string{"private-token-value", "private-captcha-cookie"} {
+		if bytes.Contains(data, []byte(secret)) { t.Fatalf("session file contains plaintext value %q", secret) }
+	}
+	var record encryptedDayaCredentials
+	if err := json.Unmarshal(data, &record); err != nil { t.Fatal(err) }
+	if record.Version != 2 { t.Fatalf("session version=%d, want 2", record.Version) }
+}
+
+func TestDayaCredentialStoreReadsLegacyV1Session(t *testing.T) {
+	store := newTestCredentialStore(t)
+	key, err := store.readKey()
+	if err != nil { t.Fatal(err) }
+	block, err := aes.NewCipher(key)
+	if err != nil { t.Fatal(err) }
+	gcm, err := cipher.NewGCM(block)
+	if err != nil { t.Fatal(err) }
+	nonce := make([]byte, gcm.NonceSize())
+	if _, err := rand.Read(nonce); err != nil { t.Fatal(err) }
+	token := "legacy-token"
+	expires := time.Now().Add(time.Hour)
+	ciphertext := gcm.Seal(nil, nonce, []byte(token), []byte("daya-assistant/daya-session/v1"))
+	record := encryptedDayaCredentials{Version: 1, Nonce: base64.StdEncoding.EncodeToString(nonce), Ciphertext: base64.StdEncoding.EncodeToString(ciphertext), UpdatedAt: time.Now(), ExpiresAt: expires}
+	data, err := json.Marshal(record)
+	if err != nil { t.Fatal(err) }
+	if err := os.WriteFile(store.sessionPath, data, 0600); err != nil { t.Fatal(err) }
+	loaded, _, err := store.LoadAccessSession()
+	if err != nil { t.Fatal(err) }
+	if loaded.Token != token || len(loaded.Cookies) != 1 || loaded.Cookies[0].Name != "token" { t.Fatalf("legacy session not restored: %#v", loaded) }
 }
