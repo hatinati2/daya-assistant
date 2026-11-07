@@ -218,3 +218,51 @@ func TestDayaMonitorWindowUsesTehranTime(t *testing.T) {
 		})
 	}
 }
+
+
+func TestDayaMonitorWaitsForWindowThenChecks(t *testing.T) {
+	requests := make(chan struct{}, 1)
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet || r.URL.Path != "/orders" {
+			t.Errorf("unexpected request %s %s", r.Method, r.URL.Path)
+		}
+		requests <- struct{}{}
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer server.Close()
+
+	m := NewDayaSessionMonitor(monitorTestClient(server))
+	var windowChecks int
+	m.windowCheck = func(time.Time) (bool, time.Duration) {
+		windowChecks++
+		if windowChecks == 1 {
+			return false, 60 * time.Millisecond
+		}
+		return true, 0
+	}
+	m.interval = func() (time.Duration, error) {
+		return time.Millisecond, nil
+	}
+	if err := m.Start(context.Background(), monitorSession()); err != nil {
+		t.Fatal(err)
+	}
+	defer m.Stop(false, "test done")
+
+	select {
+	case <-requests:
+		t.Fatal("monitor must not call Daya while the monitoring window is closed")
+	case <-time.After(20 * time.Millisecond):
+	}
+
+	select {
+	case <-requests:
+		snapshot := waitForMonitor(t, m, func(s DayaMonitorSnapshot) bool {
+			return s.Checks > 0
+		})
+		if snapshot.LastStatus != http.StatusOK {
+			t.Fatalf("unexpected response status: %d", snapshot.LastStatus)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("monitor did not resume checks after the window opened")
+	}
+}
