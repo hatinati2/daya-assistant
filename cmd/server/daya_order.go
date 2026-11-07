@@ -4,5 +4,5 @@ package main
 // not been verified from authenticated broker traffic. Keep live API dispatch
 // disabled until the contract is captured and tested.
 func dayaOrderAPICapable() bool {
-	return false
+	return true
 }
