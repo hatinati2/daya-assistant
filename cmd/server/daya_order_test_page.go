@@ -185,12 +185,16 @@ func executeDayaLocalOrderTest(ctx context.Context, order Order, scenario string
 		captured = body
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(status)
+		errorMessage := ""
+		if status >= 400 {
+			errorMessage = responseMessage
+		}
 		_ = json.NewEncoder(w).Encode(map[string]any{
 			"timestamp": time.Now().UnixMilli(),
-			"path": "/orders",
-			"status": status,
-			"error": func() string { if status >= 400 { return responseMessage }; return "" }(),
-			"message": responseMessage,
+			"path":      "/orders",
+			"status":    status,
+			"error":     errorMessage,
+			"message":   responseMessage,
 			"requestId": fmt.Sprintf("LOCAL-MOCK-%d", status),
 		})
 	}))
