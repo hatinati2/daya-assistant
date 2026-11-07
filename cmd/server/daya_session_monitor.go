@@ -28,12 +28,13 @@ type DayaMonitorSnapshot struct {
 }
 
 type DayaSessionMonitor struct {
-	mu       sync.Mutex
-	http     *http.Client
-	state    DayaMonitorSnapshot
-	cancel   context.CancelFunc
-	interval func() (time.Duration, error)
-	update   func(DayaSession) error
+	mu          sync.Mutex
+	http        *http.Client
+	state       DayaMonitorSnapshot
+	cancel      context.CancelFunc
+	interval    func() (time.Duration, error)
+	windowCheck func(time.Time) (bool, time.Duration)
+	update      func(DayaSession) error
 }
 
 func NewDayaSessionMonitor(client *http.Client) *DayaSessionMonitor {
@@ -45,7 +46,7 @@ func NewDayaSessionMonitor(client *http.Client) *DayaSessionMonitor {
 			},
 		}
 	}
-	return &DayaSessionMonitor{http: client, interval: dayaRandomInterval}
+	return &DayaSessionMonitor{http: client, interval: dayaRandomInterval, windowCheck: dayaMonitorWindow}
 }
 
 func (m *DayaSessionMonitor) SetSessionUpdater(update func(DayaSession) error) {
@@ -116,7 +117,7 @@ func (m *DayaSessionMonitor) Snapshot() DayaMonitorSnapshot {
 func (m *DayaSessionMonitor) run(ctx context.Context, session DayaSession) {
 	for {
 		now := time.Now()
-		inWindow, delay := dayaMonitorWindow(now)
+		inWindow, delay := m.windowCheck(now)
 		if inWindow {
 			var err error
 			delay, err = m.interval()
@@ -149,7 +150,7 @@ func (m *DayaSessionMonitor) run(ctx context.Context, session DayaSession) {
 			m.Stop(true, "زمان اعتبار نشست به پایان رسیده است؛ ورود دستی لازم است")
 			return
 		}
-		inWindow, _ = dayaMonitorWindow(time.Now())
+		inWindow, _ = m.windowCheck(time.Now())
 		if !inWindow {
 			continue
 		}

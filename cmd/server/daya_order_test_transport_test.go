@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"strings"
+	"sync/atomic"
 	"testing"
 )
 
@@ -45,5 +46,31 @@ func TestDayaTestTransportRejectsNonLoopbackBeforeNetwork(t *testing.T) {
 		if _, _, err := postDayaOrderToTestServer(context.Background(), nil, address, order); err == nil {
 			t.Fatalf("expected %q to be rejected", address)
 		}
+	}
+}
+
+func TestDayaTestTransportDoesNotFollowRedirects(t *testing.T) {
+	var destinationHit atomic.Bool
+	destination := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		destinationHit.Store(true)
+		w.WriteHeader(http.StatusCreated)
+	}))
+	defer destination.Close()
+
+	redirector := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, destination.URL+"/orders", http.StatusFound)
+	}))
+	defer redirector.Close()
+
+	order := Order{ISIN: "IRO3SIMC0001", Side: "buy", Price: 1, Quantity: 1, ExecutionMode: executionModeAPI}
+	status, _, err := postDayaOrderToTestServer(context.Background(), redirector.Client(), redirector.URL, order)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if status != http.StatusFound {
+		t.Fatalf("status=%d, want %d", status, http.StatusFound)
+	}
+	if destinationHit.Load() {
+		t.Fatal("test transport followed redirect to a different destination")
 	}
 }

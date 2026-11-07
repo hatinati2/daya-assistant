@@ -77,6 +77,7 @@ func TestDayaMonitorSendsBothCookiesAndStopsOnUnauthorized(t *testing.T) {
 	defer server.Close()
 
 	m := NewDayaSessionMonitor(monitorTestClient(server))
+	m.windowCheck = func(time.Time) (bool, time.Duration) { return true, 0 }
 	m.interval = func() (time.Duration, error) {
 		return time.Millisecond, nil
 	}
@@ -102,6 +103,7 @@ func TestDayaMonitorPersistsRotatedToken(t *testing.T) {
 
 	saved := make(chan DayaSession, 1)
 	m := NewDayaSessionMonitor(monitorTestClient(server))
+	m.windowCheck = func(time.Time) (bool, time.Duration) { return true, 0 }
 	m.interval = func() (time.Duration, error) {
 		return time.Millisecond, nil
 	}
@@ -133,6 +135,7 @@ func TestDayaMonitorDoesNotExtendExpiryWithoutCookieRotation(t *testing.T) {
 
 	saved := make(chan DayaSession, 1)
 	m := NewDayaSessionMonitor(monitorTestClient(server))
+	m.windowCheck = func(time.Time) (bool, time.Duration) { return true, 0 }
 	m.interval = func() (time.Duration, error) {
 		return time.Millisecond, nil
 	}
@@ -161,6 +164,7 @@ func TestDayaMonitorStopsOnRateLimit(t *testing.T) {
 	defer server.Close()
 
 	m := NewDayaSessionMonitor(monitorTestClient(server))
+	m.windowCheck = func(time.Time) (bool, time.Duration) { return true, 0 }
 	m.interval = func() (time.Duration, error) {
 		return time.Millisecond, nil
 	}
