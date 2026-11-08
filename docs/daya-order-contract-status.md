@@ -49,6 +49,19 @@ The operator has now confirmed a separate browser request:
 
 The GET Preview is an array containing a `CONFIRMATION / BOOKED` record. The observed row includes `matchedQuantity`, `tradedQuantity`, `tradedPrice`, and `remainingQuantityOfTheOrder`; the sample shows zero matched/traded quantity and the full order quantity remaining.
 
+## Observed read-only order-list request headers
+
+The latest operator DevTools capture for the separate read-only `GET /orders` request showed these header names/values (credential values are intentionally not recorded):
+
+- `Accept: application/json`
+- `Content-Type: application/json`
+- `Origin: https://dayatrader.ir`
+- `Referer: https://dayatrader.ir/`
+- `x-client-type: WEB_CLIENT`
+- The `Cookie` header contained the cookie names `cookiesession1` and `token`; cookie values are excluded.
+
+This confirms the browser's observed headers for the read-only GET request only. It is useful corroborating evidence for the shared Daya session and client headers, but it does **not** prove that every one of these headers is required or sufficient for `POST /orders`. The POST authentication/header contract remains unverified until the corresponding POST request's headers are captured safely. No cookie or token values are stored in this repository.
+
 ## Observed follow-up requests after order submission
 
 The operator reported this browser Network sequence after the captured `POST /orders`:
