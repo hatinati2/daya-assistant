@@ -163,7 +163,7 @@ func TestReconcileAPIOrderRequiresBrokerIDToConfirmRegistration(t *testing.T) {
 	if err := store.reconcileAPIOrder("unknown", "registered", "BRK-123", "verified in broker panel", now); err != nil {
 		t.Fatal(err)
 	}
-	if store.orders[0].Status != statusSubmitted || store.orders[0].BrokerOrderID != "BRK-123" || !store.orders[0].BrokerResponseAt.Equal(now) {
+	if store.orders[0].Status != statusSubmitted || store.orders[0].BrokerOrderID != "BRK-123" || !store.orders[0].ReconciledAt.Equal(now) {
 		t.Fatalf("registered reconciliation not persisted: %#v", store.orders[0])
 	}
 }
