@@ -53,12 +53,13 @@ func (s *Store) claimReadyAPIOrders(now time.Time) ([]Order, error) {
 }
 
 type DayaOrderOutcome struct {
-	Status        string
-	HTTPStatus    int
-	RequestID     string
-	BrokerOrderID string
-	Message       string
-	ReceivedAt    time.Time
+	Status                string
+	HTTPStatus            int
+	RequestID             string
+	BrokerOrderID         string
+	BrokerHostOrderNumber int64
+	Message               string
+	ReceivedAt            time.Time
 }
 
 func (s *Store) completeAPIOrder(id string, outcome DayaOrderOutcome) error {
@@ -81,6 +82,7 @@ func (s *Store) completeAPIOrder(id string, outcome DayaOrderOutcome) error {
 		old := *order
 		order.Status = outcome.Status
 		order.BrokerOrderID = strings.TrimSpace(outcome.BrokerOrderID)
+		order.BrokerHostOrderNumber = outcome.BrokerHostOrderNumber
 		order.BrokerRequestID = strings.TrimSpace(outcome.RequestID)
 		order.BrokerHTTPStatus = outcome.HTTPStatus
 		order.BrokerMessage = outcome.Message
