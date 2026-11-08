@@ -373,8 +373,9 @@ func fetchDayaOrders(ctx context.Context, client *http.Client, session DayaSessi
 	return resp.StatusCode, body, nil
 }
 
-// reconcilePendingOrders checks the read-only GET /orders endpoint for a
-// matching CONFIRMATION/BOOKED record. It never resends the POST.
+// reconcilePendingOrders queries the observed GET /orders resource and looks
+// for a matching CONFIRMATION/BOOKED record. The route and HTTP 200 are observed;
+// the exact GET response body still needs operator Preview confirmation. It never resends the POST.
 // ResumePendingPolling is called only after an operator completes a fresh
 // Daya CAPTCHA login. It re-enables read-only confirmation checks, never POST.
 func (d *DayaOrderDispatcher) ResumePendingPolling() {
