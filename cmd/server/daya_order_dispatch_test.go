@@ -31,8 +31,18 @@ func TestNewDayaOrderRequestUsesObservedEndpointAndSessionCookies(t *testing.T) 
 	if req.Method != http.MethodPost || req.URL.String() != dayaOrderEndpoint {
 		t.Fatalf("request target = %s %s", req.Method, req.URL)
 	}
-	if got := req.Header.Get("Content-Type"); got != "application/json" {
-		t.Fatalf("Content-Type=%q", got)
+	for name, want := range map[string]string{
+		"Accept": "application/json",
+		"Content-Type": "application/json",
+		"Origin": dayaWebOrigin,
+		"Referer": dayaWebOrigin + "/",
+		"x-client-type": "WEB_CLIENT",
+			"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36",
+		"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36",
+	} {
+		if got := req.Header.Get(name); got != want {
+			t.Errorf("%s = %q, want %q", name, got, want)
+		}
 	}
 	cookie := req.Header.Get("Cookie")
 	if !strings.Contains(cookie, "token=test-token") || !strings.Contains(cookie, "cookiesession1=captcha-session") {
