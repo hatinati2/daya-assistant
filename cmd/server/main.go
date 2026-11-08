@@ -30,6 +30,8 @@ const (
 	statusSubmitting        = "submitting"
 	statusSubmissionPending = "submission_pending"
 	statusSubmitted         = "submitted"
+	statusPartiallyFilled   = "partially_filled"
+	statusFilled            = "filled"
 	statusSubmissionFailed  = "submission_failed"
 	statusSubmissionUnknown = "submission_unknown"
 	executionModeManual     = "manual"
@@ -47,8 +49,14 @@ type Order struct {
 	ExecutionMode         string    `json:"execution_mode,omitempty"`
 	Status                string    `json:"status"`
 	BrokerOrderID         string    `json:"broker_order_id,omitempty"`
-	BrokerHostOrderNumber int64     `json:"broker_host_order_number,omitempty"`
-	BrokerRequestID       string    `json:"broker_request_id,omitempty"`
+	BrokerHostOrderNumber   int64     `json:"broker_host_order_number,omitempty"`
+	BrokerMatchedQuantity   int64     `json:"broker_matched_quantity,omitempty"`
+	BrokerTradedQuantity    int64     `json:"broker_traded_quantity,omitempty"`
+	BrokerTradedPrice       int64     `json:"broker_traded_price,omitempty"`
+	BrokerRemainingQuantity int64     `json:"broker_remaining_quantity,omitempty"`
+	BrokerExecutionKnown    bool      `json:"broker_execution_known,omitempty"`
+	BrokerExecutionAt       time.Time `json:"broker_execution_at,omitempty"`
+	BrokerRequestID         string    `json:"broker_request_id,omitempty"`
 	BrokerHTTPStatus      int       `json:"broker_http_status,omitempty"`
 	BrokerResponseAt      time.Time `json:"broker_response_at,omitempty"`
 	ReconciledAt          time.Time `json:"reconciled_at,omitempty"`
@@ -151,7 +159,7 @@ func (s *Store) clearHistory() error {
 	kept := make([]Order, 0, len(previous))
 	for _, order := range previous {
 		switch order.Status {
-		case statusCancelled, statusManualDone, statusSubmissionFailed:
+		case statusCancelled, statusManualDone, statusSubmissionFailed, statusFilled:
 			// Terminal history entry: remove it.
 		default:
 			// Preserve scheduled, ready, submitting, submission_unknown,
@@ -505,7 +513,7 @@ button{border:0;border-radius:8px;background:#175cd3;color:white;padding:8px 11p
 .submit{width:100%;margin-top:9px}.cancel{background:white;color:#b42318;border:1px solid #fecdca;padding:6px 9px}
 table{width:100%;border-collapse:collapse;white-space:nowrap}th,td{text-align:right;padding:8px 6px;border-bottom:1px solid #eaecf0}
 th{font-size:10px;color:#667085}.tablewrap{overflow:auto}.tablewrap tbody td{font-size:11.5px}.status{display:inline-block;border-radius:16px;padding:4px 7px;font-size:10px}
-.scheduled{background:#eff8ff;color:#175cd3}.ready{background:#fffaeb;color:#b54708}.cancelled{background:#f2f4f7;color:#475467}
+.scheduled{background:#eff8ff;color:#175cd3}.ready{background:#fffaeb;color:#b54708}.partially-filled{background:#fff7ed;color:#9a3412}.filled{background:#ecfdf3;color:#067647}.cancelled{background:#f2f4f7;color:#475467}
 .buy{color:#067647;font-weight:bold}.sell{color:#b42318;font-weight:bold}.empty{text-align:center;color:#667085;padding:28px}
 .foot{font-size:10px;line-height:1.55;margin-top:6px}
 .server-clock{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:8px 0;padding:8px 11px;background:#fff;border:1px solid #d0d5dd;border-radius:12px}.server-clock-label{color:#667085;font-size:10px}.server-clock-value{font:700 22px Tahoma,Arial;direction:ltr;font-variant-numeric:tabular-nums;letter-spacing:1px;color:#175cd3}.server-clock-status{font-size:9px;color:#667085}@media(max-width:480px){.server-clock{align-items:flex-start;flex-direction:column}.server-clock-value{font-size:23px}}
@@ -551,7 +559,7 @@ th{font-size:10px;color:#667085}.tablewrap{overflow:auto}.tablewrap tbody td{fon
 <thead><tr><th>نماد</th><th>نوع</th><th>قیمت</th><th>تعداد</th><th>زمان تهران</th><th>مسیر</th><th>وضعیت</th><th>عملیات</th></tr></thead><tbody>
 {{range .Orders}}<tr><td><b>{{.Symbol}}</b>{{if .ISIN}}<div class="foot">{{.ISIN}}</div>{{end}}</td><td>{{if eq .Side "buy"}}<span class="buy">خرید</span>{{else}}<span class="sell">فروش</span>{{end}}</td>
 <td>{{.Price}}</td><td>{{.Quantity}}</td><td>{{jalali .ExecuteAt}}</td><td>{{executionMode .ExecutionMode}}</td>
-<td>{{if eq .Status "scheduled"}}<span class="status scheduled">زمان‌بندی‌شده</span>{{else if eq .Status "ready"}}<span class="status ready">{{if eq .ExecutionMode "api"}}آماده ارسال{{else}}آماده بررسی{{end}}</span>{{else if eq .Status "manual_done"}}<span class="status ready">ثبت دستی تأیید شد</span>{{else if eq .Status "submitting"}}<span class="status ready">در حال ارسال</span>{{else if eq .Status "submission_pending"}}<span class="status scheduled">ارسال به موتور انجام شد؛ در انتظار تأیید</span>{{else if eq .Status "submitted"}}<span class="status ready">ثبت در دایا؛ در انتظار تطبیق سفارش مقابل</span>{{else if eq .Status "submission_failed"}}<span class="status cancelled">ارسال ناموفق</span>{{else if eq .Status "submission_unknown"}}<span class="status cancelled">نتیجه نامشخص — بررسی لازم</span>{{else}}<span class="status cancelled">لغوشده</span>{{end}}{{if .BrokerOrderID}}<div class="foot">شناسه سفارش دایا: {{.BrokerOrderID}}</div>{{end}}{{if .BrokerHostOrderNumber}}<div class="foot">شماره میزبان دایا: {{.BrokerHostOrderNumber}}</div>{{end}}{{if .BrokerHTTPStatus}}<div class="foot">HTTP: {{.BrokerHTTPStatus}}</div>{{end}}{{if .BrokerRequestID}}<div class="foot">شناسه درخواست: {{.BrokerRequestID}}</div>{{end}}{{if not .BrokerResponseAt.IsZero}}<div class="foot">زمان پاسخ دایا: {{jalali .BrokerResponseAt}}</div>{{end}}{{if not .ReconciledAt.IsZero}}<div class="foot">زمان تطبیق دستی: {{jalali .ReconciledAt}}</div>{{end}}{{if .BrokerMessage}}<div class="foot">{{.BrokerMessage}}</div>{{end}}</td>
+<td>{{if eq .Status "scheduled"}}<span class="status scheduled">زمان‌بندی‌شده</span>{{else if eq .Status "ready"}}<span class="status ready">{{if eq .ExecutionMode "api"}}آماده ارسال{{else}}آماده بررسی{{end}}</span>{{else if eq .Status "manual_done"}}<span class="status ready">ثبت دستی تأیید شد</span>{{else if eq .Status "submitting"}}<span class="status ready">در حال ارسال</span>{{else if eq .Status "submission_pending"}}<span class="status scheduled">ارسال به موتور انجام شد؛ در انتظار تأیید</span>{{else if eq .Status "submitted"}}<span class="status ready">ثبت در دایا؛ در انتظار تطبیق سفارش مقابل</span>{{else if eq .Status "partially_filled"}}<span class="status partially-filled">معامله جزئی</span>{{else if eq .Status "filled"}}<span class="status filled">کل سفارش معامله شد</span>{{else if eq .Status "submission_failed"}}<span class="status cancelled">ارسال ناموفق</span>{{else if eq .Status "submission_unknown"}}<span class="status cancelled">نتیجه نامشخص — بررسی لازم</span>{{else}}<span class="status cancelled">لغوشده</span>{{end}}{{if .BrokerOrderID}}<div class="foot">شناسه سفارش دایا: {{.BrokerOrderID}}</div>{{end}}{{if .BrokerHostOrderNumber}}<div class="foot">شماره میزبان دایا: {{.BrokerHostOrderNumber}}</div>{{end}}{{if .BrokerExecutionKnown}}<div class="foot">مقدار تطبیق‌شده: {{.BrokerMatchedQuantity}}</div><div class="foot">مقدار معامله‌شده: {{.BrokerTradedQuantity}} از {{.Quantity}}</div><div class="foot">قیمت معامله: {{.BrokerTradedPrice}} ریال</div><div class="foot">مقدار باقی‌مانده سفارش: {{.BrokerRemainingQuantity}}</div>{{if not .BrokerExecutionAt.IsZero}}<div class="foot">آخرین به‌روزرسانی معامله: {{jalali .BrokerExecutionAt}}</div>{{end}}{{end}}{{if .BrokerHTTPStatus}}<div class="foot">HTTP: {{.BrokerHTTPStatus}}</div>{{end}}{{if .BrokerRequestID}}<div class="foot">شناسه درخواست: {{.BrokerRequestID}}</div>{{end}}{{if not .BrokerResponseAt.IsZero}}<div class="foot">زمان پاسخ دایا: {{jalali .BrokerResponseAt}}</div>{{end}}{{if not .ReconciledAt.IsZero}}<div class="foot">زمان تطبیق دستی: {{jalali .ReconciledAt}}</div>{{end}}{{if .BrokerMessage}}<div class="foot">{{.BrokerMessage}}</div>{{end}}</td>
 <td>{{if or (eq .Status "scheduled") (and (eq .Status "ready") (eq .ExecutionMode "api"))}}<form method="post" action="/orders/cancel"><input type="hidden" name="id" value="{{.ID}}"><button class="cancel">لغو</button></form>{{else if and $.History (eq .Status "ready") (manualMode .ExecutionMode)}}<form method="post" action="/orders/manual-confirm" onsubmit="return confirm('آیا سفارش را شخصاً در سامانه دایا ثبت کرده‌ای؟')"><input type="hidden" name="id" value="{{.ID}}"><button class="submit">ثبت دستی انجام شد</button></form>{{else if and $.History (or (eq .Status "submission_unknown") (eq .Status "submission_pending")) (eq .ExecutionMode "api")}}<form method="post" action="/orders/reconcile" class="reconcile-form"><input type="hidden" name="id" value="{{.ID}}"><select name="resolution" aria-label="نتیجه بررسی در دایا"><option value="registered">در دایا ثبت شده</option><option value="rejected">در دایا ثبت نشده</option></select><input name="broker_order_id" maxlength="128" placeholder="شناسه سفارش دایا (برای ثبت‌شده)"><input name="broker_message" maxlength="1000" placeholder="توضیح بررسی (اختیاری)"><button type="submit">ثبت نتیجه بررسی</button></form>{{else}}—{{end}}<button type="button" class="copy-order" data-symbol="{{.Symbol}}" data-isin="{{.ISIN}}" data-side="{{.Side}}" data-price="{{.Price}}" data-quantity="{{.Quantity}}" data-mode="{{.ExecutionMode}}" data-execute="{{jalali .ExecuteAt}}" style="margin-right:6px;background:#eff8ff;color:#175cd3;border:1px solid #b2ddff;padding:6px 9px">کپی سفارش</button></td></tr>
 {{else}}<tr><td colspan="8" class="empty">{{if .History}}هنوز موردی در تاریخچه ثبت نشده است.{{else}}سفارش فعالی ثبت نشده است.{{end}}</td></tr>{{end}}
 </tbody></table></div><div class="foot">{{if .History}}این صفحه سفارش‌های سررسیدشده و لغوشده را نگه می‌دارد؛ هیچ سفارشی از داده‌ها حذف نشده است.{{else}}ساعت سرور: {{.Now}} · سفارش‌های سررسیدشده در صفحه تاریخچه نمایش داده می‌شوند.{{end}} وضعیت «آماده بررسی» به معنی ارسال به کارگزاری نیست.</div>
