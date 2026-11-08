@@ -150,3 +150,45 @@ func TestClaimReadyAPIOrdersRollsBackWhenPersistenceFails(t *testing.T) {
 		t.Fatalf("failed claim was not rolled back: before=%#v after=%#v", before, after)
 	}
 }
+
+
+func TestReconcileAPIOrderRequiresBrokerIDToConfirmRegistration(t *testing.T) {
+	store := &Store{orders: []Order{{ID: "unknown", ExecutionMode: executionModeAPI, Status: statusSubmissionUnknown}}}
+	now := time.Now().In(tehran())
+	if err := store.reconcileAPIOrder("unknown", "registered", "", "", now); err == nil {
+		t.Fatal("expected broker order ID to be required")
+	}
+	if store.orders[0].Status != statusSubmissionUnknown {
+		t.Fatalf("failed reconciliation changed state to %q", store.orders[0].Status)
+	}
+	if err := store.reconcileAPIOrder("unknown", "registered", "BRK-123", "verified in broker panel", now); err != nil {
+		t.Fatal(err)
+	}
+	if store.orders[0].Status != statusSubmitted || store.orders[0].BrokerOrderID != "BRK-123" || !store.orders[0].BrokerResponseAt.Equal(now) {
+		t.Fatalf("registered reconciliation not persisted: %#v", store.orders[0])
+	}
+}
+
+func TestReconcileAPIOrderCanRecordManualRejection(t *testing.T) {
+	store := &Store{orders: []Order{{ID: "unknown", ExecutionMode: executionModeAPI, Status: statusSubmissionUnknown}}}
+	now := time.Now().In(tehran())
+	if err := store.reconcileAPIOrder("unknown", "rejected", "", "ثبت نشد", now); err != nil {
+		t.Fatal(err)
+	}
+	if store.orders[0].Status != statusSubmissionFailed || store.orders[0].BrokerMessage != "ثبت نشد" {
+		t.Fatalf("rejected reconciliation not persisted: %#v", store.orders[0])
+	}
+}
+
+func TestReconcileAPIOrderCannotChangeManualOrDefiniteOrders(t *testing.T) {
+	store := &Store{orders: []Order{
+		{ID: "manual", ExecutionMode: executionModeManual, Status: statusSubmissionUnknown},
+		{ID: "failed", ExecutionMode: executionModeAPI, Status: statusSubmissionFailed},
+	}}
+	now := time.Now().In(tehran())
+	for _, id := range []string{"manual", "failed"} {
+		if err := store.reconcileAPIOrder(id, "registered", "BRK-1", "", now); err == nil {
+			t.Errorf("expected reconciliation for %s to be rejected", id)
+		}
+	}
+}
