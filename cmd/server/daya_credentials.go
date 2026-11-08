@@ -71,9 +71,10 @@ type DayaSettingsPageData struct {
 	Saved      bool
 	HasSession bool
 	LoginAt    string
-	Monitor    DayaMonitorSnapshot
-	Error      string
-	Notice     string
+	Monitor     DayaMonitorSnapshot
+	PreviewMode bool
+	Error       string
+	Notice      string
 }
 
 var dayaSettingsPage = template.Must(template.New("daya-settings").Parse(`<!doctype html>
@@ -123,6 +124,10 @@ button{border:0;border-radius:8px;background:#175cd3;color:#fff;padding:10px 14p
 <div class="foot">آخرین بررسی: <time id="daya-monitor-last">{{if not .Monitor.LastCheck.IsZero}}{{.Monitor.LastCheck.Format "2006-01-02 15:04:05 MST"}}{{else}}—{{end}}</time></div>
 <div class="foot">بررسی بعدی: <time id="daya-monitor-next">{{if not .Monitor.NextCheck.IsZero}}{{.Monitor.NextCheck.Format "2006-01-02 15:04:05 MST"}}{{else}}—{{end}}</time> · پایش شبانه‌روزی با فاصله تصادفی ۱ تا ۷ دقیقه</div>
 <p id="daya-monitor-error" class="foot">{{.Monitor.LastError}}</p>
+{{if .PreviewMode}}
+<div class="row"><button type="button" id="daya-verify-endpoints">بررسی دستی مسیرهای نشست</button></div>
+<pre id="daya-verify-results" class="foot" aria-live="polite" style="white-space:pre-wrap;margin-top:10px"></pre>
+{{end}}
 </section>
 <section class="note">
 برای ورود به دایا، تصویر CAPTCHA را دریافت کن و عدد داخل تصویر را خودت وارد کن. پاسخ CAPTCHA در سرور ذخیره نمی‌شود.
@@ -161,6 +166,42 @@ button{border:0;border-radius:8px;background:#175cd3;color:#fff;padding:10px 14p
   }
   refreshMonitor();
   window.setInterval(refreshMonitor, 15000);
+  const verifyButton = document.getElementById("daya-verify-endpoints");
+  const verifyOutput = document.getElementById("daya-verify-results");
+  if (verifyButton && verifyOutput) {
+    verifyButton.addEventListener("click", async () => {
+      verifyButton.disabled = true;
+      verifyButton.textContent = "در حال بررسی دو مسیر…";
+      verifyOutput.textContent = "این فرمان فقط یک بار به هر مسیر GET می‌فرستد؛ لطفاً پنجره را نبند.";
+      try {
+        const response = await fetch("/api/daya/verify-endpoints", {
+          method: "POST",
+          cache: "no-store",
+          headers: {"Accept": "application/json"}
+        });
+        const report = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(report.error || "بررسی مسیرها انجام نشد (HTTP " + response.status + ")");
+        const lines = ["زمان بررسی: " + new Date(report.checked_at).toLocaleString("fa-IR")];
+        for (const item of (report.results || [])) {
+          lines.push(
+            item.method + " " + item.path +
+            " | HTTP " + (item.status_code || "—") +
+            " | " + Number(item.latency_ms || 0).toFixed(3) + " ms" +
+            " | Set-Cookie: " + (item.set_cookie_present ? "بله (" + item.set_cookie_count + ")" : "خیر") +
+            " | چرخش نشست: " + (item.session_rotated ? (item.session_persisted ? "ذخیره شد" : "ذخیره نشد") : "مشاهده نشد") +
+            (item.error ? " | خطا: " + item.error : "")
+          );
+        }
+        verifyOutput.textContent = lines.join("\\n");
+        refreshMonitor();
+      } catch (error) {
+        verifyOutput.textContent = error.message || "بررسی مسیرها ناموفق بود.";
+      } finally {
+        verifyButton.disabled = false;
+        verifyButton.textContent = "بررسی دستی مسیرهای نشست";
+      }
+    });
+  }
 })();
 (() => {
   const button = document.getElementById("load-daya-captcha");
@@ -600,6 +641,9 @@ func (s *DayaCredentialStore) Render(w http.ResponseWriter, errorMessage, notice
 	s.RenderWithMonitor(w, errorMessage, notice, DayaMonitorSnapshot{})
 }
 func (s *DayaCredentialStore) RenderWithMonitor(w http.ResponseWriter, errorMessage, notice string, monitor DayaMonitorSnapshot) {
+	s.RenderWithMonitorMode(w, errorMessage, notice, monitor, false)
+}
+func (s *DayaCredentialStore) RenderWithMonitorMode(w http.ResponseWriter, errorMessage, notice string, monitor DayaMonitorSnapshot, previewMode bool) {
 	username, saved, err := s.Status()
 	if err != nil && errorMessage == "" {
 		errorMessage = "خواندن اطلاعات ذخیره‌شده ممکن نشد: " + err.Error()
@@ -617,8 +661,9 @@ func (s *DayaCredentialStore) RenderWithMonitor(w http.ResponseWriter, errorMess
 		Saved:      saved,
 		HasSession: hasSession,
 		LoginAt:    loginAtText,
-		Monitor:    monitor,
-		Error:      errorMessage,
+		Monitor:     monitor,
+		PreviewMode: previewMode,
+		Error:       errorMessage,
 		Notice:     notice,
 	}
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
