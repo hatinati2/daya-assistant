@@ -195,3 +195,46 @@ func TestReconcileAPIOrderCannotChangeManualOrDefiniteOrders(t *testing.T) {
 		}
 	}
 }
+
+func TestAPIOrderMovesFromEntryPendingToBookedConfirmed(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "orders.json")
+	store, err := newStore(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	now := time.Now().In(tehran())
+	if err := store.add(Order{
+		ID: "api-pending", ExecutionMode: executionModeAPI, ISIN: "IRT1FPAF0001",
+		Side: "buy", Price: 9707, Quantity: 617, Status: statusSubmitting,
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	entry := DayaOrderOutcome{
+		Status: statusSubmissionPending, BrokerOrderID: "1787906",
+		HTTPStatus: 200, Message: "SENT_TO_TRADING_ENGINE", ReceivedAt: now,
+	}
+	if err := store.completeAPIOrder("api-pending", entry); err != nil {
+		t.Fatal(err)
+	}
+	pending := store.pendingAPIOrders()
+	if len(pending) != 1 || pending[0].Status != statusSubmissionPending || pending[0].BrokerOrderID != "1787906" {
+		t.Fatalf("ENTRY acknowledgement was not persisted as pending: %#v", pending)
+	}
+
+	booked := DayaOrderOutcome{
+		Status: statusSubmitted, BrokerOrderID: "1787906", BrokerHostOrderNumber: 399,
+		HTTPStatus: 200, Message: "CONFIRMATION/BOOKED", ReceivedAt: now.Add(time.Minute),
+	}
+	if err := store.completeAPIOrder("api-pending", booked); err != nil {
+		t.Fatal(err)
+	}
+	if got := store.pendingAPIOrders(); len(got) != 0 {
+		t.Fatalf("confirmed order remained pending: %#v", got)
+	}
+	orders := store.snapshot()
+	if len(orders) != 1 || orders[0].Status != statusSubmitted ||
+		orders[0].BrokerOrderID != "1787906" || orders[0].BrokerHostOrderNumber != 399 {
+		t.Fatalf("BOOKED confirmation was not persisted: %#v", orders)
+	}
+}
