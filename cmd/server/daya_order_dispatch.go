@@ -183,8 +183,10 @@ type dayaOrderConfirmationRecord struct {
 	OrderPrice        int64   `json:"orderPrice"`
 	OrderQuantity     int64   `json:"orderQuantity"`
 	OrderSide         string  `json:"orderSide"`
-	OrderValidityType string  `json:"orderValidityType"`
-	OrderValidityDate *string `json:"orderValidityDate"`
+	OrderValidityType string          `json:"orderValidityType"`
+	OrderValidityDate *string         `json:"orderValidityDate"`
+	ErrorCode         json.RawMessage `json:"errorCode"`
+	ErrorText         json.RawMessage `json:"errorText"`
 }
 
 // decodeDayaConfirmationRecords accepts only the observed direct object or
@@ -234,10 +236,20 @@ func dayaConfirmationMatches(record dayaOrderConfirmationRecord, expected *Order
 	return record.OrderSide == wantSide
 }
 
+func dayaErrorFieldIsEmpty(value json.RawMessage) bool {
+	text := strings.TrimSpace(string(value))
+	return text == "" || text == "null" || text == `""` || text == "0"
+}
+
+func dayaRecordHasNoError(record dayaOrderConfirmationRecord) bool {
+	return dayaErrorFieldIsEmpty(record.ErrorCode) && dayaErrorFieldIsEmpty(record.ErrorText)
+}
+
 func dayaBookedConfirmationMatches(record dayaOrderConfirmationRecord, expected *Order) bool {
 	return record.OrderFunction == "CONFIRMATION" &&
 		record.OrderStatus == "BOOKED" &&
 		record.HostOrderNumber > 0 &&
+		dayaRecordHasNoError(record) &&
 		dayaConfirmationMatches(record, expected)
 }
 
@@ -246,6 +258,7 @@ func dayaEntryAcknowledgementMatches(record dayaOrderConfirmationRecord, expecte
 		record.OrderStatus == "SENT_TO_TRADING_ENGINE" &&
 		record.OrderID > 0 &&
 		record.HostOrderNumber == 0 &&
+		dayaRecordHasNoError(record) &&
 		dayaConfirmationMatches(record, expected)
 }
 
