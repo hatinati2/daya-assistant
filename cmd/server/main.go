@@ -494,8 +494,15 @@ var page = template.Must(template.New("page").Funcs(template.FuncMap{
 	"jalali":        formatJalaliDateTime,
 	"executionMode": executionModeLabel,
 	"manualMode":    isManualExecution,
-	"hasInt64":      func(value *int64) bool { return value != nil },
-	"int64Value":    func(value *int64) int64 { if value == nil { return 0 }; return *value },
+	"hasInt64": func(value *int64) bool {
+		return value != nil
+	},
+	"int64Value": func(value *int64) int64 {
+		if value == nil {
+			return 0
+		}
+		return *value
+	},
 }).Parse(`<!doctype html>
 <html lang="fa" dir="rtl"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
