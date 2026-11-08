@@ -41,6 +41,15 @@ On 2026-11-08, a manual order attempt in the Daya panel during the reported clos
 
 This matches the earlier observed HTTP 400 group-state rejection. The dispatcher now recognizes this Persian rejection text when returned as plain text as well as through the structured JSON error parser. It still does not imply that all requests made outside trading hours are necessarily discarded or that another endpoint cannot queue an order.
 
+## Observed follow-up requests after order submission
+
+The operator reported this browser Network sequence after the captured `POST /orders`:
+
+- `GET https://mg.dayatrader.ir/financials/buying-power` — HTTP 200.
+- `GET https://mg.dayatrader.ir/market-data/market-view/trading-view/{instrumentId}/tradeVolumeAndCountOnCustomerType/on-minutes` — HTTP 200.
+
+These are respectively a buying-power refresh and market-data request by endpoint path. Neither is an order-list endpoint or proof of final booking. The observed sequence does not prove that the browser issues `GET /orders` after submission; the source of the separate earlier `CONFIRMATION / BOOKED` sample remains to be identified.
+
 ## DevTools evidence supplied by the operator
 
 The operator clarified that the supplied fragments came from different panels of the same Network item named `order` (such as Headers, Payload, and Preview). The fragments show a six-field request payload, an `ENTRY / SENT_TO_TRADING_ENGINE` record with an `orderId` and null `hostOrderNumber`, and a `CONFIRMATION / BOOKED` record with an `orderId` and numeric `hostOrderNumber`.
