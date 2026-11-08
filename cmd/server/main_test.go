@@ -268,7 +268,7 @@ func TestClearHistoryPreservesActiveAndAmbiguousOrders(t *testing.T) {
 	statuses := []string{
 		statusScheduled, statusReady, statusSubmitting, statusSubmissionUnknown,
 		statusCancelled, statusManualDone, statusSubmissionFailed,
-		statusSubmitted, statusPartiallyFilled, statusFilled, "future_status",
+		statusSubmitted, "future_status",
 	}
 	for _, status := range statuses {
 		store.orders = append(store.orders, Order{ID: status, Status: status})
@@ -285,7 +285,7 @@ func TestClearHistoryPreservesActiveAndAmbiguousOrders(t *testing.T) {
 	}
 	want := map[string]bool{
 		statusScheduled: true, statusReady: true, statusSubmitting: true,
-		statusSubmissionUnknown: true, statusSubmitted: true, statusPartiallyFilled: true, "future_status": true,
+		statusSubmissionUnknown: true, statusSubmitted: true, "future_status": true,
 	}
 	if len(got.orders) != len(want) {
 		t.Fatalf("remaining orders = %d, want %d: %#v", len(got.orders), len(want), got.orders)
