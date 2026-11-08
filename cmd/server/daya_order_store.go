@@ -23,6 +23,11 @@ func (s *Store) claimReadyAPIOrders(now time.Time) ([]Order, error) {
 		if mode != executionModeAPI || order.Status != statusReady {
 			continue
 		}
+		// Defense in depth: never claim an API order before its scheduled time,
+		// even if another code path accidentally marks it ready early.
+		if order.ExecuteAt.After(now) {
+			continue
+		}
 		if order.ISIN == "" {
 			order.Status = statusSubmissionFailed
 			order.BrokerMessage = "شناسه ISIN برای سفارش وارد نشده است؛ سفارش به کارگزاری ارسال نشد."
