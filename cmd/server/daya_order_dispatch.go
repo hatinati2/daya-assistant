@@ -16,15 +16,15 @@ import (
 // is wired into the Preview/Production process, but the live capability gate
 // remains fail-closed in daya_order.go until the broker contract is verified.
 type DayaOrderDispatcher struct {
-	store                 *Store
-	credentials           *DayaCredentialStore
-	http                  *http.Client
-	liveEnabled           func() bool
-	now                   func() time.Time
-	pendingMu             sync.Mutex
-	nextPendingPoll       time.Time
-	pendingPollInterval    func() (time.Duration, error)
-	pendingPollingStopped  bool
+	store                    *Store
+	credentials              *DayaCredentialStore
+	http                     *http.Client
+	liveEnabled              func() bool
+	now                      func() time.Time
+	pendingMu                sync.Mutex
+	nextPendingPoll          time.Time
+	pendingPollInterval      func() (time.Duration, error)
+	pendingPollingStopped    bool
 	pendingPollingNeedsLogin bool
 }
 
