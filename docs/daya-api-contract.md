@@ -30,7 +30,7 @@ The method, URL, HTTP status, and one actual response body are now confirmed. Th
 
 ## Meaning of BOOKED versus execution
 
-The latest observed `GET /orders` Preview contains a `CONFIRMATION / BOOKED` row with `matchedQuantity: 0`, `tradedQuantity: 0`, `tradedPrice: 0`, and `remainingQuantityOfTheOrder` equal to the submitted quantity. The operator clarified the exchange lifecycle: BOOKED means the order has been registered in the order book; execution happens later only when a counterparty order matches. Thus registration and execution are separate states. The broker fields `matchedQuantity`, `tradedQuantity`, `tradedPrice`, and remaining quantity are execution-progress data, not proof of a fill when zero. The current dispatcher confirms broker registration only; it does not yet track fill progress or declare the order traded.
+The latest observed `GET /orders` Preview contains a `CONFIRMATION / BOOKED` row with `matchedQuantity: 0`, `tradedQuantity: 0`, `tradedPrice: 0`, and `remainingQuantityOfTheOrder` equal to the submitted quantity. BOOKED means the order is registered in the order book; execution happens later only when a counterparty order matches. The implementation now continues read-only polling after BOOKED and records `matchedQuantity`, `tradedQuantity`, `tradedPrice`, and `remainingQuantityOfTheOrder` when present. It distinguishes an unfilled registered order, a partially filled order, and a fully filled order. Partial/full counter transitions are covered by local mock tests; real partial/full snapshots have not yet been captured.
 
 ## Observed confirmation/order record
 
@@ -76,7 +76,7 @@ The operator clarified that the supplied fragments came from different panels of
 
 The latest full Response panel for the POST confirms an ENTRY / SENT_TO_TRADING_ENGINE record. The ENTRY and BOOKED examples have different broker order IDs because several test orders were deleted and re-created between captures; they are separate orders and must not be correlated. The separate GET /orders capture independently confirms the BOOKED record shape.
 
-The code recognizes a matching ENTRY acknowledgement as `submission_pending` and a matching CONFIRMATION/BOOKED row as order-book registration. Matching requires the same broker `orderId`; the differing IDs in the supplied examples are expected because they came from different re-created orders. Ongoing fill-progress polling and persistence are not yet implemented.
+The code recognizes a matching ENTRY acknowledgement as `submission_pending` and a matching CONFIRMATION/BOOKED row as order-book registration. Matching requires the same broker `orderId`; the differing IDs in the supplied examples are expected because they came from different re-created orders. After BOOKED, the read-only poller continues checking the same broker order ID and updates the local order to `partially_filled` or `filled` from the broker's traded and remaining quantity fields. It never correlates records solely by symbol, side, price, or quantity.
 
 ## Current implementation and gate
 
@@ -85,7 +85,7 @@ The code recognizes a matching ENTRY acknowledgement as `submission_pending` and
 - A server-side dispatcher is present, but `dayaOrderAPICapable()` remains hard-coded to `false`; it exits before loading credentials or making a network request.
 - The session monitor performs read-only `GET /orders` checks. It does not submit, modify, or cancel orders.
 - No live order has been submitted by the implementation.
-- A matching ENTRY HTTP 2xx is recorded as pending, not confirmed or executed. A matching CONFIRMATION/BOOKED record is required for local confirmation. An arbitrary or unrecognized HTTP 2xx remains ambiguous. Ambiguous results must not be automatically retried.
+- A matching ENTRY HTTP 2xx is recorded as pending, not confirmed or executed. A matching CONFIRMATION/BOOKED record is required for local registration. Once registered, the read-only GET /orders poller persists fill counters and tracks partial/full execution. An arbitrary or unrecognized HTTP 2xx remains ambiguous. Ambiguous results must not be automatically retried.
 
 ## Fastest safe next step: sanitized browser capture
 
