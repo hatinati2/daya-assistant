@@ -192,7 +192,7 @@ button{border:0;border-radius:8px;background:#175cd3;color:#fff;padding:10px 14p
             (item.error ? " | خطا: " + item.error : "")
           );
         }
-        verifyOutput.textContent = lines.join("\\n");
+        verifyOutput.textContent = lines.join("\n");
         refreshMonitor();
       } catch (error) {
         verifyOutput.textContent = error.message || "بررسی مسیرها ناموفق بود.";
