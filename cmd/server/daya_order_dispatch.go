@@ -355,6 +355,7 @@ func fetchDayaOrders(ctx context.Context, client *http.Client, session DayaSessi
 	req.Header.Set("Origin", dayaWebOrigin)
 	req.Header.Set("Referer", dayaWebOrigin+"/")
 	req.Header.Set("x-client-type", "WEB_CLIENT")
+	req.Header.Set("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36")
 	if client == nil {
 		client = &http.Client{Timeout: 12 * time.Second}
 	}
