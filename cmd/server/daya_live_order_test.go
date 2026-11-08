@@ -20,7 +20,7 @@ type dayaLiveOrderTestPageData struct {
 	Result *Order
 }
 
-var dayaLiveOrderTestPage = template.Must(template.New("daya-live-order-test").Parse(\`<!doctype html>
+var dayaLiveOrderTestPage = template.Must(template.New("daya-live-order-test").Parse(`<!doctype html>
 <html lang="fa" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>ارسال یک سفارش واقعی دایا</title>
 <style>
@@ -60,7 +60,7 @@ ISIN: {{.Result.ISIN}} · سمت: {{.Result.Side}}<br>
 <div class="muted">این نتیجه ذخیره شده است. در وضعیت نامشخص، سفارش را دوباره نفرست.</div>
 </div>
 {{end}}
-</section></main></body></html>\`))
+</section></main></body></html>`))
 
 var dayaLiveOrderTestNonceStore = struct {
 	sync.Mutex
