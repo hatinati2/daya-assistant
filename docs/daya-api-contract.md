@@ -25,7 +25,7 @@ The currently available evidence records these fragments:
 - The represented side values are `BUY` and `SELL`; the represented validity type is `JUST_TODAY`.
 - A Daya HTTP 400 response has been observed with the group-state rejection message: `امکان ثبت سفارش با توجه به وضعیت گروه وجود ندارد`.
 
-The method, URL, and HTTP status are now confirmed for that captured request. HTTP `200 OK` is only the transport-level result; by itself it does not prove that the broker booked the order. The exact successful response body/schema, required headers, whether the observed session cookies are sufficient, and the full accepted enum set remain unverified. The request shape in code is therefore still a candidate adapter contract, not proof that the broker will accept or book it.
+The method, URL, HTTP status, and one actual response body are now confirmed. The captured POST returned HTTP `200 OK` with an `ENTRY / SENT_TO_TRADING_ENGINE` record, a positive broker `orderId`, `hostOrderNumber: null`, and empty `errorCode`/`errorText`. The response echoed the submitted instrument, side, price, quantity, and validity values. This proves that this particular request reached the trading engine and received an ENTRY acknowledgement; it does not prove final BOOKED confirmation or a trade execution. The exact required headers, whether the observed session cookies are sufficient in general, and the full accepted enum set remain unverified.
 
 
 ## Observed confirmation/order record
@@ -41,7 +41,7 @@ A redacted order record supplied during implementation contains these fields:
 - `orderValidityDate: null`
 - `errorCode: null` and `errorText: null`
 
-This establishes the shape of a confirmation/booked order record. It does **not** establish whether the sample came from the immediate `POST /orders` response or from a subsequent read of the order list. The code therefore recognizes it only when it appears in a 2xx dispatch response **and** its instrument, side, price, quantity, and validity exactly match the local order being dispatched. It stores both the broker `orderId` and `hostOrderNumber`. A response that does not match remains ambiguous.
+This establishes the shape of a confirmation/booked order record from an earlier supplied sample. It has not been correlated with the newly captured POST response or proven to come from a subsequent `GET /orders`. It is therefore retained as a separate observed record shape, not proof of a two-step ENTRY-to-BOOKED lifecycle.
 
 ## DevTools evidence supplied by the operator
 
@@ -51,9 +51,9 @@ The operator clarified that the supplied fragments came from different panels of
 - An order record with `orderFunction: ENTRY`, `orderStatus: SENT_TO_TRADING_ENGINE`, a numeric `orderId`, and `hostOrderNumber: null`.
 - A confirmation-shaped record was also supplied earlier with `orderFunction: CONFIRMATION`, `orderStatus: BOOKED`, a numeric `orderId`, and a numeric `hostOrderNumber`.
 
-Because the snippets are partial views of one Network item, we must not infer from them alone that the ENTRY object is the immediate POST response and the BOOKED object came from a later `GET /orders`. The browser Network **Name** label `order` is only a request label, not the URL. The operator has now supplied the Request URL (`https://mg.dayatrader.ir/orders`), method (`POST`), and status (`200 OK`) for that item. The exact response body and the relationship between the supplied ENTRY and BOOKED fragments still need to be established before treating the lifecycle mapping as fully verified.
+The latest full Response panel for the same Network item confirms that the immediate `POST https://mg.dayatrader.ir/orders` response is the ENTRY record (`SENT_TO_TRADING_ENGINE`), with a positive `orderId`, null `hostOrderNumber`, and null error fields. The earlier BOOKED sample is not part of this latest response body; its source and relationship to this POST remain unverified. Do not infer that `GET /orders` necessarily produces the BOOKED sample without capturing that separate request.
 
-The code can conservatively understand both observed record shapes: ENTRY is represented as pending, while only a matching CONFIRMATION/BOOKED record can become locally confirmed. Pending confirmation checks use read-only `GET /orders`; this is a defensive implementation path, not proof from the supplied fragments that Daya necessarily returns the BOOKED record there.
+The code can conservatively understand both observed record shapes: a matching ENTRY acknowledgement is represented as `submission_pending`, while only a matching CONFIRMATION/BOOKED record can become locally confirmed. Pending confirmation checks use read-only `GET /orders`; this remains a defensive implementation path, not a verified source for the earlier BOOKED sample.
 
 ## Current implementation and gate
 
@@ -62,7 +62,7 @@ The code can conservatively understand both observed record shapes: ENTRY is rep
 - A server-side dispatcher is present, but `dayaOrderAPICapable()` remains hard-coded to `false`; it exits before loading credentials or making a network request.
 - The session monitor performs read-only `GET /orders` checks. It does not submit, modify, or cancel orders.
 - No live order has been submitted by the implementation.
-- An arbitrary HTTP 2xx must not be treated as a confirmed order. Confirmation requires the verified success response and definitive broker order ID. Ambiguous results must not be automatically retried.
+- A matching ENTRY HTTP 2xx is recorded as pending, not confirmed or executed. A matching CONFIRMATION/BOOKED record is required for local confirmation. An arbitrary or unrecognized HTTP 2xx remains ambiguous. Ambiguous results must not be automatically retried.
 
 ## Fastest safe next step: sanitized browser capture
 
@@ -81,4 +81,4 @@ To finish the contract without sharing credentials or trade details:
 
 The sanitizer is a defensive aid, not a guarantee: manually remove any newly introduced sensitive field before sharing. Never send the raw HAR, Cookie, Set-Cookie, Authorization, token, username, password, account number, or customer ID.
 
-Once a successful sanitized response is available, the adapter can be updated to parse the actual broker order ID and response status, with mocked tests for all response classes. Only then can a separate review decide whether to change the live capability gate.
+The ENTRY response shape is now captured and supported by the conservative adapter. Remaining work is to verify the later confirmation/reconciliation source, required headers/authentication, and behavior for rejection/ambiguity before any separate review of the live capability gate.
