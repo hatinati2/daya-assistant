@@ -182,6 +182,28 @@ func TestFetchDayaOrdersIsReadOnlyAndUsesSessionCookies(t *testing.T) {
 		if r.Method != http.MethodGet || r.URL.Path != "/orders" {
 			t.Errorf("unexpected order-list request: %s %s", r.Method, r.URL.Path)
 		}
+		for name, want := range map[string]string{
+			"Accept": "application/json",
+			"Content-Type": "application/json",
+			"Origin": dayaWebOrigin,
+			"Referer": dayaWebOrigin + "/",
+			"x-client-type": "WEB_CLIENT",
+		} {
+			if got := r.Header.Get(name); got != want {
+				t.Errorf("%s = %q, want %q", name, got, want)
+			}
+		}
+		for name, want := range map[string]string{
+			"Accept": "application/json",
+			"Content-Type": "application/json",
+			"Origin": dayaWebOrigin,
+			"Referer": dayaWebOrigin + "/",
+			"x-client-type": "WEB_CLIENT",
+		} {
+			if got := r.Header.Get(name); got != want {
+				t.Errorf("%s = %q, want %q", name, got, want)
+			}
+		}
 		if cookie, err := r.Cookie("token"); err != nil || cookie.Value != "current-token" {
 			t.Errorf("current token cookie missing")
 		}
