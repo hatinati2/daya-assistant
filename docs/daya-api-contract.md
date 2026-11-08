@@ -43,6 +43,30 @@ A redacted order record supplied during implementation contains these fields:
 
 This establishes the shape of a confirmation/booked order record. It does **not** establish whether the sample came from the immediate `POST /orders` response or from a subsequent read of the order list. The code therefore recognizes it only when it appears in a 2xx dispatch response **and** its instrument, side, price, quantity, and validity exactly match the local order being dispatched. It stores both the broker `orderId` and `hostOrderNumber`. A response that does not match remains ambiguous.
 
+## Observed two-stage order lifecycle
+
+The operator supplied a request body containing these six fields: `instrumentId`, `orderPrice`, `orderQuantity`, `orderSide`, `orderValidityDate`, and `orderValidityType`. The browser Network entry is labelled `order`.
+
+The accompanying first response record has:
+
+- `orderFunction: ENTRY`
+- `orderStatus: SENT_TO_TRADING_ENGINE`
+- a numeric `orderId`
+- `hostOrderNumber: null`
+- the same instrument, side, price, quantity, and validity values as the request.
+
+A later order record has:
+
+- `orderFunction: CONFIRMATION`
+- `orderStatus: BOOKED`
+- the same numeric `orderId`
+- a numeric `hostOrderNumber`
+- the same instrument, side, price, quantity, and validity values.
+
+The observed flow is therefore two-stage: the POST acknowledgement confirms delivery to the trading engine, while the later confirmation record is the final booked-order evidence. The implementation stores the ENTRY order ID as a pending broker reference, then performs read-only `GET /orders` checks on a randomized 1–7 minute interval. It marks the local order submitted only when a CONFIRMATION/BOOKED record matches that order ID and all submitted order fields. A rate limit stops further automatic confirmation reads; no POST retry is attempted. A pending order can also be reconciled manually after checking Daya.
+
+The Network **Name** value `order` is only the browser's request label; the method and Request URL are the authoritative endpoint details. The examples provided establish the request payload and response record shapes, but the full request URL, HTTP status, and required non-secret headers should still be confirmed in the Network Headers panel.
+
 ## Current implementation and gate
 
 - The order model, scheduling, batching, persistence, status lifecycle, calendar, and symbol search are implemented independently of the broker.
