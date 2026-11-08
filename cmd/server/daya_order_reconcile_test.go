@@ -4,13 +4,14 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
 )
 
 func TestDayaOrderReconciliationRouteRecordsManualConfirmation(t *testing.T) {
-	store := &Store{orders: []Order{{
+	store := &Store{path: filepath.Join(t.TempDir(), "orders.json"), orders: []Order{{
 		ID: "local-unknown", ExecutionMode: executionModeAPI, Status: statusSubmissionUnknown,
 	}}}
 	mux := http.NewServeMux()
@@ -41,7 +42,7 @@ func TestDayaOrderReconciliationRouteRecordsManualConfirmation(t *testing.T) {
 }
 
 func TestDayaOrderReconciliationRouteRejectsCrossOrigin(t *testing.T) {
-	store := &Store{orders: []Order{{
+	store := &Store{path: filepath.Join(t.TempDir(), "orders.json"), orders: []Order{{
 		ID: "local-unknown", ExecutionMode: executionModeAPI, Status: statusSubmissionUnknown,
 	}}}
 	mux := http.NewServeMux()
