@@ -66,6 +66,10 @@ The latest full Response view now establishes that the POST response for `POST h
 
 The code supports the captured ENTRY response conservatively: an exact matching ENTRY acknowledgement with empty error fields becomes `submission_pending`, not final success. An exact matching CONFIRMATION/BOOKED record with empty error fields is required for local confirmation. Pending checks use read-only GET `/orders`; that polling path is still an implementation assumption to validate, not a proven source for the earlier BOOKED sample.
 
+## BOOKED is registration, not execution
+
+The operator clarified that a Daya order first becomes registered in the order book (`BOOKED`). A trade occurs later only if a counterparty order matches. The supplied BOOKED Preview shows `matchedQuantity: 0`, `tradedQuantity: 0`, and `tradedPrice: 0`, with the full quantity remaining. The UI therefore labels this status as registered and waiting for a counterparty, not completed. Current code records the broker registration but does not yet persist or poll the subsequent fill counters.
+
 ## Still unverified
 
 - Full required headers and authentication requirements for order creation.
