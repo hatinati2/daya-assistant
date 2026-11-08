@@ -1389,6 +1389,9 @@ func main() {
 			credentials.RenderWithMonitor(w, "نشست ذخیره شد، اما پایش خودکار شروع نشد.", "", sessionMonitor.Snapshot())
 			return
 		}
+		// A fresh CAPTCHA login re-enables only read-only confirmation polling
+		// for orders already acknowledged by Daya. It never resubmits POST.
+		orderDispatcher.ResumePendingPolling()
 		http.Redirect(w, r, "/settings?notice=daya_login_ok", http.StatusSeeOther)
 	})
 	mux.HandleFunc("GET /history", func(w http.ResponseWriter, r *http.Request) {
