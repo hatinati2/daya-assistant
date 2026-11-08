@@ -36,6 +36,7 @@ a{color:#175cd3;text-decoration:none}.muted{color:#667085;line-height:1.9}input[
 <p class="muted"><a href="/daya-online-test">بازگشت به تست آنلاین</a> · فقط نسخه Preview</p>
 <div class="warning"><b>این فرم درخواست واقعی POST /orders می‌فرستد.</b> سفارش وارد زمان‌بندی نمی‌شود. فقط یک بار ارسال می‌شود و در صورت نامشخص‌بودن پاسخ، هیچ ارسال مجدد خودکاری انجام نمی‌شود. سفارش ممکن است در کارگزاری ثبت شود.</div>
 <section class="card">
+{{if not .Result}}
 <form method="post" action="/daya-online-test/one/send" onsubmit="return confirm('تأیید نهایی: همین یک سفارش واقعی با مشخصات واردشده به دایا ارسال شود؟')">
 <input type="hidden" name="submission_nonce" value="{{.Nonce}}">
 <div class="grid">
@@ -47,6 +48,7 @@ a{color:#175cd3;text-decoration:none}.muted{color:#667085;line-height:1.9}input[
 <label style="display:flex;gap:9px;align-items:flex-start;font-weight:normal"><input type="checkbox" name="confirm_live_order" value="yes" required><span>ارسال همین سفارش واقعی را با مشخصات بالا تأیید می‌کنم.</span></label>
 <button type="submit">ارسال یک سفارش واقعی</button>
 </form>
+{{end}}
 {{if .Error}}<div class="error">{{.Error}}</div>{{end}}
 {{if .Result}}
 <div class="result">
@@ -120,11 +122,18 @@ func registerDayaLiveOrderTestRoutes(mux *http.ServeMux, previewMode bool, crede
 		ctx, cancel := context.WithTimeout(r.Context(), 20*time.Second)
 		defer cancel()
 		id, err := submitOneDayaOnlineTestOrder(ctx, credentials, store, order)
+		if id != "" {
+			// PRG prevents browser refresh from replaying a live POST. Even if
+			// result persistence failed, show the stored in-flight record and
+			// never present the submission form again on this result page.
+			http.Redirect(w, r, "/daya-online-test/one?order_id="+id, http.StatusSeeOther)
+			return
+		}
 		if err != nil {
 			renderDayaLiveOrderTestError(w, err.Error())
 			return
 		}
-		http.Redirect(w, r, "/daya-online-test/one?order_id="+id, http.StatusSeeOther)
+		renderDayaLiveOrderTestError(w, "نتیجه ارسال در دسترس نیست؛ قبل از هر اقدام، پنل دایا را بررسی کن.")
 	})
 }
 
