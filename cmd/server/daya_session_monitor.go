@@ -28,12 +28,12 @@ type DayaMonitorSnapshot struct {
 }
 
 type DayaSessionMonitor struct {
-	mu          sync.Mutex
-	http        *http.Client
-	state       DayaMonitorSnapshot
-	cancel      context.CancelFunc
-	interval    func() (time.Duration, error)
-	update      func(DayaSession) error
+	mu       sync.Mutex
+	http     *http.Client
+	state    DayaMonitorSnapshot
+	cancel   context.CancelFunc
+	interval func() (time.Duration, error)
+	update   func(DayaSession) error
 }
 
 func NewDayaSessionMonitor(client *http.Client) *DayaSessionMonitor {
@@ -146,7 +146,7 @@ func (m *DayaSessionMonitor) run(ctx context.Context, session DayaSession) {
 			}
 		}
 		resp, err := m.http.Do(req)
-		now = time.Now().UTC()
+		now := time.Now().UTC()
 		if err != nil {
 			if ctx.Err() != nil {
 				return
