@@ -41,6 +41,14 @@ On 2026-11-08, a manual order attempt in the Daya panel during the reported clos
 
 This matches the earlier observed HTTP 400 group-state rejection. The dispatcher now recognizes this Persian rejection text when returned as plain text as well as through the structured JSON error parser. It still does not imply that all requests made outside trading hours are necessarily discarded or that another endpoint cannot queue an order.
 
+## Separately observed order-list request
+
+The operator has now confirmed a separate browser request:
+
+- `GET https://mg.dayatrader.ir/orders` — HTTP `200 OK`.
+
+This verifies the order-list request path is present and responds successfully. The GET Preview/body is still needed to verify whether it returns `CONFIRMATION / BOOKED`, and to confirm its response envelope and exact fields. Do not mark the earlier BOOKED sample as coming from this GET until those values are compared.
+
 ## Observed follow-up requests after order submission
 
 The operator reported this browser Network sequence after the captured `POST /orders`:
