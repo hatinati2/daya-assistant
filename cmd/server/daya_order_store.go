@@ -128,7 +128,7 @@ func (s *Store) updateAPIOrderExecution(id string, record dayaOrderConfirmationR
 		record.TradedQuantity == nil || *record.TradedQuantity < 0 {
 		return errors.New("اطلاعات تأیید و مقدار معامله‌شده از دایا معتبر نیست")
 	}
-	if record.MatchedQuantity != nil && (*record.MatchedQuantity < 0 || *record.MatchedQuantity > order.Quantity) {
+	if record.MatchedQuantity != nil && *record.MatchedQuantity < 0 {
 		return errors.New("مقدار تطبیق‌شده از دایا معتبر نیست")
 	}
 	if record.TradedPrice != nil && *record.TradedPrice < 0 {
@@ -151,6 +151,9 @@ func (s *Store) updateAPIOrderExecution(id string, record dayaOrderConfirmationR
 			return errors.New("رکورد معامله متعلق به همین سفارش ثبت‌شده نیست")
 		}
 		traded := *record.TradedQuantity
+		if record.MatchedQuantity != nil && *record.MatchedQuantity > order.Quantity {
+			return errors.New("مقدار تطبیق‌شده از تعداد کل سفارش بیشتر است")
+		}
 		if traded > order.Quantity {
 			return errors.New("مقدار معامله‌شده از تعداد کل سفارش بیشتر است")
 		}
