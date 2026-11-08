@@ -49,8 +49,8 @@ func TestDayaOrderReconciliationRouteRejectsCrossOrigin(t *testing.T) {
 	registerDayaOrderReconciliationRoute(mux, store)
 
 	form := url.Values{
-		"id":             {"local-unknown"},
-		"resolution":     {"registered"},
+		"id":              {"local-unknown"},
+		"resolution":      {"registered"},
 		"broker_order_id": {"DAYA-ORDER-42"},
 	}
 	req := httptest.NewRequest(http.MethodPost, "/orders/reconcile", strings.NewReader(form.Encode()))
