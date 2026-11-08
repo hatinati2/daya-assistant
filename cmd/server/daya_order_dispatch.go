@@ -185,10 +185,6 @@ type dayaOrderConfirmationRecord struct {
 	OrderSide                   string          `json:"orderSide"`
 	OrderValidityType           string          `json:"orderValidityType"`
 	OrderValidityDate           *string         `json:"orderValidityDate"`
-	MatchedQuantity             *int64          `json:"matchedQuantity"`
-	TradedQuantity              *int64          `json:"tradedQuantity"`
-	TradedPrice                 *int64          `json:"tradedPrice"`
-	RemainingQuantityOfTheOrder *int64          `json:"remainingQuantityOfTheOrder"`
 	ErrorCode                   json.RawMessage `json:"errorCode"`
 	ErrorText                   json.RawMessage `json:"errorText"`
 }
