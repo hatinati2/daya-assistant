@@ -288,7 +288,7 @@ func classifyDayaOrderResponseForOrder(status int, body []byte, expected *Order)
 				outcome.Status = statusSubmitted
 				outcome.BrokerOrderID = fmt.Sprintf("%d", record.OrderID)
 				outcome.BrokerHostOrderNumber = record.HostOrderNumber
-				outcome.Message = "سفارش با وضعیت BOOKED در دایا ثبت شد؛ این وضعیت به معنی انجام معامله نیست و تا تطبیق با سفارش مقابل باید فعال بماند."
+				outcome.Message = "ثبت سفارش در دایا با وضعیت BOOKED تأیید شد."
 				return outcome
 			}
 			if dayaEntryAcknowledgementMatches(record, expected) {
@@ -375,7 +375,7 @@ func fetchDayaOrders(ctx context.Context, client *http.Client, session DayaSessi
 
 // reconcilePendingOrders queries the observed GET /orders resource and looks
 // for a matching CONFIRMATION/BOOKED record. The route and HTTP 200 are observed;
-// the exact GET response body still needs operator Preview confirmation. It never resends the POST.
+// A matching CONFIRMATION/BOOKED record is required before it marks the order registered. It never resends the POST.
 // ResumePendingPolling is called only after an operator completes a fresh
 // Daya CAPTCHA login. It re-enables read-only confirmation checks, never POST.
 func (d *DayaOrderDispatcher) ResumePendingPolling() {
