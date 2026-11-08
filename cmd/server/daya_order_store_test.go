@@ -239,7 +239,6 @@ func TestAPIOrderMovesFromEntryPendingToBookedConfirmed(t *testing.T) {
 	}
 }
 
-
 func TestPendingAPIOrdersIncludesBookedAndPartiallyFilledOrders(t *testing.T) {
 	store := &Store{orders: []Order{
 		{ID: "entry", ExecutionMode: executionModeAPI, Status: statusSubmissionPending, BrokerOrderID: "1"},
