@@ -184,8 +184,12 @@ type dayaOrderConfirmationRecord struct {
 	OrderQuantity     int64           `json:"orderQuantity"`
 	OrderSide         string          `json:"orderSide"`
 	OrderValidityType string          `json:"orderValidityType"`
-	OrderValidityDate *string         `json:"orderValidityDate"`
-	ErrorCode         json.RawMessage `json:"errorCode"`
+	OrderValidityDate          *string         `json:"orderValidityDate"`
+	MatchedQuantity             *int64          `json:"matchedQuantity"`
+	TradedQuantity              *int64          `json:"tradedQuantity"`
+	TradedPrice                 *int64          `json:"tradedPrice"`
+	RemainingQuantityOfTheOrder *int64          `json:"remainingQuantityOfTheOrder"`
+	ErrorCode                   json.RawMessage `json:"errorCode"`
 	ErrorText         json.RawMessage `json:"errorText"`
 }
 
@@ -460,20 +464,30 @@ func (d *DayaOrderDispatcher) reconcilePendingOrders(ctx context.Context) error 
 	records := decodeDayaConfirmationRecords(body)
 	for _, order := range pending {
 		for _, record := range records {
+			// Never correlate by symbol/side/price/quantity alone: a user may
+			// delete and recreate an otherwise identical order with a new ID.
 			if record.OrderID != parseBrokerOrderID(order.BrokerOrderID) ||
 				!dayaBookedConfirmationMatches(record, &order) {
 				continue
 			}
-			outcome := DayaOrderOutcome{
-				Status:                statusSubmitted,
-				BrokerOrderID:         order.BrokerOrderID,
-				BrokerHostOrderNumber: record.HostOrderNumber,
-				HTTPStatus:            status,
-				Message:               "ثبت سفارش در دایا تأیید شد: CONFIRMATION/BOOKED با شناسه منطبق در GET /orders؛ انجام معامله جداگانه از روی مقادیر معامله‌شده پیگیری می‌شود.",
-				ReceivedAt:            now,
+			if order.Status == statusSubmissionPending {
+				outcome := DayaOrderOutcome{
+					Status:                statusSubmitted,
+					BrokerOrderID:         order.BrokerOrderID,
+					BrokerHostOrderNumber: record.HostOrderNumber,
+					HTTPStatus:            status,
+					Message:               "ثبت سفارش در دایا تأیید شد؛ پایش مقدار معامله‌شده و باقی‌مانده ادامه دارد.",
+					ReceivedAt:            now,
+				}
+				if err := d.store.completeAPIOrder(order.ID, outcome); err != nil {
+					log.Printf("Daya confirmation persistence failed for local order %q: %v", order.ID, err)
+					break
+				}
 			}
-			if err := d.store.completeAPIOrder(order.ID, outcome); err != nil {
-				log.Printf("Daya confirmation persistence failed for local order %q: %v", order.ID, err)
+			if record.TradedQuantity != nil {
+				if err := d.store.updateAPIOrderExecution(order.ID, record, now); err != nil {
+					log.Printf("Daya execution progress persistence failed for local order %q: %v", order.ID, err)
+				}
 			}
 			break
 		}
