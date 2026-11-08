@@ -20,7 +20,6 @@ import (
 	"time"
 
 	jalaali "github.com/hatinati2/daya-assistant/internal/jalaali"
-	"github.com/hatinati2/daya-assistant/internal/mockcaptcha"
 )
 
 const (
