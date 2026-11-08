@@ -174,6 +174,9 @@ func classifyDayaOrderResponse(status int, body []byte) (string, string, string)
 		message := fmt.Sprintf("دایا درخواست را با HTTP %d رد کرد.", status)
 		if result, err := DecodeDayaOrderError(body); err == nil && strings.TrimSpace(result.Message) != "" {
 			message = result.Message
+		} else if strings.Contains(string(body), "امكان ثبت سفارش با توجه به وضعيت كروه وجود ندارد") ||
+			strings.Contains(string(body), "امکان ثبت سفارش با توجه به وضعیت گروه وجود ندارد") {
+			message = "امکان ثبت سفارش با توجه به وضعیت گروه وجود ندارد"
 		}
 		return statusSubmissionFailed, "", message
 	default:
