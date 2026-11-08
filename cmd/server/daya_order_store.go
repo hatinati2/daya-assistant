@@ -159,6 +159,10 @@ func (s *Store) updateAPIOrderExecution(id string, record dayaOrderConfirmationR
 		if record.RemainingQuantityOfTheOrder != nil {
 			remaining = *record.RemainingQuantityOfTheOrder
 		}
+		if remaining > order.Quantity {
+			return errors.New("مقدار باقی‌مانده از تعداد کل سفارش بیشتر است")
+		}
+		old := *order
 		if traded == order.Quantity && remaining == 0 {
 			order.Status = statusFilled
 			order.BrokerMessage = "کل تعداد سفارش معامله شد."
@@ -184,6 +188,7 @@ func (s *Store) updateAPIOrderExecution(id string, record dayaOrderConfirmationR
 		order.BrokerProgressAt = now
 		order.UpdatedAt = now
 		if err := s.saveLocked(); err != nil {
+			*order = old
 			return err
 		}
 		return nil
