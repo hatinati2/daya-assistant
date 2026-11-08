@@ -351,6 +351,7 @@ func fetchDayaOrders(ctx context.Context, client *http.Client, session DayaSessi
 		req.AddCookie(&http.Cookie{Name: "token", Value: session.Token})
 	}
 	req.Header.Set("Accept", "application/json")
+	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Origin", dayaWebOrigin)
 	req.Header.Set("Referer", dayaWebOrigin+"/")
 	req.Header.Set("x-client-type", "WEB_CLIENT")
