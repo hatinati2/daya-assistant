@@ -259,7 +259,7 @@ func TestCancelAllScheduledOnlyCancelsScheduledOrdersAtomically(t *testing.T) {
 	}
 }
 
-func TestClearHistoryPreservesActiveAndAmbiguousOrders(t *testing.T) {
+func TestClearHistoryRemovesEverythingExceptScheduledOrders(t *testing.T) {
 	path := t.TempDir() + "/orders.json"
 	store, err := newStore(path)
 	if err != nil {
@@ -267,8 +267,8 @@ func TestClearHistoryPreservesActiveAndAmbiguousOrders(t *testing.T) {
 	}
 	statuses := []string{
 		statusScheduled, statusReady, statusSubmitting, statusSubmissionUnknown,
-		statusCancelled, statusManualDone, statusSubmitted, statusSubmissionFailed,
-		"future_status",
+		statusCancelled, statusManualDone, statusSubmissionFailed,
+		statusSubmitted, "future_status",
 	}
 	for _, status := range statuses {
 		store.orders = append(store.orders, Order{ID: status, Status: status})
@@ -283,21 +283,14 @@ func TestClearHistoryPreservesActiveAndAmbiguousOrders(t *testing.T) {
 	if err != nil {
 		t.Fatalf("reload store: %v", err)
 	}
-	want := map[string]bool{
-		statusScheduled: true, statusReady: true, statusSubmitting: true,
-		statusSubmissionUnknown: true, "future_status": true,
+	if len(got.orders) != 1 || got.orders[0].Status != statusScheduled {
+		t.Fatalf("remaining orders = %#v, want only scheduled order", got.orders)
 	}
-	if len(got.orders) != len(want) {
-		t.Fatalf("remaining orders = %d, want %d: %#v", len(got.orders), len(want), got.orders)
+	if history := got.historySnapshot(); len(history) != 0 {
+		t.Fatalf("history after clear = %#v, want empty", history)
 	}
-	for _, order := range got.orders {
-		if !want[order.Status] {
-			t.Errorf("terminal status %q should have been removed", order.Status)
-		}
-		delete(want, order.Status)
-	}
-	if len(want) != 0 {
-		t.Errorf("these active/ambiguous statuses were removed: %#v", want)
+	if active := got.activeSnapshot(); len(active) != 1 || active[0].Status != statusScheduled {
+		t.Fatalf("active orders after clear = %#v, want only scheduled order", active)
 	}
 }
 

@@ -1,8 +1,9 @@
 package main
 
-// Daya's order-submission endpoint, payload, enums, and response schema have
-// not been verified from authenticated broker traffic. Keep live API dispatch
-// disabled until the contract is captured and tested.
+import "strings"
+
+// Live Daya API dispatch is enabled only in the isolated Preview environment.
+// Production remains fail-closed even if this code is deployed there.
 func dayaOrderAPICapable() bool {
-	return false
+	return strings.EqualFold(env("DAYA_PREVIEW_MODE", "false"), "true")
 }

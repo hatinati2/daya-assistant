@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"strings"
 	"time"
 )
 
@@ -20,6 +21,11 @@ func (s *Store) claimReadyAPIOrders(now time.Time) ([]Order, error) {
 			mode = executionModeManual
 		}
 		if mode != executionModeAPI || order.Status != statusReady {
+			continue
+		}
+		// Defense in depth: never claim an API order before its scheduled time,
+		// even if another code path accidentally marks it ready early.
+		if order.ExecuteAt.After(now) {
 			continue
 		}
 		if order.ISIN == "" {
@@ -46,9 +52,22 @@ func (s *Store) claimReadyAPIOrders(now time.Time) ([]Order, error) {
 	return claimed, nil
 }
 
-func (s *Store) completeAPIOrder(id, finalStatus, brokerOrderID, message string, now time.Time) error {
-	if finalStatus != statusSubmitted && finalStatus != statusSubmissionFailed && finalStatus != statusSubmissionUnknown {
+type DayaOrderOutcome struct {
+	Status                string
+	HTTPStatus            int
+	RequestID             string
+	BrokerOrderID         string
+	BrokerHostOrderNumber int64
+	Message               string
+	ReceivedAt            time.Time
+}
+
+func (s *Store) completeAPIOrder(id string, outcome DayaOrderOutcome) error {
+	if outcome.Status != statusSubmitted && outcome.Status != statusSubmissionPending && outcome.Status != statusSubmissionFailed && outcome.Status != statusSubmissionUnknown {
 		return errors.New("وضعیت نهایی ارسال سفارش نامعتبر است")
+	}
+	if (outcome.Status == statusSubmitted || outcome.Status == statusSubmissionPending) && strings.TrimSpace(outcome.BrokerOrderID) == "" {
+		return errors.New("برای تأیید ثبت سفارش، شناسه سفارش دایا الزامی است")
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -57,13 +76,93 @@ func (s *Store) completeAPIOrder(id, finalStatus, brokerOrderID, message string,
 		if order.ID != id {
 			continue
 		}
-		if order.Status != statusSubmitting {
-			return errors.New("سفارش در وضعیت ارسال نیست")
+		validSourceState := order.Status == statusSubmitting ||
+			(order.Status == statusSubmissionPending && outcome.Status == statusSubmitted)
+		if !validSourceState || order.ExecutionMode != executionModeAPI {
+			return errors.New("سفارش در وضعیت معتبر برای ثبت نتیجه API نیست")
 		}
 		old := *order
-		order.Status = finalStatus
-		order.BrokerOrderID = brokerOrderID
+		order.Status = outcome.Status
+		order.BrokerOrderID = strings.TrimSpace(outcome.BrokerOrderID)
+		order.BrokerHostOrderNumber = outcome.BrokerHostOrderNumber
+		order.BrokerRequestID = strings.TrimSpace(outcome.RequestID)
+		order.BrokerHTTPStatus = outcome.HTTPStatus
+		order.BrokerMessage = outcome.Message
+		order.BrokerResponseAt = outcome.ReceivedAt
+		order.UpdatedAt = outcome.ReceivedAt
+		if order.UpdatedAt.IsZero() {
+			order.UpdatedAt = time.Now().In(tehran())
+		}
+		if err := s.saveLocked(); err != nil {
+			*order = old
+			return err
+		}
+		return nil
+	}
+	return errors.New("سفارش پیدا نشد")
+}
+
+func (s *Store) pendingAPIOrders() []Order {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	out := make([]Order, 0)
+	for _, order := range s.orders {
+		if order.ExecutionMode != executionModeAPI || strings.TrimSpace(order.BrokerOrderID) == "" {
+			continue
+		}
+		switch order.Status {
+		case statusSubmissionPending:
+			out = append(out, order)
+		}
+	}
+	return out
+}
+
+func (s *Store) reconcileAPIOrder(id, resolution, brokerOrderID, message string, now time.Time) error {
+	id = strings.TrimSpace(id)
+	brokerOrderID = strings.TrimSpace(brokerOrderID)
+	message = strings.TrimSpace(message)
+	if id == "" {
+		return errors.New("شناسه سفارش محلی الزامی است")
+	}
+	if len(brokerOrderID) > 128 || len(message) > 1000 {
+		return errors.New("شناسه یا توضیح نتیجه بررسی بیش از حد مجاز است")
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	for i := range s.orders {
+		order := &s.orders[i]
+		if order.ID != id {
+			continue
+		}
+		if order.ExecutionMode != executionModeAPI ||
+			(order.Status != statusSubmissionUnknown && order.Status != statusSubmissionPending) {
+			return errors.New("فقط سفارش API در انتظار تأیید یا با نتیجه نامشخص قابل تطبیق دستی است")
+		}
+		old := *order
+		switch resolution {
+		case "registered":
+			if brokerOrderID == "" {
+				return errors.New("برای تأیید ثبت سفارش، شناسه سفارش دایا را وارد کنید")
+			}
+			order.Status = statusSubmitted
+			order.BrokerOrderID = brokerOrderID
+			if message == "" {
+				message = "ثبت سفارش پس از بررسی دستی در پنل دایا تأیید شد."
+			}
+		case "rejected":
+			if brokerOrderID != "" {
+				return errors.New("برای نتیجه ردشده نباید شناسه سفارش ثبت‌شده وارد شود")
+			}
+			order.Status = statusSubmissionFailed
+			if message == "" {
+				message = "پس از بررسی دستی در پنل دایا، ثبت سفارش تأیید نشد."
+			}
+		default:
+			return errors.New("نتیجه بررسی دستی معتبر نیست")
+		}
 		order.BrokerMessage = message
+		order.ReconciledAt = now
 		order.UpdatedAt = now
 		if err := s.saveLocked(); err != nil {
 			*order = old

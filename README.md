@@ -32,7 +32,7 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/hatinati2/daya-assistant
 تا وقتی تغییرات شاخهٔ توسعه ادغام نشده‌اند، برای نصب همان نسخهٔ آزمایشی از دستور زیر استفاده کن:
 
 ```bash
-DAYA_INSTALL_REF=feature/project-scaffold bash -c "$(curl -fsSL https://raw.githubusercontent.com/hatinati2/daya-assistant/feature/project-scaffold/install-preview-public.sh)"
+DAYA_INSTALL_REF=feat/daya-order-dispatch-foundation bash -c "$(curl -fsSL https://raw.githubusercontent.com/hatinati2/daya-assistant/feat/daya-order-dispatch-foundation/install-preview-public.sh)"
 ```
 
 این دستور فقط Preview مستقل را نصب می‌کند؛ پورت آن 8102 است. پس از ادغام PR می‌توان از نصب‌کنندهٔ `main` استفاده کرد.
@@ -64,6 +64,13 @@ DAYA_INSTALL_REF=feature/project-scaffold bash -c "$(curl -fsSL https://raw.gith
 **ارسال خودکار سفارش از API هنوز فعال نشده است.** تاکنون endpoint، ساختار payload، مقادیر enum خرید/فروش و اعتبار سفارش و ساختار پاسخ ثبت سفارش دایا از ترافیک واقعی تأیید نشده‌اند. برای جلوگیری از ارسال اشتباه یا تکراری، endpoint رابین به دایا تعمیم داده نشده و انتخاب مسیر API غیرفعال است.
 
 تمام مدل سفارش، زمان‌بندی، برنامه‌ریز چندنوبتی، مدیریت وضعیت، تاریخچه، لغوها و مسیر دستی پیاده‌سازی شده‌اند. برای تکمیل ارسال خودکار، باید درخواست واقعی ثبت سفارش از Network مرورگر دایا (با حذف token، cookie، رمز، شماره حساب و شناسه‌های شخصی) دریافت شود. هیچ درخواست سفارش زنده‌ای در CI یا تست‌ها ارسال نمی‌شود.
+
+## تست آنلاین در Preview
+
+- مسیر `/daya-online-test` با کلیک کاربر فقط `GET /orders` واقعی را برای بررسی نشست و پاسخ JSON اجرا می‌کند.
+- مسیر `/daya-online-test/one` فقط در Preview یک فرم ارسال دستی یک‌باره دارد. با تأیید صریح کاربر، همان یک درخواست واقعی `POST /orders` ارسال و نتیجه در تاریخچه Preview ذخیره می‌شود.
+- سفارش آزمایشی وارد زمان‌بندی نمی‌شود. در timeout یا نتیجه مبهم، ارسال مجدد خودکار انجام نمی‌شود. در پاسخ ENTRY، فقط تأیید خواندنی BOOKED بررسی می‌شود و بعد از BOOKED پایش متوقف می‌ماند.
+- هیچ درخواست POST واقعی در CI یا تست‌های خودکار اجرا نمی‌شود. ارسال زمان‌بندی‌شده از API همچنان به‌صورت مستقل غیرفعال است.
 
 ## توسعه محلی
 

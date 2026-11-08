@@ -28,6 +28,7 @@ const (
 	statusCancelled         = "cancelled"
 	statusManualDone        = "manual_done"
 	statusSubmitting        = "submitting"
+	statusSubmissionPending = "submission_pending"
 	statusSubmitted         = "submitted"
 	statusSubmissionFailed  = "submission_failed"
 	statusSubmissionUnknown = "submission_unknown"
@@ -36,20 +37,25 @@ const (
 )
 
 type Order struct {
-	ID            string    `json:"id"`
-	Symbol        string    `json:"symbol"`
-	ISIN          string    `json:"isin,omitempty"`
-	Side          string    `json:"side"`
-	Price         int64     `json:"price"`
-	Quantity      int64     `json:"quantity"`
-	ExecuteAt     time.Time `json:"execute_at"`
-	ExecutionMode string    `json:"execution_mode,omitempty"`
-	Status        string    `json:"status"`
-	BrokerOrderID string    `json:"broker_order_id,omitempty"`
-	BrokerMessage string    `json:"broker_message,omitempty"`
-	AttemptedAt   time.Time `json:"attempted_at,omitempty"`
-	CreatedAt     time.Time `json:"created_at"`
-	UpdatedAt     time.Time `json:"updated_at"`
+	ID                    string    `json:"id"`
+	Symbol                string    `json:"symbol"`
+	ISIN                  string    `json:"isin,omitempty"`
+	Side                  string    `json:"side"`
+	Price                 int64     `json:"price"`
+	Quantity              int64     `json:"quantity"`
+	ExecuteAt             time.Time `json:"execute_at"`
+	ExecutionMode         string    `json:"execution_mode,omitempty"`
+	Status                string    `json:"status"`
+	BrokerOrderID         string    `json:"broker_order_id,omitempty"`
+	BrokerHostOrderNumber int64     `json:"broker_host_order_number,omitempty"`
+	BrokerRequestID       string    `json:"broker_request_id,omitempty"`
+	BrokerHTTPStatus      int       `json:"broker_http_status,omitempty"`
+	BrokerResponseAt      time.Time `json:"broker_response_at,omitempty"`
+	ReconciledAt          time.Time `json:"reconciled_at,omitempty"`
+	BrokerMessage         string    `json:"broker_message,omitempty"`
+	AttemptedAt           time.Time `json:"attempted_at,omitempty"`
+	CreatedAt             time.Time `json:"created_at"`
+	UpdatedAt             time.Time `json:"updated_at"`
 }
 
 type Store struct {
@@ -136,20 +142,15 @@ func (s *Store) addMany(orders []Order) error {
 	return nil
 }
 
-// clearHistory removes terminal history entries while preserving every
-// order that is active, ready, in flight, or has an ambiguous submission result.
+// clearHistory removes every item shown in history. Scheduled orders are
+// preserved because they remain in the active-orders view.
 func (s *Store) clearHistory() error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	previous := s.orders
 	kept := make([]Order, 0, len(previous))
 	for _, order := range previous {
-		switch order.Status {
-		case statusCancelled, statusManualDone, statusSubmitted, statusSubmissionFailed:
-			// Terminal history entry: remove it.
-		default:
-			// Preserve scheduled, ready, submitting, submission_unknown,
-			// and any future/unrecognized status conservatively.
+		if order.Status == statusScheduled {
 			kept = append(kept, order)
 		}
 	}
@@ -481,6 +482,15 @@ var page = template.Must(template.New("page").Funcs(template.FuncMap{
 	"jalali":        formatJalaliDateTime,
 	"executionMode": executionModeLabel,
 	"manualMode":    isManualExecution,
+	"hasInt64": func(value *int64) bool {
+		return value != nil
+	},
+	"int64Value": func(value *int64) int64 {
+		if value == nil {
+			return 0
+		}
+		return *value
+	},
 }).Parse(`<!doctype html>
 <html lang="fa" dir="rtl"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -511,9 +521,12 @@ th{font-size:10px;color:#667085}.tablewrap{overflow:auto}.tablewrap tbody td{fon
 .datebox{position:relative}.datebar{display:flex;gap:8px}.datebar input{flex:1}.datebar button{white-space:nowrap}.calendar{margin-top:8px;padding:12px;border:1px solid #d0d5dd;border-radius:10px;background:#fff}.cal-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:12px}.cal-nav{background:#f2f4f7;color:#344054;padding:7px 10px}.cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;text-align:center}.cal-grid span{padding:7px 0;color:#667085;font-size:11px}.cal-day{background:#f8fafc;color:#182230;padding:9px 2px;border-radius:7px}.cal-day:hover,.cal-day.selected{background:#175cd3;color:#fff}.cal-day.today{outline:2px solid #84adff}.cal-empty{min-height:34px}
 .batch-planner{grid-column:1/-1;margin:4px 0;border:1px solid #d0d5dd;border-radius:9px;padding:7px 9px;background:#f8fafc}.batch-planner>summary{cursor:pointer;font-size:11px;font-weight:bold;color:#344054}.batch-planner-body{padding-top:7px}.batch-planner-note{font-size:10px;line-height:1.55;color:#667085;margin-bottom:6px}.batch-plan-controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 10px}.batch-plan-controls label{font-size:10px;margin:4px 0}.batch-plan-controls input{min-height:32px;padding:5px 8px;font-size:12px}.batch-plan-calc{margin-top:7px;font-size:11px;padding:7px 10px}.batch-plan-error{margin-top:6px;color:#b42318;font-size:10px}.batch-plan-result{margin-top:7px;padding:7px;background:#fff;border:1px solid #e4e7ec;border-radius:8px}.batch-plan-summary{display:flex;gap:10px;flex-wrap:wrap;font-size:10px}.batch-plan-table-wrap{max-height:140px;overflow:auto;margin-top:6px}.batch-plan-table{font-size:10px}.batch-plan-table th,.batch-plan-table td{padding:4px 6px}
 .dry-run{width:100%;margin-top:7px;background:#eff8ff;color:#175cd3;border:1px solid #b2ddff}.dry-run-result{margin-top:7px;padding:9px 11px;border:1px solid #b2ddff;border-radius:9px;background:#f5faff;color:#1849a9;line-height:1.7;white-space:pre-wrap}.dry-run-result.error{background:#fef3f2;border-color:#fecdca;color:#b42318}
+.reconcile-form{display:grid;gap:5px;min-width:180px;max-width:260px;white-space:normal}
+.reconcile-form select,.reconcile-form input{min-height:30px;padding:5px 7px;font-size:10px}
+.reconcile-form button{padding:6px 8px;font-size:10px;background:#175cd3}
 @media(max-width:900px){.grid{grid-template-columns:1fr}.head{align-items:flex-start;gap:10px;flex-direction:column}}@media(max-width:560px){.form-grid{grid-template-columns:1fr}.form-field.wide,.form-grid>.wide{grid-column:auto}.batch-plan-controls{grid-template-columns:1fr}}
 </style></head><body data-jyear="{{.JYear}}" data-jmonth="{{.JMonth}}" data-jday="{{.JDay}}"><main class="wrap">
-<div class="head"><div><h1>دستیار دایا</h1><div class="muted" style="margin-top:7px">مدیریت سفارش‌ها · ساعت تهران</div></div><div class="nav"><a class="{{if not .History}}active{{end}}" href="/">سفارش‌های فعال</a><a class="{{if .History}}active{{end}}" href="/history">تاریخچه</a><a href="/settings">اتصال به دایا</a>{{if .PreviewMode}}<a href="/daya-api-test">تست API محلی</a>{{end}}</div><span class="tag">{{if .APIAvailable}}ارسال واقعی API فعال است{{else}}ارسال واقعی API غیرفعال است{{end}}</span></div>
+<div class="head"><div><h1>دستیار دایا</h1><div class="muted" style="margin-top:7px">مدیریت سفارش‌ها · ساعت تهران</div></div><div class="nav"><a class="{{if not .History}}active{{end}}" href="/">سفارش‌های فعال</a><a class="{{if .History}}active{{end}}" href="/history">تاریخچه</a><a href="/settings">اتصال به دایا</a>{{if .PreviewMode}}<a href="/daya-api-test">تست API محلی</a><a href="/daya-online-test">تست آنلاین دایا</a>{{end}}</div><span class="tag">{{if .APIAvailable}}ارسال واقعی API فعال است{{else}}ارسال واقعی API غیرفعال است{{end}}</span></div>
 <div class="note"><b>دو مسیر اجرا:</b> مسیر «بدون API» سفارش را برای ثبت دستی آماده می‌کند. مسیر «با API» تا زمان تأیید endpoint و ساختار درخواست سفارش دایا غیرفعال است؛ مدل سفارش و زمان‌بندی آماده‌اند.</div>
 {{if .Error}}<div class="msg err">{{.Error}}</div>{{end}}{{if .Notice}}<div class="msg">{{.Notice}}</div>{{end}}
 <div class="grid{{if .History}} history{{end}}">{{if not .History}}<section class="card"><h2>تعریف سفارش</h2>
@@ -538,12 +551,12 @@ th{font-size:10px;color:#667085}.tablewrap{overflow:auto}.tablewrap tbody td{fon
 </div></details>
 <button class="submit wide" type="submit">ذخیره سفارش زمان‌بندی‌شده</button><button class="dry-run wide" type="button" id="order-dry-run">اعتبارسنجی سفارش آزمایشی (بدون ارسال و ذخیره)</button><div class="dry-run-result wide" id="order-dry-run-result" role="status" aria-live="polite" hidden></div></div></form>
 <div class="foot">قیمت به ریال و تعداد به عدد سهم وارد شود. در مسیر API، ISIN دقیق نماد الزامی است.</div></section>{{end}}
-<section class="card"><div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap"><h2 style="margin:0">{{if .History}}تاریخچه سفارش‌ها{{else}}سفارش‌های فعال{{end}} ({{len .Orders}})</h2>{{if .History}}<form method="post" action="/history/clear" onsubmit="return confirm('تمام موارد تاریخچه برای همیشه پاک شوند؟ سفارش‌های زمان‌بندی‌شده فعال دست‌نخورده می‌مانند.')"><button type="submit" class="cancel">پاک کردن تاریخچه</button></form>{{else if .HasScheduledOrders}}<form method="post" action="/orders/cancel-all" onsubmit="return confirm('تمام سفارش‌های زمان‌بندی‌شده لغو شوند؟ سفارش‌های آماده ارسال، درحال ارسال و ثبت‌شده دست‌نخورده می‌مانند. این عملیات قابل بازگشت نیست.')"><button type="submit" class="cancel">لغو همه</button></form>{{end}}</div><div class="tablewrap"><table>
+<section class="card"><div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap"><h2 style="margin:0">{{if .History}}تاریخچه سفارش‌ها{{else}}سفارش‌های فعال{{end}} ({{len .Orders}})</h2>{{if .History}}<form method="post" action="/history/clear" onsubmit="return confirm('تمام موارد نمایش‌داده‌شده در تاریخچه، حتی سفارش‌های آماده، درحال‌ارسال و با نتیجه نامشخص، برای همیشه حذف شوند؟ سفارش‌های زمان‌بندی‌شده فعال باقی می‌مانند. با حذف سوابق درحال‌ارسال یا نامشخص، امکان پیگیری آن‌ها در این پنل از بین می‌رود.')"><button type="submit" class="cancel">پاک کردن تاریخچه</button></form>{{else if .HasScheduledOrders}}<form method="post" action="/orders/cancel-all" onsubmit="return confirm('تمام سفارش‌های زمان‌بندی‌شده لغو شوند؟ سفارش‌های آماده ارسال، درحال ارسال و ثبت‌شده دست‌نخورده می‌مانند. این عملیات قابل بازگشت نیست.')"><button type="submit" class="cancel">لغو همه</button></form>{{end}}</div><div class="tablewrap"><table>
 <thead><tr><th>نماد</th><th>نوع</th><th>قیمت</th><th>تعداد</th><th>زمان تهران</th><th>مسیر</th><th>وضعیت</th><th>عملیات</th></tr></thead><tbody>
 {{range .Orders}}<tr><td><b>{{.Symbol}}</b>{{if .ISIN}}<div class="foot">{{.ISIN}}</div>{{end}}</td><td>{{if eq .Side "buy"}}<span class="buy">خرید</span>{{else}}<span class="sell">فروش</span>{{end}}</td>
 <td>{{.Price}}</td><td>{{.Quantity}}</td><td>{{jalali .ExecuteAt}}</td><td>{{executionMode .ExecutionMode}}</td>
-<td>{{if eq .Status "scheduled"}}<span class="status scheduled">زمان‌بندی‌شده</span>{{else if eq .Status "ready"}}<span class="status ready">{{if eq .ExecutionMode "api"}}آماده ارسال{{else}}آماده بررسی{{end}}</span>{{else if eq .Status "manual_done"}}<span class="status ready">ثبت دستی تأیید شد</span>{{else if eq .Status "submitting"}}<span class="status ready">در حال ارسال</span>{{else if eq .Status "submitted"}}<span class="status ready">ثبت در دایا</span>{{else if eq .Status "submission_failed"}}<span class="status cancelled">ارسال ناموفق</span>{{else if eq .Status "submission_unknown"}}<span class="status cancelled">نتیجه نامشخص — بررسی لازم</span>{{else}}<span class="status cancelled">لغوشده</span>{{end}}{{if .BrokerOrderID}}<div class="foot">شناسه دایا: {{.BrokerOrderID}}</div>{{end}}{{if .BrokerMessage}}<div class="foot">{{.BrokerMessage}}</div>{{end}}</td>
-<td>{{if or (eq .Status "scheduled") (and (eq .Status "ready") (eq .ExecutionMode "api"))}}<form method="post" action="/orders/cancel"><input type="hidden" name="id" value="{{.ID}}"><button class="cancel">لغو</button></form>{{else if and $.History (eq .Status "ready") (manualMode .ExecutionMode)}}<form method="post" action="/orders/manual-confirm" onsubmit="return confirm('آیا سفارش را شخصاً در سامانه دایا ثبت کرده‌ای؟')"><input type="hidden" name="id" value="{{.ID}}"><button class="submit">ثبت دستی انجام شد</button></form>{{else}}—{{end}}<button type="button" class="copy-order" data-symbol="{{.Symbol}}" data-isin="{{.ISIN}}" data-side="{{.Side}}" data-price="{{.Price}}" data-quantity="{{.Quantity}}" data-mode="{{.ExecutionMode}}" data-execute="{{jalali .ExecuteAt}}" style="margin-right:6px;background:#eff8ff;color:#175cd3;border:1px solid #b2ddff;padding:6px 9px">کپی سفارش</button></td></tr>
+<td>{{if eq .Status "scheduled"}}<span class="status scheduled">زمان‌بندی‌شده</span>{{else if eq .Status "ready"}}<span class="status ready">{{if eq .ExecutionMode "api"}}آماده ارسال{{else}}آماده بررسی{{end}}</span>{{else if eq .Status "manual_done"}}<span class="status ready">ثبت دستی تأیید شد</span>{{else if eq .Status "submitting"}}<span class="status ready">در حال ارسال</span>{{else if eq .Status "submission_pending"}}<span class="status scheduled">ارسال به موتور انجام شد؛ در انتظار تأیید</span>{{else if eq .Status "submitted"}}<span class="status ready">ثبت سفارش در دفتر سفارش‌های دایا تأیید شد</span>{{else if eq .Status "submission_failed"}}<span class="status cancelled">ارسال ناموفق</span>{{else if eq .Status "submission_unknown"}}<span class="status cancelled">نتیجه نامشخص — بررسی لازم</span>{{else}}<span class="status cancelled">لغوشده</span>{{end}}{{if .BrokerOrderID}}<div class="foot">شناسه سفارش دایا: {{.BrokerOrderID}}</div>{{end}}{{if .BrokerHostOrderNumber}}<div class="foot">شماره میزبان دایا: {{.BrokerHostOrderNumber}}</div>{{end}}{{if .BrokerHTTPStatus}}<div class="foot">HTTP: {{.BrokerHTTPStatus}}</div>{{end}}{{if .BrokerRequestID}}<div class="foot">شناسه درخواست: {{.BrokerRequestID}}</div>{{end}}{{if not .BrokerResponseAt.IsZero}}<div class="foot">زمان پاسخ دایا: {{jalali .BrokerResponseAt}}</div>{{end}}{{if not .ReconciledAt.IsZero}}<div class="foot">زمان تطبیق دستی: {{jalali .ReconciledAt}}</div>{{end}}{{if .BrokerMessage}}<div class="foot">{{.BrokerMessage}}</div>{{end}}</td>
+<td>{{if or (eq .Status "scheduled") (and (eq .Status "ready") (eq .ExecutionMode "api"))}}<form method="post" action="/orders/cancel"><input type="hidden" name="id" value="{{.ID}}"><button class="cancel">لغو</button></form>{{else if and $.History (eq .Status "ready") (manualMode .ExecutionMode)}}<form method="post" action="/orders/manual-confirm" onsubmit="return confirm('آیا سفارش را شخصاً در سامانه دایا ثبت کرده‌ای؟')"><input type="hidden" name="id" value="{{.ID}}"><button class="submit">ثبت دستی انجام شد</button></form>{{else if and $.History (or (eq .Status "submission_unknown") (eq .Status "submission_pending")) (eq .ExecutionMode "api")}}<form method="post" action="/orders/reconcile" class="reconcile-form"><input type="hidden" name="id" value="{{.ID}}"><select name="resolution" aria-label="نتیجه بررسی در دایا"><option value="registered">در دایا ثبت شده</option><option value="rejected">در دایا ثبت نشده</option></select><input name="broker_order_id" maxlength="128" placeholder="شناسه سفارش دایا (برای ثبت‌شده)"><input name="broker_message" maxlength="1000" placeholder="توضیح بررسی (اختیاری)"><button type="submit">ثبت نتیجه بررسی</button></form>{{else}}—{{end}}<button type="button" class="copy-order" data-symbol="{{.Symbol}}" data-isin="{{.ISIN}}" data-side="{{.Side}}" data-price="{{.Price}}" data-quantity="{{.Quantity}}" data-mode="{{.ExecutionMode}}" data-execute="{{jalali .ExecuteAt}}" style="margin-right:6px;background:#eff8ff;color:#175cd3;border:1px solid #b2ddff;padding:6px 9px">کپی سفارش</button></td></tr>
 {{else}}<tr><td colspan="8" class="empty">{{if .History}}هنوز موردی در تاریخچه ثبت نشده است.{{else}}سفارش فعالی ثبت نشده است.{{end}}</td></tr>{{end}}
 </tbody></table></div><div class="foot">{{if .History}}این صفحه سفارش‌های سررسیدشده و لغوشده را نگه می‌دارد؛ هیچ سفارشی از داده‌ها حذف نشده است.{{else}}ساعت سرور: {{.Now}} · سفارش‌های سررسیدشده در صفحه تاریخچه نمایش داده می‌شوند.{{end}} وضعیت «آماده بررسی» به معنی ارسال به کارگزاری نیست.</div>
 </section></div></main>
@@ -1182,9 +1195,17 @@ func main() {
 		}
 	}()
 
+	// The dispatcher is connected to the scheduler, but its live capability
+	// gate remains closed in daya_order.go until the broker contract is verified.
+	orderDispatcher := NewDayaOrderDispatcher(store, credentials)
+	go orderDispatcher.Run(context.Background())
+
 	mux := http.NewServeMux()
 	previewMode := strings.EqualFold(env("DAYA_PREVIEW_MODE", "false"), "true")
 	registerDayaLocalOrderTestRoutes(mux, previewMode)
+	registerDayaOnlineTestRoutes(mux, previewMode, credentials)
+	registerDayaLiveOrderTestRoutes(mux, previewMode, credentials, store)
+	registerDayaOrderReconciliationRoute(mux, store)
 	mux.HandleFunc("GET /api/server-time", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.Header().Set("Cache-Control", "no-store, no-cache, must-revalidate")
@@ -1267,6 +1288,8 @@ func main() {
 			data.Notice = fmt.Sprintf("%d سفارش زمان‌بندی‌شده لغو شد.", count)
 		case "manual_confirmed":
 			data.Notice = "تأیید دستی ثبت شد. این تأیید به معنی راستی‌آزمایی خودکار کارگزاری نیست."
+		case "reconciled":
+			data.Notice = "نتیجه بررسی دستی سفارش در تاریخچه ثبت شد."
 		case "history_cleared":
 			data.Notice = "تاریخچه پاک شد؛ سفارش‌های زمان‌بندی‌شده فعال حفظ شدند."
 		}
@@ -1372,6 +1395,9 @@ func main() {
 			credentials.RenderWithMonitor(w, "نشست ذخیره شد، اما پایش خودکار شروع نشد.", "", sessionMonitor.Snapshot())
 			return
 		}
+		// A fresh CAPTCHA login re-enables only read-only confirmation polling
+		// for orders already acknowledged by Daya. It never resubmits POST.
+		orderDispatcher.ResumePendingPolling()
 		http.Redirect(w, r, "/settings?notice=daya_login_ok", http.StatusSeeOther)
 	})
 	mux.HandleFunc("GET /history", func(w http.ResponseWriter, r *http.Request) {
