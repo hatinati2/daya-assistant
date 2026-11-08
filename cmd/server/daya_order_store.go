@@ -123,8 +123,10 @@ func (s *Store) pendingAPIOrders() []Order {
 // order. The broker order ID is the primary identity; order attributes are
 // checked by the caller before this method is reached.
 func (s *Store) updateAPIOrderExecution(id string, record dayaOrderConfirmationRecord, now time.Time) error {
-	if record.OrderID <= 0 || record.TradedQuantity == nil || *record.TradedQuantity < 0 {
-		return errors.New("اطلاعات مقدار معامله‌شده از دایا معتبر نیست")
+	if record.OrderFunction != "CONFIRMATION" || record.OrderStatus != "BOOKED" ||
+		!dayaRecordHasNoError(record) || record.OrderID <= 0 ||
+		record.TradedQuantity == nil || *record.TradedQuantity < 0 {
+		return errors.New("اطلاعات تأیید و مقدار معامله‌شده از دایا معتبر نیست")
 	}
 	if record.MatchedQuantity != nil && *record.MatchedQuantity < 0 {
 		return errors.New("مقدار تطبیق‌شده از دایا معتبر نیست")
@@ -159,8 +161,8 @@ func (s *Store) updateAPIOrderExecution(id string, record dayaOrderConfirmationR
 		if record.RemainingQuantityOfTheOrder != nil {
 			remaining = *record.RemainingQuantityOfTheOrder
 		}
-		if remaining > order.Quantity {
-			return errors.New("مقدار باقی‌مانده از تعداد کل سفارش بیشتر است")
+		if remaining > order.Quantity || traded+remaining > order.Quantity {
+			return errors.New("مقدار باقی‌مانده و معامله‌شده با تعداد کل سفارش سازگار نیست")
 		}
 		old := *order
 		if traded == order.Quantity && remaining == 0 {
