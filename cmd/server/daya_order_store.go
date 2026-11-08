@@ -93,6 +93,61 @@ func (s *Store) completeAPIOrder(id string, outcome DayaOrderOutcome) error {
 	return errors.New("سفارش پیدا نشد")
 }
 
+
+func (s *Store) reconcileAPIOrder(id, resolution, brokerOrderID, message string, now time.Time) error {
+	id = strings.TrimSpace(id)
+	brokerOrderID = strings.TrimSpace(brokerOrderID)
+	message = strings.TrimSpace(message)
+	if id == "" {
+		return errors.New("شناسه سفارش محلی الزامی است")
+	}
+	if len(brokerOrderID) > 128 || len(message) > 1000 {
+		return errors.New("شناسه یا توضیح نتیجه بررسی بیش از حد مجاز است")
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	for i := range s.orders {
+		order := &s.orders[i]
+		if order.ID != id {
+			continue
+		}
+		if order.ExecutionMode != executionModeAPI || order.Status != statusSubmissionUnknown {
+			return errors.New("فقط سفارش API با نتیجه نامشخص قابل تطبیق دستی است")
+		}
+		old := *order
+		switch resolution {
+		case "registered":
+			if brokerOrderID == "" {
+				return errors.New("برای تأیید ثبت سفارش، شناسه سفارش دایا را وارد کنید")
+			}
+			order.Status = statusSubmitted
+			order.BrokerOrderID = brokerOrderID
+			if message == "" {
+				message = "ثبت سفارش پس از بررسی دستی در پنل دایا تأیید شد."
+			}
+		case "rejected":
+			if brokerOrderID != "" {
+				return errors.New("برای نتیجه ردشده نباید شناسه سفارش ثبت‌شده وارد شود")
+			}
+			order.Status = statusSubmissionFailed
+			if message == "" {
+				message = "پس از بررسی دستی در پنل دایا، ثبت سفارش تأیید نشد."
+			}
+		default:
+			return errors.New("نتیجه بررسی دستی معتبر نیست")
+		}
+		order.BrokerMessage = message
+		order.BrokerResponseAt = now
+		order.UpdatedAt = now
+		if err := s.saveLocked(); err != nil {
+			*order = old
+			return err
+		}
+		return nil
+	}
+	return errors.New("سفارش پیدا نشد")
+}
+
 func (s *Store) recoverInterruptedAPIOrders(now time.Time) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
