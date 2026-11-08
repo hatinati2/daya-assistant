@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -20,6 +21,7 @@ type DayaOrderDispatcher struct {
 	http                  *http.Client
 	liveEnabled           func() bool
 	now                   func() time.Time
+	pendingMu             sync.Mutex
 	nextPendingPoll       time.Time
 	pendingPollInterval   func() (time.Duration, error)
 	pendingPollingStopped bool
@@ -359,8 +361,25 @@ func fetchDayaOrders(ctx context.Context, client *http.Client, session DayaSessi
 
 // reconcilePendingOrders checks the read-only GET /orders endpoint for a
 // matching CONFIRMATION/BOOKED record. It never resends the POST.
+// ResumePendingPolling is called only after an operator completes a fresh
+// Daya CAPTCHA login. It re-enables read-only confirmation checks, never POST.
+func (d *DayaOrderDispatcher) ResumePendingPolling() {
+	if d == nil {
+		return
+	}
+	d.pendingMu.Lock()
+	defer d.pendingMu.Unlock()
+	d.pendingPollingStopped = false
+	d.nextPendingPoll = time.Time{}
+}
+
 func (d *DayaOrderDispatcher) reconcilePendingOrders(ctx context.Context) error {
-	if d == nil || d.store == nil || d.credentials == nil || d.pendingPollingStopped {
+	if d == nil || d.store == nil || d.credentials == nil {
+		return nil
+	}
+	d.pendingMu.Lock()
+	defer d.pendingMu.Unlock()
+	if d.pendingPollingStopped {
 		return nil
 	}
 	pending := d.store.pendingAPIOrders()
@@ -387,9 +406,11 @@ func (d *DayaOrderDispatcher) reconcilePendingOrders(ctx context.Context) error 
 
 	session, _, err := d.credentials.LoadAccessSession()
 	if err != nil || session.Token == "" {
-		return fmt.Errorf("no authenticated Daya session is available for read-only order confirmation")
+		d.pendingPollingStopped = true
+		return fmt.Errorf("no authenticated Daya session is available for read-only order confirmation; manual login is required")
 	}
 	if !session.ExpiresAt.IsZero() && !session.ExpiresAt.After(now) {
+		d.pendingPollingStopped = true
 		return fmt.Errorf("Daya session expired before pending order confirmation; manual login is required")
 	}
 
@@ -403,8 +424,9 @@ func (d *DayaOrderDispatcher) reconcilePendingOrders(ctx context.Context) error 
 		return fmt.Errorf("Daya rate limited order-list checks; pending orders require manual review")
 	}
 	if status == http.StatusUnauthorized || status == http.StatusForbidden {
-		d.nextPendingPoll = now.Add(7 * time.Minute)
-		return fmt.Errorf("Daya session rejected read-only order-list check; manual login is required")
+		d.pendingPollingStopped = true
+		d.nextPendingPoll = time.Time{}
+		return fmt.Errorf("Daya session rejected read-only order-list check; confirmation polling stopped until manual login")
 	}
 	if status < 200 || status >= 300 {
 		d.nextPendingPoll = now.Add(7 * time.Minute)
