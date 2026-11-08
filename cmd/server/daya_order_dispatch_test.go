@@ -234,3 +234,25 @@ func TestResumePendingPollingDoesNotOverrideRateLimitStop(t *testing.T) {
 		t.Fatal("rate-limit stop must retain its stopped state")
 	}
 }
+
+func TestDayaBookedRecordWithBrokerErrorIsNotConfirmed(t *testing.T) {
+	expected := Order{ExecutionMode: executionModeAPI, ISIN: "IRT1FPAF0001", Side: "buy", Price: 9707, Quantity: 617}
+	body := []byte(`{
+		"orderFunction":"CONFIRMATION",
+		"orderStatus":"BOOKED",
+		"orderId":12345,
+		"hostOrderNumber":6789,
+		"instrumentId":"IRT1FPAF0001",
+		"orderPrice":9707,
+		"orderQuantity":617,
+		"orderValidityType":"JUST_TODAY",
+		"orderSide":"BUY",
+		"orderValidityDate":null,
+		"errorCode":400,
+		"errorText":"rejected"
+	}`)
+	got := classifyDayaOrderResponseForOrder(http.StatusOK, body, &expected)
+	if got.Status != statusSubmissionUnknown || got.BrokerOrderID != "" {
+		t.Fatalf("confirmation with broker error was accepted: %#v", got)
+	}
+}
