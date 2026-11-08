@@ -58,33 +58,17 @@ type DayaOrderOutcome struct {
 	RequestID             string
 	BrokerOrderID         string
 	BrokerHostOrderNumber int64
-	MatchedQuantity       *int64
-	TradedQuantity        *int64
-	TradedPrice           *int64
-	RemainingQuantity     *int64
 	Message               string
 	ReceivedAt            time.Time
-	ExecutionAt           time.Time
-}
-
-func (o DayaOrderOutcome) hasExecutionProgress() bool {
-	return o.MatchedQuantity != nil || o.TradedQuantity != nil ||
-		o.TradedPrice != nil || o.RemainingQuantity != nil
 }
 
 func (s *Store) completeAPIOrder(id string, outcome DayaOrderOutcome) error {
-	switch outcome.Status {
-	case statusSubmitted, statusSubmissionPending, statusPartiallyFilled, statusFilled,
-		statusSubmissionFailed, statusSubmissionUnknown:
-	default:
+	if outcome.Status != statusSubmitted && outcome.Status != statusSubmissionPending && outcome.Status != statusSubmissionFailed && outcome.Status != statusSubmissionUnknown {
 		return errors.New("وضعیت نهایی ارسال سفارش نامعتبر است")
 	}
-	if (outcome.Status == statusSubmitted || outcome.Status == statusSubmissionPending ||
-		outcome.Status == statusPartiallyFilled || outcome.Status == statusFilled) &&
-		strings.TrimSpace(outcome.BrokerOrderID) == "" {
+	if (outcome.Status == statusSubmitted || outcome.Status == statusSubmissionPending) && strings.TrimSpace(outcome.BrokerOrderID) == "" {
 		return errors.New("برای تأیید ثبت سفارش، شناسه سفارش دایا الزامی است")
 	}
-
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	for i := range s.orders {
@@ -92,90 +76,19 @@ func (s *Store) completeAPIOrder(id string, outcome DayaOrderOutcome) error {
 		if order.ID != id {
 			continue
 		}
-		if order.ExecutionMode != executionModeAPI {
+		validSourceState := order.Status == statusSubmitting ||
+			(order.Status == statusSubmissionPending && outcome.Status == statusSubmitted)
+		if !validSourceState || order.ExecutionMode != executionModeAPI {
 			return errors.New("سفارش در وضعیت معتبر برای ثبت نتیجه API نیست")
 		}
-		if order.Status == statusFilled {
-			return nil
-		}
-		for _, value := range []*int64{
-			outcome.MatchedQuantity, outcome.TradedQuantity, outcome.RemainingQuantity, outcome.TradedPrice,
-		} {
-			if value != nil && *value < 0 {
-				return errors.New("مقادیر اجرای سفارش نمی‌توانند منفی باشند")
-			}
-		}
-		for _, value := range []*int64{
-			outcome.MatchedQuantity, outcome.TradedQuantity, outcome.RemainingQuantity,
-		} {
-			if value != nil && *value > order.Quantity {
-				return errors.New("مقدار اجرای سفارش از تعداد کل سفارش بیشتر است")
-			}
-		}
-		if outcome.Status == statusPartiallyFilled &&
-			(outcome.TradedQuantity == nil || *outcome.TradedQuantity <= 0 || *outcome.TradedQuantity >= order.Quantity) {
-			return errors.New("برای وضعیت معامله جزئی، مقدار معامله‌شده باید بین صفر و تعداد کل سفارش باشد")
-		}
-		if outcome.Status == statusFilled &&
-			(outcome.TradedQuantity == nil || *outcome.TradedQuantity != order.Quantity) {
-			return errors.New("تکمیل سفارش فقط با معامله‌شدن کل تعداد سفارش تأیید می‌شود")
-		}
-
-		initialResult := order.Status == statusSubmitting
-		bookedResult := order.Status == statusSubmissionPending &&
-			(outcome.Status == statusSubmitted || outcome.Status == statusPartiallyFilled || outcome.Status == statusFilled)
-		executionUpdate := (order.Status == statusSubmitted || order.Status == statusPartiallyFilled) &&
-			outcome.hasExecutionProgress() &&
-			(outcome.Status == statusSubmitted || outcome.Status == statusPartiallyFilled || outcome.Status == statusFilled)
-		if !initialResult && !bookedResult && !executionUpdate {
-			return errors.New("سفارش در وضعیت معتبر برای ثبت نتیجه API نیست")
-		}
-
-		// Broker counters are cumulative. Ignore an older snapshot rather than
-		// rolling back a partial fill already persisted locally.
-		if order.BrokerExecutionKnown && outcome.TradedQuantity != nil &&
-			* outcome.TradedQuantity < order.BrokerTradedQuantity {
-			return nil
-		}
-
 		old := *order
-		if order.Status == statusPartiallyFilled && outcome.Status == statusSubmitted {
-			// A delayed/stale BOOKED snapshot must not hide an earlier partial fill.
-			outcome.Status = statusPartiallyFilled
-		}
 		order.Status = outcome.Status
-		if brokerID := strings.TrimSpace(outcome.BrokerOrderID); brokerID != "" {
-			order.BrokerOrderID = brokerID
-		}
-		if outcome.BrokerHostOrderNumber > 0 {
-			order.BrokerHostOrderNumber = outcome.BrokerHostOrderNumber
-		}
+		order.BrokerOrderID = strings.TrimSpace(outcome.BrokerOrderID)
+		order.BrokerHostOrderNumber = outcome.BrokerHostOrderNumber
 		order.BrokerRequestID = strings.TrimSpace(outcome.RequestID)
 		order.BrokerHTTPStatus = outcome.HTTPStatus
 		order.BrokerMessage = outcome.Message
 		order.BrokerResponseAt = outcome.ReceivedAt
-		if outcome.MatchedQuantity != nil {
-			order.BrokerMatchedQuantity = *outcome.MatchedQuantity
-			order.BrokerExecutionKnown = true
-		}
-		if outcome.TradedQuantity != nil {
-			order.BrokerTradedQuantity = *outcome.TradedQuantity
-			order.BrokerExecutionKnown = true
-		}
-		if outcome.TradedPrice != nil {
-			order.BrokerTradedPrice = *outcome.TradedPrice
-			order.BrokerExecutionKnown = true
-		}
-		if outcome.RemainingQuantity != nil {
-			order.BrokerRemainingQuantity = *outcome.RemainingQuantity
-			order.BrokerExecutionKnown = true
-		}
-		if order.BrokerExecutionKnown {
-			order.BrokerExecutionAt = outcome.ExecutionAt
-			if order.BrokerExecutionAt.IsZero() {
-				order.BrokerExecutionAt = outcome.ReceivedAt
-			}
-		}
 		order.UpdatedAt = outcome.ReceivedAt
 		if order.UpdatedAt.IsZero() {
 			order.UpdatedAt = time.Now().In(tehran())
@@ -195,24 +108,6 @@ func (s *Store) pendingAPIOrders() []Order {
 	out := make([]Order, 0)
 	for _, order := range s.orders {
 		if order.ExecutionMode == executionModeAPI && order.Status == statusSubmissionPending && order.BrokerOrderID != "" {
-			out = append(out, order)
-		}
-	}
-	return out
-}
-
-// monitoredAPIOrders includes ENTRY acknowledgements and broker-BOOKED orders
-// that are still waiting for a counterparty or have only partially traded.
-func (s *Store) monitoredAPIOrders() []Order {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	out := make([]Order, 0)
-	for _, order := range s.orders {
-		if order.ExecutionMode != executionModeAPI || strings.TrimSpace(order.BrokerOrderID) == "" {
-			continue
-		}
-		switch order.Status {
-		case statusSubmissionPending, statusSubmitted, statusPartiallyFilled:
 			out = append(out, order)
 		}
 	}
