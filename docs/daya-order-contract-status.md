@@ -94,9 +94,9 @@ The operator clarified that `BOOKED` means the order is registered in the order 
 
 ## Current implementation facts
 
-- `dayaOrderAPICapable()` intentionally remains `false`; the API execution option is disabled.
-- A server-side dispatcher is now wired to the scheduler, but it exits before loading credentials or making any network request while the capability gate is closed.
-- The dormant dispatch path builds a POST using the fixed Daya endpoint and allowlisted session cookies only; redirects are not followed.
+- `dayaOrderAPICapable()` returns true only when `DAYA_PREVIEW_MODE=true`; both manual API orders and scheduled API dispatch are enabled in the isolated Preview service, while Production remains fail-closed.
+- The server-side dispatcher is wired to the scheduler and submits due API-mode orders once using the fixed Daya endpoint and allowlisted session cookies only; redirects are not followed.
+- This Preview-only live capability does not change the separate Production service or any Rabin service/configuration/data.
 - Response HTTP status, Daya `requestId` (when returned), response timestamp, and broker message are persisted on the local order and displayed in history.
 - A 4xx response is recorded as a rejection; the observed group-state message is normalized for display. A 2xx response containing an exact matching ENTRY / SENT_TO_TRADING_ENGINE record with an order ID and empty error fields becomes `submission_pending`; it is not marked as booked or executed. A matching CONFIRMATION/BOOKED record with the same broker order ID confirms registration. The read-only GET /orders check stops after this confirmation; execution tracking is out of scope. Other unrecognized 2xx responses remain `submission_unknown`.
 - Network errors, 3xx responses, 5xx responses, and service restarts during submission are treated as ambiguous. Automatic retry is deliberately not performed to avoid duplicate orders.
@@ -106,7 +106,7 @@ The operator clarified that `BOOKED` means the order is registered in the order 
 
 ## Manual Preview test route
 
-The Preview application now exposes a separately operator-triggered one-shot POST test. It is not part of the scheduler or automated CI. The operator manually supplies an exact ISIN, side, price and quantity, then confirms the live POST in the browser and with a required checkbox. The request is persisted in Preview history before the network call, is sent only once, and an ambiguous result is never retried automatically. A matching ENTRY can be checked once immediately through read-only GET /orders and then only until BOOKED. Scheduled API dispatch remains disabled.
+The Preview application exposes a separately operator-triggered one-shot POST test in addition to scheduled API dispatch. The operator manually supplies an exact ISIN, side, price and quantity, then confirms the live POST in the browser and with a required checkbox. The request is persisted in Preview history before the network call, is sent only once, and an ambiguous result is never retried automatically. A matching ENTRY can be checked once immediately through read-only GET /orders and then only until BOOKED. Scheduled API orders use the same one-shot POST transport and conservative outcome handling; ambiguous submissions are never automatically retried.
 
 ## Test interpretation
 
