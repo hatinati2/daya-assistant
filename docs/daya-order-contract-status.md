@@ -40,24 +40,13 @@ On 2026-11-08, a manual order attempt in the Daya panel during the reported clos
 
 This matches the earlier observed HTTP 400 group-state rejection. The dispatcher now recognizes this Persian rejection text when returned as plain text as well as through the structured JSON error parser. It still does not imply that all requests made outside trading hours are necessarily discarded or that another endpoint cannot queue an order.
 
-## Observed confirmation record
+## DevTools evidence supplied by the operator
 
-A redacted broker order record supplied by the operator contains `orderFunction=CONFIRMATION`, `orderStatus=BOOKED`, numeric `orderId`, numeric `hostOrderNumber`, and the submitted instrument/price/quantity/side/validity fields. The implementation now recognizes a 2xx confirmation only when the record says `CONFIRMATION` and `BOOKED`, both identifiers are present, and instrument, side, price, quantity, and validity exactly match the local order. Both identifiers are persisted and displayed in order history.
+The operator clarified that the supplied fragments came from different panels of the same Network item named `order` (such as Headers, Payload, and Preview). The fragments show a six-field request payload, an `ENTRY / SENT_TO_TRADING_ENGINE` record with an `orderId` and null `hostOrderNumber`, and a `CONFIRMATION / BOOKED` record with an `orderId` and numeric `hostOrderNumber`.
 
-The sample's source endpoint is not yet established: it may be the immediate POST response or a subsequent order-list result. This record therefore improves the response parser but does not by itself prove the POST response contract.
+The supplied fragments do not independently establish which exact panel contains each record or whether the BOOKED record came from the POST response or a later order-list request. The Network Name label `order` is not the Request URL. Do not claim that POST and GET phases have been proven until the Request URL, Method, Status, and full Response view are checked on that same Network entry.
 
-## Two-stage broker acknowledgement now represented
-
-The operator provided a request payload followed by an `ENTRY / SENT_TO_TRADING_ENGINE` record with a numeric `orderId` and no `hostOrderNumber`, then a later `CONFIRMATION / BOOKED` record with the same `orderId` and a numeric `hostOrderNumber`. The request and records share the same instrument, side, price, quantity, and validity fields.
-
-The dispatcher now:
-- stores the ENTRY `orderId` as a pending broker reference rather than reporting final success;
-- checks read-only `GET /orders` at a randomized 1–7 minute cadence while pending;
-- moves to submitted only when a CONFIRMATION/BOOKED record matches the broker `orderId` and every submitted field;
-- stores both `orderId` and `hostOrderNumber`;
-- never retries the order-creation POST automatically.
-
-The Network label `order` is a browser request name, not proof of the request URL. The full URL and non-secret request headers remain to be verified from the Network Headers panel.
+The code now supports both record shapes conservatively: an exact matching ENTRY acknowledgement becomes pending, and an exact matching CONFIRMATION/BOOKED record with empty error fields is required for final local confirmation. Pending checks use read-only GET `/orders`; that polling path is an implementation assumption to validate, not a fact established by the partial DevTools snippets.
 
 ## Still unverified
 
