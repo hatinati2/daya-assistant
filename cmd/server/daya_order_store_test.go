@@ -66,7 +66,7 @@ func TestCompleteAPIOrderPersistsFinalBrokerResult(t *testing.T) {
 	}
 
 	if err := store.completeAPIOrder("api-1", DayaOrderOutcome{
-		Status: statusSubmitted, BrokerOrderID: "broker-123", RequestID: "request-123",
+		Status: statusSubmitted, BrokerOrderID: "broker-123", BrokerHostOrderNumber: 6789, RequestID: "request-123",
 		HTTPStatus: 201, Message: "ثبت شد", ReceivedAt: now,
 	}); err != nil {
 		t.Fatal(err)
@@ -79,7 +79,7 @@ func TestCompleteAPIOrderPersistsFinalBrokerResult(t *testing.T) {
 	if len(got) != 1 {
 		t.Fatalf("reloaded order count = %d, want 1", len(got))
 	}
-	if got[0].Status != statusSubmitted || got[0].BrokerOrderID != "broker-123" || got[0].BrokerRequestID != "request-123" || got[0].BrokerHTTPStatus != 201 || got[0].BrokerMessage != "ثبت شد" || !got[0].BrokerResponseAt.Equal(now) || !got[0].UpdatedAt.Equal(now) {
+	if got[0].Status != statusSubmitted || got[0].BrokerOrderID != "broker-123" || got[0].BrokerHostOrderNumber != 6789 || got[0].BrokerRequestID != "request-123" || got[0].BrokerHTTPStatus != 201 || got[0].BrokerMessage != "ثبت شد" || !got[0].BrokerResponseAt.Equal(now) || !got[0].UpdatedAt.Equal(now) {
 		t.Fatalf("persisted completion = %#v", got[0])
 	}
 	if err := store.completeAPIOrder("api-1", DayaOrderOutcome{
