@@ -45,7 +45,7 @@ A redacted order record supplied during implementation contains these fields:
 - `orderValidityDate: null`
 - `errorCode: null` and `errorText: null`
 
-This establishes the shape of a confirmation/booked order record from an earlier supplied sample. It has not been correlated with the newly captured POST response or proven to come from a subsequent `GET /orders`. It is therefore retained as a separate observed record shape, not proof of a two-step ENTRY-to-BOOKED lifecycle.
+The operator clarified why the broker `orderId` differs between the ENTRY and BOOKED examples: several test orders were deleted and re-created, so the two samples represent different orders. This is expected and is not evidence of a broken lifecycle. They must not be linked to one another. For an individual order, ENTRY-to-BOOKED reconciliation still requires the same broker `orderId` and matching instrument, side, price, quantity, and validity.
 
 ## Observed order-list request
 
@@ -54,7 +54,7 @@ The operator has now separately selected the `order` resource in the Daya interf
 - `GET https://mg.dayatrader.ir/orders`
 - HTTP `200 OK`
 
-This confirms that `GET /orders` is an actual reachable order-resource request in the browser, not a guessed path. The response Preview/body for this GET has not yet been supplied, so it is not yet confirmed that it contains the earlier `CONFIRMATION / BOOKED` record or that its body uses the direct-object/array shape currently supported by the parser.
+This confirms that `GET /orders` is an actual reachable order-resource request in the browser, not a guessed path. Its Preview contains an array with a `CONFIRMATION / BOOKED` record. The record includes `matchedQuantity`, `tradedQuantity`, `tradedPrice`, and `remainingQuantityOfTheOrder`; the observed sample has zero matched/traded quantity and the full order quantity remaining.
 
 ## Observed post-submit browser requests
 
@@ -74,9 +74,9 @@ The operator clarified that the supplied fragments came from different panels of
 - An order record with `orderFunction: ENTRY`, `orderStatus: SENT_TO_TRADING_ENGINE`, a numeric `orderId`, and `hostOrderNumber: null`.
 - A confirmation-shaped record was also supplied earlier with `orderFunction: CONFIRMATION`, `orderStatus: BOOKED`, a numeric `orderId`, and a numeric `hostOrderNumber`.
 
-The latest full Response panel for the same Network item confirms that the immediate `POST https://mg.dayatrader.ir/orders` response is the ENTRY record (`SENT_TO_TRADING_ENGINE`), with a positive `orderId`, null `hostOrderNumber`, and null error fields. The earlier BOOKED sample is not part of this latest response body; its source and relationship to this POST remain unverified. Do not infer that `GET /orders` necessarily produces the BOOKED sample without capturing that separate request.
+The latest full Response panel for the POST confirms an ENTRY / SENT_TO_TRADING_ENGINE record. The ENTRY and BOOKED examples have different broker order IDs because several test orders were deleted and re-created between captures; they are separate orders and must not be correlated. The separate GET /orders capture independently confirms the BOOKED record shape.
 
-The code can conservatively understand both observed record shapes: a matching ENTRY acknowledgement is represented as `submission_pending`, while only a matching CONFIRMATION/BOOKED record can become locally confirmed. Pending confirmation checks use read-only `GET /orders`; this remains a defensive implementation path, not a verified source for the earlier BOOKED sample.
+The code recognizes a matching ENTRY acknowledgement as `submission_pending` and a matching CONFIRMATION/BOOKED row as order-book registration. Matching requires the same broker `orderId`; the differing IDs in the supplied examples are expected because they came from different re-created orders. Ongoing fill-progress polling and persistence are not yet implemented.
 
 ## Current implementation and gate
 
