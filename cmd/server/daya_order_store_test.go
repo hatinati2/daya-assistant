@@ -229,8 +229,8 @@ func TestAPIOrderMovesFromEntryPendingToBookedConfirmed(t *testing.T) {
 	if err := store.completeAPIOrder("api-pending", booked); err != nil {
 		t.Fatal(err)
 	}
-	if got := store.pendingAPIOrders(); len(got) != 0 {
-		t.Fatalf("confirmed order remained pending: %#v", got)
+	if got := store.pendingAPIOrders(); len(got) != 1 || got[0].Status != statusSubmitted {
+		t.Fatalf("BOOKED order must remain in the execution-progress poll set: %#v", got)
 	}
 	orders := store.snapshot()
 	if len(orders) != 1 || orders[0].Status != statusSubmitted ||
