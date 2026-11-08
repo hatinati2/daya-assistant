@@ -4,6 +4,8 @@ import (
 	"context"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -290,5 +292,69 @@ func TestDayaEntryAcknowledgementAcceptsArrayPreviewShape(t *testing.T) {
 	got = classifyDayaOrderResponseForOrder(http.StatusOK, body, &wrong)
 	if got.Status != statusSubmissionUnknown || got.BrokerOrderID != "" {
 		t.Fatalf("array ENTRY for another order must remain unknown: %#v", got)
+	}
+}
+
+
+func TestReconcilePendingOrdersTracksExecutionAfterBooked(t *testing.T) {
+	now := time.Now().In(tehran())
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet || r.URL.Path != "/orders" {
+			t.Errorf("unexpected request: %s %s", r.Method, r.URL.Path)
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`[{
+			"orderFunction":"CONFIRMATION",
+			"orderStatus":"BOOKED",
+			"orderId":321,
+			"hostOrderNumber":654,
+			"instrumentId":"IRT1FPAF0001",
+			"orderPrice":9707,
+			"orderQuantity":10,
+			"orderValidityType":"JUST_TODAY",
+			"orderSide":"BUY",
+			"orderValidityDate":null,
+			"matchedQuantity":4,
+			"tradedQuantity":4,
+			"tradedPrice":9710,
+			"remainingQuantityOfTheOrder":6,
+			"errorCode":null,
+			"errorText":null
+		}]`))
+	}))
+	defer server.Close()
+
+	dir := t.TempDir()
+	keyPath := filepath.Join(dir, "key")
+	if err := os.WriteFile(keyPath, []byte("01234567890123456789012345678901"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	credentials := NewDayaCredentialStore(dir, keyPath)
+	session := monitorSession()
+	session.ExpiresAt = now.Add(time.Hour)
+	if err := credentials.SaveAccessSession(session); err != nil {
+		t.Fatal(err)
+	}
+
+	store := &Store{path: filepath.Join(dir, "orders.json"), orders: []Order{{
+		ID: "local-order", ExecutionMode: executionModeAPI, Status: statusSubmissionPending,
+		ISIN: "IRT1FPAF0001", Side: "buy", Price: 9707, Quantity: 10, BrokerOrderID: "321",
+	}}}
+	dispatcher := &DayaOrderDispatcher{
+		store: store, credentials: credentials, http: monitorTestClient(server),
+		now: func() time.Time { return now },
+		nextPendingPoll: now.Add(-time.Second),
+		pendingPollInterval: func() (time.Duration, error) { return time.Minute, nil },
+	}
+	if err := dispatcher.reconcilePendingOrders(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	got := store.snapshot()
+	if len(got) != 1 || got[0].Status != statusPartiallyFilled ||
+		got[0].BrokerHostOrderNumber != 654 ||
+		got[0].BrokerTradedQuantity == nil || *got[0].BrokerTradedQuantity != 4 ||
+		got[0].BrokerRemainingQuantity == nil || *got[0].BrokerRemainingQuantity != 6 ||
+		got[0].BrokerTradedPrice == nil || *got[0].BrokerTradedPrice != 9710 {
+		t.Fatalf("BOOKED-to-partial execution was not reconciled: %#v", got)
 	}
 }
