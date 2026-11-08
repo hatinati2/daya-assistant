@@ -6,8 +6,9 @@ This document records only the order request shape observed in browser traffic a
 
 ## Observed request
 
-- Method: `POST`
-- URL: `https://mg.dayatrader.ir/orders`
+- Method: `POST` (confirmed in the latest operator DevTools capture)
+- URL: `https://mg.dayatrader.ir/orders` (confirmed in the same capture)
+- Latest captured HTTP status: `200 OK`
 - Content type observed in local request construction: `application/json`
 - Observed JSON fields:
 
@@ -22,7 +23,7 @@ This document records only the order request shape observed in browser traffic a
 }
 ```
 
-The instrument identifier, price, quantity, side, null validity date, and `JUST_TODAY` value are represented in the local payload builder. The observed side values are `BUY` and `SELL`.
+The instrument identifier, price, quantity, side, null validity date, and `JUST_TODAY` value are represented in the local payload builder. The observed side values are `BUY` and `SELL`. HTTP `200 OK` confirms only that the endpoint returned a successful HTTP status; it does not by itself prove final broker booking.
 
 ## Observed rejection
 
@@ -44,7 +45,7 @@ This matches the earlier observed HTTP 400 group-state rejection. The dispatcher
 
 The operator clarified that the supplied fragments came from different panels of the same Network item named `order` (such as Headers, Payload, and Preview). The fragments show a six-field request payload, an `ENTRY / SENT_TO_TRADING_ENGINE` record with an `orderId` and null `hostOrderNumber`, and a `CONFIRMATION / BOOKED` record with an `orderId` and numeric `hostOrderNumber`.
 
-The supplied fragments do not independently establish which exact panel contains each record or whether the BOOKED record came from the POST response or a later order-list request. The Network Name label `order` is not the Request URL. Do not claim that POST and GET phases have been proven until the Request URL, Method, Status, and full Response view are checked on that same Network entry.
+The supplied fragments do not independently establish whether the BOOKED record came from the POST response or a later order-list request. The Network Name label `order` is not the Request URL. The operator has now confirmed that this Network item used `POST https://mg.dayatrader.ir/orders` and returned HTTP `200 OK`. The exact Response body still needs to be correlated with the ENTRY and BOOKED fragments; do not infer a separate GET phase without a separate Network entry showing it.
 
 The code now supports both record shapes conservatively: an exact matching ENTRY acknowledgement becomes pending, and an exact matching CONFIRMATION/BOOKED record with empty error fields is required for final local confirmation. Pending checks use read-only GET `/orders`; that polling path is an implementation assumption to validate, not a fact established by the partial DevTools snippets.
 
