@@ -91,6 +91,12 @@ The latest full Response panel for the POST confirms an ENTRY / SENT_TO_TRADING_
 
 The code recognizes a matching ENTRY acknowledgement as `submission_pending` and a matching CONFIRMATION/BOOKED row as order-book registration. Matching requires the same broker `orderId`; the differing IDs in the supplied examples are expected because they came from different re-created orders. After BOOKED, no further polling or execution tracking is performed. The broker order ID is used only to confirm the pending ENTRY acknowledgement.
 
+## Manual one-shot live test in Preview
+
+A separate operator-triggered form at `/daya-online-test/one` sends one real `POST /orders` using the encrypted Preview session only after the operator enters the exact ISIN, side, price, quantity, checks the explicit acknowledgement, and confirms the browser dialog. It creates a local history record first, does not schedule the order, and does not use the background dispatcher. A nonce prevents accidental replay of the same form; an ambiguous POST is never retried automatically. If the POST returns a matching ENTRY acknowledgement, the page makes at most one immediate read-only `GET /orders` check for the same broker order ID and matching fields; the existing pending-confirmation process may continue only until BOOKED. After BOOKED, tracking stops. The page displays no raw response or credentials.
+
+This manual route is Preview-only and does not change `dayaOrderAPICapable()`; scheduled API dispatch remains disabled. CI and automated tests never send a live POST.
+
 ## Current implementation and gate
 
 - The order model, scheduling, batching, persistence, status lifecycle, calendar, and symbol search are implemented independently of the broker.
