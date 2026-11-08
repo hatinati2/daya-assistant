@@ -15,10 +15,11 @@ func TestClaimReadyAPIOrdersClaimsOnlyEligibleOrders(t *testing.T) {
 	}
 	now := time.Date(2026, time.November, 7, 10, 0, 0, 0, tehran())
 	orders := []Order{
-		{ID: "api-ready", ExecutionMode: executionModeAPI, ISIN: "IR0000000001", Status: statusReady},
-		{ID: "api-without-isin", ExecutionMode: executionModeAPI, Status: statusReady},
+		{ID: "api-ready", ExecutionMode: executionModeAPI, ISIN: "IR0000000001", Status: statusReady, ExecuteAt: now.Add(-time.Minute)},
+		{ID: "api-without-isin", ExecutionMode: executionModeAPI, Status: statusReady, ExecuteAt: now.Add(-time.Minute)},
 		{ID: "manual-ready", ExecutionMode: executionModeManual, Status: statusReady},
-		{ID: "api-scheduled", ExecutionMode: executionModeAPI, ISIN: "IR0000000002", Status: statusScheduled},
+		{ID: "api-scheduled", ExecutionMode: executionModeAPI, ISIN: "IR0000000002", Status: statusScheduled, ExecuteAt: now.Add(-time.Minute)},
+		{ID: "api-future-ready", ExecutionMode: executionModeAPI, ISIN: "IR0000000003", Status: statusReady, ExecuteAt: now.Add(time.Minute)},
 	}
 	if err := store.addMany(orders); err != nil {
 		t.Fatal(err)
@@ -45,8 +46,11 @@ func TestClaimReadyAPIOrdersClaimsOnlyEligibleOrders(t *testing.T) {
 	if got["api-without-isin"].Status != statusSubmissionFailed {
 		t.Errorf("API order without ISIN status = %q, want %q", got["api-without-isin"].Status, statusSubmissionFailed)
 	}
-	if got["manual-ready"].Status != statusReady || got["api-scheduled"].Status != statusScheduled {
-		t.Errorf("ineligible orders were changed: manual=%q scheduled=%q", got["manual-ready"].Status, got["api-scheduled"].Status)
+	if got["manual-ready"].Status != statusReady || got["api-scheduled"].Status != statusScheduled || got["api-future-ready"].Status != statusReady {
+		t.Errorf("ineligible orders were changed: manual=%q scheduled=%q future-ready=%q", got["manual-ready"].Status, got["api-scheduled"].Status, got["api-future-ready"].Status)
+	}
+	if !got["api-future-ready"].AttemptedAt.IsZero() {
+		t.Errorf("future API order was claimed early at %s", got["api-future-ready"].AttemptedAt)
 	}
 }
 
