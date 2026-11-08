@@ -45,9 +45,12 @@ type Order struct {
 	ExecuteAt     time.Time `json:"execute_at"`
 	ExecutionMode string    `json:"execution_mode,omitempty"`
 	Status        string    `json:"status"`
-	BrokerOrderID string    `json:"broker_order_id,omitempty"`
-	BrokerMessage string    `json:"broker_message,omitempty"`
-	AttemptedAt   time.Time `json:"attempted_at,omitempty"`
+	BrokerOrderID    string    `json:"broker_order_id,omitempty"`
+	BrokerRequestID  string    `json:"broker_request_id,omitempty"`
+	BrokerHTTPStatus int       `json:"broker_http_status,omitempty"`
+	BrokerResponseAt time.Time `json:"broker_response_at,omitempty"`
+	BrokerMessage    string    `json:"broker_message,omitempty"`
+	AttemptedAt      time.Time `json:"attempted_at,omitempty"`
 	CreatedAt     time.Time `json:"created_at"`
 	UpdatedAt     time.Time `json:"updated_at"`
 }
