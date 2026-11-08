@@ -33,7 +33,6 @@ type DayaSessionMonitor struct {
 	state       DayaMonitorSnapshot
 	cancel      context.CancelFunc
 	interval    func() (time.Duration, error)
-	windowCheck func(time.Time) (bool, time.Duration)
 	update      func(DayaSession) error
 }
 
@@ -46,7 +45,7 @@ func NewDayaSessionMonitor(client *http.Client) *DayaSessionMonitor {
 			},
 		}
 	}
-	return &DayaSessionMonitor{http: client, interval: dayaRandomInterval, windowCheck: dayaMonitorWindow}
+	return &DayaSessionMonitor{http: client, interval: dayaRandomInterval}
 }
 
 func (m *DayaSessionMonitor) SetSessionUpdater(update func(DayaSession) error) {
@@ -63,17 +62,6 @@ func dayaRandomInterval() (time.Duration, error) {
 	n := binary.BigEndian.Uint64(b[:])
 	span := uint64((dayaMonitorMax-dayaMonitorMin)/time.Second) + 1
 	return dayaMonitorMin + time.Duration(n%span)*time.Second, nil
-}
-
-// dayaMonitorWindow uses Tehran local time: 15:30 inclusive until 02:00 exclusive.
-func dayaMonitorWindow(now time.Time) (bool, time.Duration) {
-	local := now.In(tehran())
-	minutes := local.Hour()*60 + local.Minute()
-	if minutes >= 15*60+30 || minutes < 2*60 {
-		return true, 0
-	}
-	nextStart := time.Date(local.Year(), local.Month(), local.Day(), 15, 30, 0, 0, tehran())
-	return false, nextStart.Sub(local)
 }
 
 func (m *DayaSessionMonitor) Start(parent context.Context, session DayaSession) error {
@@ -116,15 +104,10 @@ func (m *DayaSessionMonitor) Snapshot() DayaMonitorSnapshot {
 
 func (m *DayaSessionMonitor) run(ctx context.Context, session DayaSession) {
 	for {
-		now := time.Now()
-		inWindow, delay := m.windowCheck(now)
-		if inWindow {
-			var err error
-			delay, err = m.interval()
-			if err != nil {
-				m.Stop(false, "تولید فاصله بررسی ناموفق بود")
-				return
-			}
+		delay, err := m.interval()
+		if err != nil {
+			m.Stop(false, "تولید فاصله بررسی ناموفق بود")
+			return
 		}
 		if !session.ExpiresAt.IsZero() {
 			untilExpiry := time.Until(session.ExpiresAt)
@@ -149,10 +132,6 @@ func (m *DayaSessionMonitor) run(ctx context.Context, session DayaSession) {
 		if !session.ExpiresAt.IsZero() && !time.Now().Before(session.ExpiresAt) {
 			m.Stop(true, "زمان اعتبار نشست به پایان رسیده است؛ ورود دستی لازم است")
 			return
-		}
-		inWindow, _ = m.windowCheck(time.Now())
-		if !inWindow {
-			continue
 		}
 
 		req, err := http.NewRequestWithContext(ctx, http.MethodGet, dayaOrdersURL, nil)
