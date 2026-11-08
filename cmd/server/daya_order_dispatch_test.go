@@ -256,3 +256,39 @@ func TestDayaBookedRecordWithBrokerErrorIsNotConfirmed(t *testing.T) {
 		t.Fatalf("confirmation with broker error was accepted: %#v", got)
 	}
 }
+
+func TestDayaEntryAcknowledgementAcceptsArrayPreviewShape(t *testing.T) {
+	expected := Order{
+		ExecutionMode: executionModeAPI,
+		ISIN:          "IRT1FPAF0001",
+		Side:          "buy",
+		Price:         9707,
+		Quantity:      617,
+	}
+	body := []byte(`[{
+		"orderFunction":"ENTRY",
+		"orderStatus":"SENT_TO_TRADING_ENGINE",
+		"orderId":1787906,
+		"hostOrderNumber":null,
+		"instrumentId":"IRT1FPAF0001",
+		"orderPrice":9707,
+		"orderQuantity":617,
+		"orderValidityType":"JUST_TODAY",
+		"orderSide":"BUY",
+		"orderValidityDate":null,
+		"errorCode":null,
+		"errorText":null
+	}]`)
+
+	got := classifyDayaOrderResponseForOrder(http.StatusOK, body, &expected)
+	if got.Status != statusSubmissionPending || got.BrokerOrderID != "1787906" || got.BrokerHostOrderNumber != 0 {
+		t.Fatalf("array ENTRY Preview must be pending, got %#v", got)
+	}
+
+	wrong := expected
+	wrong.Quantity++
+	got = classifyDayaOrderResponseForOrder(http.StatusOK, body, &wrong)
+	if got.Status != statusSubmissionUnknown || got.BrokerOrderID != "" {
+		t.Fatalf("array ENTRY for another order must remain unknown: %#v", got)
+	}
+}
