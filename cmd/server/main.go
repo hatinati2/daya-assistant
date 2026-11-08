@@ -39,30 +39,30 @@ const (
 )
 
 type Order struct {
-	ID                    string    `json:"id"`
-	Symbol                string    `json:"symbol"`
-	ISIN                  string    `json:"isin,omitempty"`
-	Side                  string    `json:"side"`
-	Price                 int64     `json:"price"`
-	Quantity              int64     `json:"quantity"`
-	ExecuteAt             time.Time `json:"execute_at"`
-	ExecutionMode         string    `json:"execution_mode,omitempty"`
-	Status                string    `json:"status"`
-	BrokerOrderID         string    `json:"broker_order_id,omitempty"`
-	BrokerHostOrderNumber int64     `json:"broker_host_order_number,omitempty"`
-	BrokerRequestID       string    `json:"broker_request_id,omitempty"`
-	BrokerHTTPStatus      int       `json:"broker_http_status,omitempty"`
-	BrokerResponseAt      time.Time `json:"broker_response_at,omitempty"`
-	ReconciledAt          time.Time `json:"reconciled_at,omitempty"`
-	BrokerMessage         string    `json:"broker_message,omitempty"`
+	ID                      string    `json:"id"`
+	Symbol                  string    `json:"symbol"`
+	ISIN                    string    `json:"isin,omitempty"`
+	Side                    string    `json:"side"`
+	Price                   int64     `json:"price"`
+	Quantity                int64     `json:"quantity"`
+	ExecuteAt               time.Time `json:"execute_at"`
+	ExecutionMode           string    `json:"execution_mode,omitempty"`
+	Status                  string    `json:"status"`
+	BrokerOrderID           string    `json:"broker_order_id,omitempty"`
+	BrokerHostOrderNumber   int64     `json:"broker_host_order_number,omitempty"`
+	BrokerRequestID         string    `json:"broker_request_id,omitempty"`
+	BrokerHTTPStatus        int       `json:"broker_http_status,omitempty"`
+	BrokerResponseAt        time.Time `json:"broker_response_at,omitempty"`
+	ReconciledAt            time.Time `json:"reconciled_at,omitempty"`
+	BrokerMessage           string    `json:"broker_message,omitempty"`
 	BrokerMatchedQuantity   *int64    `json:"broker_matched_quantity,omitempty"`
 	BrokerTradedQuantity    *int64    `json:"broker_traded_quantity,omitempty"`
 	BrokerTradedPrice       *int64    `json:"broker_traded_price,omitempty"`
 	BrokerRemainingQuantity *int64    `json:"broker_remaining_quantity,omitempty"`
 	BrokerProgressAt        time.Time `json:"broker_progress_at,omitempty"`
-	AttemptedAt           time.Time `json:"attempted_at,omitempty"`
-	CreatedAt             time.Time `json:"created_at"`
-	UpdatedAt             time.Time `json:"updated_at"`
+	AttemptedAt             time.Time `json:"attempted_at,omitempty"`
+	CreatedAt               time.Time `json:"created_at"`
+	UpdatedAt               time.Time `json:"updated_at"`
 }
 
 type Store struct {
