@@ -46,6 +46,19 @@ A redacted broker order record supplied by the operator contains `orderFunction=
 
 The sample's source endpoint is not yet established: it may be the immediate POST response or a subsequent order-list result. This record therefore improves the response parser but does not by itself prove the POST response contract.
 
+## Two-stage broker acknowledgement now represented
+
+The operator provided a request payload followed by an `ENTRY / SENT_TO_TRADING_ENGINE` record with a numeric `orderId` and no `hostOrderNumber`, then a later `CONFIRMATION / BOOKED` record with the same `orderId` and a numeric `hostOrderNumber`. The request and records share the same instrument, side, price, quantity, and validity fields.
+
+The dispatcher now:
+- stores the ENTRY `orderId` as a pending broker reference rather than reporting final success;
+- checks read-only `GET /orders` at a randomized 1–7 minute cadence while pending;
+- moves to submitted only when a CONFIRMATION/BOOKED record matches the broker `orderId` and every submitted field;
+- stores both `orderId` and `hostOrderNumber`;
+- never retries the order-creation POST automatically.
+
+The Network label `order` is a browser request name, not proof of the request URL. The full URL and non-secret request headers remain to be verified from the Network Headers panel.
+
 ## Still unverified
 
 - Full required headers and authentication requirements for order creation.
