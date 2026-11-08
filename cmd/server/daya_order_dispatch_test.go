@@ -206,16 +206,31 @@ func TestFetchDayaOrdersIsReadOnlyAndUsesSessionCookies(t *testing.T) {
 	}
 }
 
-func TestResumePendingPollingClearsStopAndSchedule(t *testing.T) {
+func TestResumePendingPollingClearsAuthenticationStopAndSchedule(t *testing.T) {
+	d := &DayaOrderDispatcher{
+		pendingPollingStopped:    true,
+		pendingPollingNeedsLogin: true,
+		nextPendingPoll:          time.Now().Add(time.Hour),
+	}
+	d.ResumePendingPolling()
+	if d.pendingPollingStopped || d.pendingPollingNeedsLogin {
+		t.Fatal("fresh login must resume an authentication-stopped read-only poll")
+	}
+	if !d.nextPendingPoll.IsZero() {
+		t.Fatalf("pending poll schedule was not reset: %v", d.nextPendingPoll)
+	}
+}
+
+func TestResumePendingPollingDoesNotOverrideRateLimitStop(t *testing.T) {
 	d := &DayaOrderDispatcher{
 		pendingPollingStopped: true,
 		nextPendingPoll:       time.Now().Add(time.Hour),
 	}
 	d.ResumePendingPolling()
-	if d.pendingPollingStopped {
-		t.Fatal("fresh login must resume read-only confirmation polling")
+	if !d.pendingPollingStopped {
+		t.Fatal("fresh login must not override a 429 rate-limit stop")
 	}
-	if !d.nextPendingPoll.IsZero() {
-		t.Fatalf("pending poll schedule was not reset: %v", d.nextPendingPoll)
+	if d.nextPendingPoll.IsZero() {
+		t.Fatal("rate-limit stop must retain its stopped state")
 	}
 }
