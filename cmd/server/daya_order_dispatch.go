@@ -175,14 +175,14 @@ func postDayaOrder(ctx context.Context, client *http.Client, session DayaSession
 // It may be returned directly or as an array. It is not assumed to be the
 // immediate POST response unless it matches the exact submitted order.
 type dayaOrderConfirmationRecord struct {
-	OrderFunction     string  `json:"orderFunction"`
-	OrderStatus       string  `json:"orderStatus"`
-	OrderID           int64   `json:"orderId"`
-	HostOrderNumber   int64   `json:"hostOrderNumber"`
-	InstrumentID      string  `json:"instrumentId"`
-	OrderPrice        int64   `json:"orderPrice"`
-	OrderQuantity     int64   `json:"orderQuantity"`
-	OrderSide         string  `json:"orderSide"`
+	OrderFunction     string          `json:"orderFunction"`
+	OrderStatus       string          `json:"orderStatus"`
+	OrderID           int64           `json:"orderId"`
+	HostOrderNumber   int64           `json:"hostOrderNumber"`
+	InstrumentID      string          `json:"instrumentId"`
+	OrderPrice        int64           `json:"orderPrice"`
+	OrderQuantity     int64           `json:"orderQuantity"`
+	OrderSide         string          `json:"orderSide"`
 	OrderValidityType string          `json:"orderValidityType"`
 	OrderValidityDate *string         `json:"orderValidityDate"`
 	ErrorCode         json.RawMessage `json:"errorCode"`
