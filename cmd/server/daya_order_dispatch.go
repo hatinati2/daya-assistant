@@ -18,8 +18,11 @@ type DayaOrderDispatcher struct {
 	store       *Store
 	credentials *DayaCredentialStore
 	http        *http.Client
-	liveEnabled func() bool
-	now         func() time.Time
+	liveEnabled          func() bool
+	now                  func() time.Time
+	nextPendingPoll      time.Time
+	pendingPollInterval  func() (time.Duration, error)
+	pendingPollingStopped bool
 }
 
 func NewDayaOrderDispatcher(store *Store, credentials *DayaCredentialStore) *DayaOrderDispatcher {
@@ -32,8 +35,9 @@ func NewDayaOrderDispatcher(store *Store, credentials *DayaCredentialStore) *Day
 	}
 	return &DayaOrderDispatcher{
 		store: store, credentials: credentials, http: client,
-		liveEnabled: dayaOrderAPICapable,
-		now:         func() time.Time { return time.Now().In(tehran()) },
+		liveEnabled:         dayaOrderAPICapable,
+		now:                 func() time.Time { return time.Now().In(tehran()) },
+		pendingPollInterval: dayaRandomInterval,
 	}
 }
 
@@ -50,6 +54,9 @@ func (d *DayaOrderDispatcher) Run(ctx context.Context) {
 		case <-ticker.C:
 			if err := d.dispatchReady(ctx); err != nil {
 				log.Printf("Daya order dispatcher: %v", err)
+			}
+			if err := d.reconcilePendingOrders(ctx); err != nil {
+				log.Printf("Daya pending-order confirmation: %v", err)
 			}
 		}
 	}
@@ -201,9 +208,7 @@ func decodeDayaConfirmationRecords(body []byte) []dayaOrderConfirmationRecord {
 }
 
 func dayaConfirmationMatches(record dayaOrderConfirmationRecord, expected *Order) bool {
-	if expected == nil || record.OrderFunction != "CONFIRMATION" ||
-		record.OrderStatus != "BOOKED" || record.OrderID <= 0 ||
-		record.HostOrderNumber <= 0 {
+	if expected == nil || record.OrderID <= 0 {
 		return false
 	}
 
@@ -224,6 +229,21 @@ func dayaConfirmationMatches(record dayaOrderConfirmationRecord, expected *Order
 		return false
 	}
 	return record.OrderSide == wantSide
+}
+
+func dayaBookedConfirmationMatches(record dayaOrderConfirmationRecord, expected *Order) bool {
+	return record.OrderFunction == "CONFIRMATION" &&
+		record.OrderStatus == "BOOKED" &&
+		record.HostOrderNumber > 0 &&
+		dayaConfirmationMatches(record, expected)
+}
+
+func dayaEntryAcknowledgementMatches(record dayaOrderConfirmationRecord, expected *Order) bool {
+	return record.OrderFunction == "ENTRY" &&
+		record.OrderStatus == "SENT_TO_TRADING_ENGINE" &&
+		record.OrderID > 0 &&
+		record.HostOrderNumber == 0 &&
+	
 }
 
 // classifyDayaOrderResponse keeps the legacy no-context call fail-closed.
@@ -248,11 +268,17 @@ func classifyDayaOrderResponseForOrder(status int, body []byte, expected *Order)
 	switch {
 	case status >= 200 && status < 300:
 		for _, record := range decodeDayaConfirmationRecords(body) {
-			if dayaConfirmationMatches(record, expected) {
+			if dayaBookedConfirmationMatches(record, expected) {
 				outcome.Status = statusSubmitted
 				outcome.BrokerOrderID = fmt.Sprintf("%d", record.OrderID)
 				outcome.BrokerHostOrderNumber = record.HostOrderNumber
 				outcome.Message = "سفارش با وضعیت BOOKED و تطبیق کامل مشخصات سفارش در پاسخ دایا تأیید شد."
+				return outcome
+			}
+			if dayaEntryAcknowledgementMatches(record, expected) {
+				outcome.Status = statusSubmissionPending
+				outcome.BrokerOrderID = fmt.Sprintf("%d", record.OrderID)
+				outcome.Message = "دایا سفارش را به موتور معاملات تحویل داد؛ در انتظار CONFIRMATION/BOOKED از فهرست سفارش‌ها."
 				return outcome
 			}
 		}
@@ -279,4 +305,125 @@ func classifyDayaOrderResponseForOrder(status int, body []byte, expected *Order)
 		outcome.Message = message + " قبل از هر ارسال مجدد، وضعیت سفارش را در کارگزاری بررسی کنید."
 	}
 	return outcome
+}
+
+// fetchDayaOrders reads the broker order list. This is read-only and never
+// submits, changes, or cancels an order.
+func fetchDayaOrders(ctx context.Context, client *http.Client, session DayaSession) (int, []byte, error) {
+	if session.Token == "" {
+		return 0, nil, fmt.Errorf("نشست معتبر دایا موجود نیست")
+	}
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, dayaOrdersURL, nil)
+	if err != nil {
+		return 0, nil, fmt.Errorf("ساخت درخواست خواندن سفارش‌های دایا ناموفق بود")
+	}
+	for _, cookie := range session.Cookies {
+		if (cookie.Name == "token" || cookie.Name == "cookiesession1") && cookie.Value != "" {
+			req.AddCookie(cookie.httpCookie())
+		}
+	}
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("Origin", dayaWebOrigin)
+	req.Header.Set("Referer", dayaWebOrigin+"/")
+	req.Header.Set("x-client-type", "WEB_CLIENT")
+	if client == nil {
+		client = &http.Client{Timeout: 12 * time.Second}
+	}
+	safeClient := *client
+	safeClient.CheckRedirect = func(_ *http.Request, _ []*http.Request) error {
+		return http.ErrUseLastResponse
+	}
+	resp, err := safeClient.Do(req)
+	if err != nil {
+		return 0, nil, fmt.Errorf("خواندن فهرست سفارش‌های دایا ناموفق بود")
+	}
+	defer resp.Body.Close()
+	body, err := io.ReadAll(io.LimitReader(resp.Body, (1<<20)+1))
+	if err != nil || len(body) > 1<<20 {
+		return resp.StatusCode, nil, fmt.Errorf("پاسخ فهرست سفارش‌های دایا نامعتبر یا بیش از حد بزرگ است")
+	}
+	return resp.StatusCode, body, nil
+}
+
+// reconcilePendingOrders checks the read-only GET /orders endpoint for a
+// matching CONFIRMATION/BOOKED record. It never resends the POST.
+func (d *DayaOrderDispatcher) reconcilePendingOrders(ctx context.Context) error {
+	if d == nil || d.store == nil || d.credentials == nil || d.pendingPollingStopped {
+		return nil
+	}
+	pending := d.store.pendingAPIOrders()
+	if len(pending) == 0 {
+		d.nextPendingPoll = time.Time{}
+		return nil
+	}
+	now := d.now()
+	if d.nextPendingPoll.IsZero() {
+		intervalFn := d.pendingPollInterval
+		if intervalFn == nil {
+			intervalFn = dayaRandomInterval
+		}
+		delay, err := intervalFn()
+		if err != nil {
+			return fmt.Errorf("could not schedule pending order confirmation check")
+		}
+		d.nextPendingPoll = now.Add(delay)
+		return nil
+	}
+	if now.Before(d.nextPendingPoll) {
+		return nil
+	}
+
+	session, _, err := d.credentials.LoadAccessSession()
+	if err != nil || session.Token == "" {
+		return fmt.Errorf("no authenticated Daya session is available for read-only order confirmation")
+	}
+	if !session.ExpiresAt.IsZero() && !session.ExpiresAt.After(now) {
+		return fmt.Errorf("Daya session expired before pending order confirmation; manual login is required")
+	}
+
+	status, body, err := fetchDayaOrders(ctx, d.http, session)
+	if err != nil {
+		d.nextPendingPoll = now.Add(7 * time.Minute)
+		return err
+	}
+	if status == http.StatusTooManyRequests {
+		d.pendingPollingStopped = true
+		return fmt.Errorf("Daya rate limited order-list checks; pending orders require manual review")
+	}
+	if status == http.StatusUnauthorized || status == http.StatusForbidden {
+		d.nextPendingPoll = now.Add(7 * time.Minute)
+		return fmt.Errorf("Daya session rejected read-only order-list check; manual login is required")
+	}
+	if status < 200 || status >= 300 {
+		d.nextPendingPoll = now.Add(7 * time.Minute)
+		return fmt.Errorf("Daya order-list returned HTTP %d", status)
+	}
+
+	records := decodeDayaConfirmationRecords(body)
+	for _, order := range pending {
+		for _, record := range records {
+			if record.OrderID != parseBrokerOrderID(order.BrokerOrderID) ||
+				!dayaBookedConfirmationMatches(record, &order) {
+				continue
+			}
+			outcome := DayaOrderOutcome{
+				Status: statusSubmitted, BrokerOrderID: order.BrokerOrderID,
+				BrokerHostOrderNumber: record.HostOrderNumber,
+				HTTPStatus: status, Message: "تأیید نهایی دایا: CONFIRMATION/BOOKED با شناسه منطبق در GET /orders.",
+				ReceivedAt: now,
+			}
+			if err := d.store.completeAPIOrder(order.ID, outcome); err != nil {
+				log.Printf("Daya confirmation persistence failed for local order %q: %v", order.ID, err)
+			}
+			break
+		}
+	}
+	d.nextPendingPoll = time.Time{}
+	return nil
+}
+
+func parseBrokerOrderID(value string) int64 {
+	var id int64
+	_, _ = fmt.Sscan(strings.TrimSpace(value), &id)
+	return id
 }
