@@ -242,7 +242,7 @@ func TestAPIOrderMovesFromEntryPendingToBookedConfirmed(t *testing.T) {
 func TestPendingAPIOrdersIncludesOnlyEntryAcknowledgements(t *testing.T) {
 	store := &Store{orders: []Order{
 		{ID: "entry", ExecutionMode: executionModeAPI, Status: statusSubmissionPending, BrokerOrderID: "1"},
-		{ID: "booked", ExecutionMode: executionModeAPI, Status: statusSubmitted, BrokerOrderID: "2"},undefined
+		{ID: "booked", ExecutionMode: executionModeAPI, Status: statusSubmitted, BrokerOrderID: "2"},
 		{ID: "manual", ExecutionMode: executionModeManual, Status: statusSubmitted, BrokerOrderID: "5"},
 	}}
 	got := store.pendingAPIOrders()
