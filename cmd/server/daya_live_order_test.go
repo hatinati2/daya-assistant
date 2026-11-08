@@ -211,7 +211,7 @@ func submitOneDayaOnlineTestOrder(ctx context.Context, credentials *DayaCredenti
 	status, body, postErr := postDayaOrder(ctx, client, session, order)
 	outcome := DayaOrderOutcome{
 		Status: statusSubmissionUnknown, HTTPStatus: status,
-		Message: "نتیجه POST قطعی نیست؛ وضعیت را در پنل دایا بررسی کن و این سفارش را دوباره نفرست.",
+		Message:    "نتیجه POST قطعی نیست؛ وضعیت را در پنل دایا بررسی کن و این سفارش را دوباره نفرست.",
 		ReceivedAt: time.Now().In(tehran()),
 	}
 	if postErr != nil {
@@ -236,7 +236,7 @@ func submitOneDayaOnlineTestOrder(ctx context.Context, credentials *DayaCredenti
 				booked := DayaOrderOutcome{
 					Status: statusSubmitted, BrokerOrderID: outcome.BrokerOrderID,
 					BrokerHostOrderNumber: record.HostOrderNumber, HTTPStatus: getStatus,
-					Message: "ثبت سفارش در دایا با وضعیت BOOKED تأیید شد.",
+					Message:    "ثبت سفارش در دایا با وضعیت BOOKED تأیید شد.",
 					ReceivedAt: time.Now().In(tehran()),
 				}
 				if err := store.completeAPIOrder(localID, booked); err != nil {
