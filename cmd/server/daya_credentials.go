@@ -121,7 +121,7 @@ button{border:0;border-radius:8px;background:#175cd3;color:#fff;padding:10px 14p
 <p id="daya-monitor-state" class="muted">{{if .Monitor.Running}}پایش فعال است؛ درخواست فقط‌خواندنی GET /orders ارسال می‌شود.{{else if .Monitor.NeedsLogin}}ورود دستی با CAPTCHA لازم است.{{else}}پایش فعال نیست.{{end}}</p>
 <div class="foot">تعداد بررسی‌ها: <b id="daya-monitor-checks">{{.Monitor.Checks}}</b> · آخرین HTTP: <b id="daya-monitor-http">{{if .Monitor.LastStatus}}{{.Monitor.LastStatus}}{{else}}—{{end}}</b></div>
 <div class="foot">آخرین بررسی: <time id="daya-monitor-last">{{if not .Monitor.LastCheck.IsZero}}{{.Monitor.LastCheck.Format "2006-01-02 15:04:05 MST"}}{{else}}—{{end}}</time></div>
-<div class="foot">بررسی بعدی: <time id="daya-monitor-next">{{if not .Monitor.NextCheck.IsZero}}{{.Monitor.NextCheck.Format "2006-01-02 15:04:05 MST"}}{{else}}—{{end}}</time> · پنجره پایش: ۱۵:۳۰ تا ۰۲:۰۰ تهران</div>
+<div class="foot">بررسی بعدی: <time id="daya-monitor-next">{{if not .Monitor.NextCheck.IsZero}}{{.Monitor.NextCheck.Format "2006-01-02 15:04:05 MST"}}{{else}}—{{end}}</time> · پایش شبانه‌روزی با فاصله تصادفی ۱ تا ۷ دقیقه</div>
 <p id="daya-monitor-error" class="foot">{{.Monitor.LastError}}</p>
 </section>
 <section class="note">
