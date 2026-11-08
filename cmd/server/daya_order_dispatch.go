@@ -86,7 +86,7 @@ func (d *DayaOrderDispatcher) dispatchReady(ctx context.Context) error {
 			// Treat it as ambiguous and never retry automatically.
 			outcome.Message = "ارتباط هنگام ارسال قطع شد؛ ممکن است سفارش در دایا ثبت شده باشد. قبل از هر اقدام، وضعیت را در کارگزاری بررسی کنید."
 		} else {
-			outcome = classifyDayaOrderResponse(status, body)
+			outcome = classifyDayaOrderResponseForOrder(status, body, &order)
 			outcome.ReceivedAt = d.now()
 		}
 		if err := d.store.completeAPIOrder(order.ID, outcome); err != nil {
@@ -161,10 +161,79 @@ func postDayaOrder(ctx context.Context, client *http.Client, session DayaSession
 	return resp.StatusCode, body, nil
 }
 
-// classifyDayaOrderResponse deliberately does not equate an arbitrary 2xx with
-// a confirmed order. The successful response schema and final order ID have
-// not yet been verified from broker traffic.
+// dayaOrderConfirmationRecord is the observed order-history/confirmation record.
+// It may be returned directly or as an array. It is not assumed to be the
+// immediate POST response unless it matches the exact submitted order.
+type dayaOrderConfirmationRecord struct {
+	OrderFunction      string  `json:"orderFunction"`
+	OrderStatus        string  `json:"orderStatus"`
+	OrderID            int64   `json:"orderId"`
+	HostOrderNumber    int64   `json:"hostOrderNumber"`
+	InstrumentID       string  `json:"instrumentId"`
+	OrderPrice         int64   `json:"orderPrice"`
+	OrderQuantity      int64   `json:"orderQuantity"`
+	OrderSide          string  `json:"orderSide"`
+	OrderValidityType  string  `json:"orderValidityType"`
+	OrderValidityDate  *string `json:"orderValidityDate"`
+}
+
+// decodeDayaConfirmationRecords accepts only the observed direct object or
+// array shape; unknown envelopes remain ambiguous rather than being guessed.
+func decodeDayaConfirmationRecords(body []byte) []dayaOrderConfirmationRecord {
+	trimmed := strings.TrimSpace(string(body))
+	if trimmed == "" {
+		return nil
+	}
+	if strings.HasPrefix(trimmed, "[") {
+		var records []dayaOrderConfirmationRecord
+		if json.Unmarshal(body, &records) == nil {
+			return records
+		}
+		return nil
+	}
+	if strings.HasPrefix(trimmed, "{") {
+		var record dayaOrderConfirmationRecord
+		if json.Unmarshal(body, &record) == nil {
+			return []dayaOrderConfirmationRecord{record}
+		}
+	}
+	return nil
+}
+
+func dayaConfirmationMatches(record dayaOrderConfirmationRecord, expected *Order) bool {
+	if expected == nil || record.OrderFunction != "CONFIRMATION" ||
+		record.OrderStatus != "BOOKED" || record.OrderID <= 0 ||
+		record.HostOrderNumber <= 0 {
+		return false
+	}
+
+	instrumentID := strings.ToUpper(strings.TrimSpace(expected.ISIN))
+	if record.InstrumentID != instrumentID || record.OrderPrice != expected.Price ||
+		record.OrderQuantity != expected.Quantity || record.OrderValidityType != dayaOrderValidityToday ||
+		record.OrderValidityDate != nil {
+		return false
+	}
+
+	wantSide := ""
+	switch strings.ToLower(strings.TrimSpace(expected.Side)) {
+	case "buy":
+		wantSide = dayaOrderSideBuy
+	case "sell":
+		wantSide = dayaOrderSideSell
+	default:
+		return false
+	}
+	return record.OrderSide == wantSide
+}
+
+// classifyDayaOrderResponse keeps the legacy no-context call fail-closed.
+// A success record cannot be attributed to an order without matching the
+// submitted instrument, side, price, quantity, and validity.
 func classifyDayaOrderResponse(status int, body []byte) DayaOrderOutcome {
+	return classifyDayaOrderResponseForOrder(status, body, nil)
+}
+
+func classifyDayaOrderResponseForOrder(status int, body []byte, expected *Order) DayaOrderOutcome {
 	var metadata struct {
 		RequestID string `json:"requestId"`
 		Message   string `json:"message"`
@@ -178,9 +247,18 @@ func classifyDayaOrderResponse(status int, body []byte) DayaOrderOutcome {
 	outcome := DayaOrderOutcome{HTTPStatus: status, RequestID: strings.TrimSpace(metadata.RequestID), ReceivedAt: time.Now().In(tehran())}
 	switch {
 	case status >= 200 && status < 300:
+		for _, record := range decodeDayaConfirmationRecords(body) {
+			if dayaConfirmationMatches(record, expected) {
+				outcome.Status = statusSubmitted
+				outcome.BrokerOrderID = fmt.Sprintf("%d", record.OrderID)
+				outcome.BrokerHostOrderNumber = record.HostOrderNumber
+				outcome.Message = "سفارش با وضعیت BOOKED و تطبیق کامل مشخصات سفارش در پاسخ دایا تأیید شد."
+				return outcome
+			}
+		}
 		outcome.Status = statusSubmissionUnknown
 		if message == "" {
-			message = fmt.Sprintf("دایا HTTP %d برگرداند، اما ساختار پاسخ موفق و شناسه سفارش هنوز تأیید نشده است.", status)
+			message = fmt.Sprintf("دایا HTTP %d برگرداند، اما رکورد CONFIRMATION/BOOKED منطبق با سفارش ارسالی پیدا نشد.", status)
 		}
 		outcome.Message = message + " نتیجه را در پنل دایا بررسی کنید؛ ارسال مجدد خودکار انجام نمی‌شود."
 	case status >= 400 && status < 500:
