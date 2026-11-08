@@ -32,7 +32,7 @@ func NewDayaOrderDispatcher(store *Store, credentials *DayaCredentialStore) *Day
 	return &DayaOrderDispatcher{
 		store: store, credentials: credentials, http: client,
 		liveEnabled: dayaOrderAPICapable,
-		now: func() time.Time { return time.Now().In(tehran()) },
+		now:         func() time.Time { return time.Now().In(tehran()) },
 	}
 }
 
