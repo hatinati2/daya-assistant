@@ -229,8 +229,8 @@ func TestAPIOrderMovesFromEntryPendingToBookedConfirmed(t *testing.T) {
 	if err := store.completeAPIOrder("api-pending", booked); err != nil {
 		t.Fatal(err)
 	}
-	if got := store.pendingAPIOrders(); len(got) != 1 || got[0].Status != statusSubmitted {
-		t.Fatalf("BOOKED order must remain in the execution-progress poll set: %#v", got)
+	if got := store.pendingAPIOrders(); len(got) != 0 {
+		t.Fatalf("BOOKED order must leave the confirmation poll set: %#v", got)
 	}
 	orders := store.snapshot()
 	if len(orders) != 1 || orders[0].Status != statusSubmitted ||
@@ -239,7 +239,7 @@ func TestAPIOrderMovesFromEntryPendingToBookedConfirmed(t *testing.T) {
 	}
 }
 
-func TestPendingAPIOrdersIncludesBookedAndPartiallyFilledOrders(t *testing.T) {
+func TestPendingAPIOrdersIncludesOnlyEntryAcknowledgements(t *testing.T) {
 	store := &Store{orders: []Order{
 		{ID: "entry", ExecutionMode: executionModeAPI, Status: statusSubmissionPending, BrokerOrderID: "1"},
 		{ID: "booked", ExecutionMode: executionModeAPI, Status: statusSubmitted, BrokerOrderID: "2"},
@@ -248,8 +248,8 @@ func TestPendingAPIOrdersIncludesBookedAndPartiallyFilledOrders(t *testing.T) {
 		{ID: "manual", ExecutionMode: executionModeManual, Status: statusSubmitted, BrokerOrderID: "5"},
 	}}
 	got := store.pendingAPIOrders()
-	if len(got) != 3 {
-		t.Fatalf("pending API orders = %d, want ENTRY, BOOKED and partial-fill only: %#v", len(got), got)
+	if len(got) != 1 || got[0].ID != "entry" {
+		t.Fatalf("pending API orders = %#v, want only ENTRY acknowledgement", got)
 	}
 }
 
