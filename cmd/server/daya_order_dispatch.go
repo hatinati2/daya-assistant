@@ -23,8 +23,9 @@ type DayaOrderDispatcher struct {
 	now                   func() time.Time
 	pendingMu             sync.Mutex
 	nextPendingPoll       time.Time
-	pendingPollInterval   func() (time.Duration, error)
-	pendingPollingStopped bool
+	pendingPollInterval    func() (time.Duration, error)
+	pendingPollingStopped  bool
+	pendingPollingNeedsLogin bool
 }
 
 func NewDayaOrderDispatcher(store *Store, credentials *DayaCredentialStore) *DayaOrderDispatcher {
@@ -369,7 +370,13 @@ func (d *DayaOrderDispatcher) ResumePendingPolling() {
 	}
 	d.pendingMu.Lock()
 	defer d.pendingMu.Unlock()
+	// A fresh CAPTCHA login may clear an authentication stop, but it must
+	// never override a 429 rate-limit stop.
+	if !d.pendingPollingNeedsLogin {
+		return
+	}
 	d.pendingPollingStopped = false
+	d.pendingPollingNeedsLogin = false
 	d.nextPendingPoll = time.Time{}
 }
 
@@ -407,10 +414,12 @@ func (d *DayaOrderDispatcher) reconcilePendingOrders(ctx context.Context) error 
 	session, _, err := d.credentials.LoadAccessSession()
 	if err != nil || session.Token == "" {
 		d.pendingPollingStopped = true
+		d.pendingPollingNeedsLogin = true
 		return fmt.Errorf("no authenticated Daya session is available for read-only order confirmation; manual login is required")
 	}
 	if !session.ExpiresAt.IsZero() && !session.ExpiresAt.After(now) {
 		d.pendingPollingStopped = true
+		d.pendingPollingNeedsLogin = true
 		return fmt.Errorf("Daya session expired before pending order confirmation; manual login is required")
 	}
 
@@ -425,6 +434,7 @@ func (d *DayaOrderDispatcher) reconcilePendingOrders(ctx context.Context) error 
 	}
 	if status == http.StatusUnauthorized || status == http.StatusForbidden {
 		d.pendingPollingStopped = true
+		d.pendingPollingNeedsLogin = true
 		d.nextPendingPoll = time.Time{}
 		return fmt.Errorf("Daya session rejected read-only order-list check; confirmation polling stopped until manual login")
 	}
