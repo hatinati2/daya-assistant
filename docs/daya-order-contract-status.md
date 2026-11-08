@@ -64,17 +64,17 @@ The operator clarified that the supplied fragments came from different panels of
 
 The latest full Response view establishes that the POST response is ENTRY / SENT_TO_TRADING_ENGINE. The ENTRY and BOOKED samples have different broker order IDs because the operator deleted and re-created several test orders between captures; they are separate orders and should not be correlated. The separate GET /orders capture independently confirms the BOOKED record shape.
 
-The code supports the captured ENTRY response conservatively: an exact matching ENTRY acknowledgement with empty error fields becomes `submission_pending`. An exact matching CONFIRMATION/BOOKED record with empty error fields and the same broker `orderId` confirms order-book registration. The GET /orders array response shape is now observed. The current polling worker stops tracking an order once it reaches BOOKED; fill-progress polling and persistence are still outstanding.
+The code supports the captured ENTRY response conservatively: an exact matching ENTRY acknowledgement with empty error fields becomes `submission_pending`. An exact matching CONFIRMATION/BOOKED record with empty error fields and the same broker `orderId` confirms order-book registration. The read-only polling worker continues tracking an order after BOOKED and while partially filled; it stops polling only after the full order quantity is recorded as traded. ENTRY and BOOKED samples with different broker IDs remain separate and are never correlated.
 
 ## BOOKED is registration, not execution
 
-The operator clarified that a Daya order first becomes registered in the order book (`BOOKED`). A trade occurs later only if a counterparty order matches. The supplied BOOKED Preview shows `matchedQuantity: 0`, `tradedQuantity: 0`, and `tradedPrice: 0`, with the full quantity remaining. The UI therefore labels this status as registered and waiting for a counterparty, not completed. Current code records the broker registration but does not yet persist or poll the subsequent fill counters.
+The operator clarified that a Daya order first becomes registered in the order book (`BOOKED`). A trade occurs later only if a counterparty order matches. The supplied BOOKED Preview shows `matchedQuantity: 0`, `tradedQuantity: 0`, and `tradedPrice: 0`, with the full quantity remaining. The UI therefore labels this status as registered and waiting for a counterparty, not completed. The implementation now persists `matchedQuantity`, `tradedQuantity`, `tradedPrice`, and `remainingQuantityOfTheOrder` when present in the read-only GET /orders snapshot, and distinguishes registered/unfilled, partially filled, and fully filled states.
 
 ## Still unverified
 
 - Full required headers and authentication requirements for order creation.
 - Whether the observed session cookies alone are sufficient for POST.
-- The exact shape and counter behavior for later partial-fill and full-fill snapshots; only the unfilled BOOKED counter values have been observed so far.
+- The exact broker counter values and update cadence for real partial-fill and full-fill snapshots; the field names and unfilled BOOKED values have been observed, while partial/full behavior is covered by local mock tests only.
 - All accepted validity types and date semantics.
 - Instrument-, account-, session-, group-state-, price-band-, quantity-, and balance-specific constraints.
 - Idempotency behavior, duplicate submission handling, and final order-status reconciliation.
@@ -85,7 +85,7 @@ The operator clarified that a Daya order first becomes registered in the order b
 - A server-side dispatcher is now wired to the scheduler, but it exits before loading credentials or making any network request while the capability gate is closed.
 - The dormant dispatch path builds a POST using the fixed Daya endpoint and allowlisted session cookies only; redirects are not followed.
 - Response HTTP status, Daya `requestId` (when returned), response timestamp, and broker message are persisted on the local order and displayed in history.
-- A 4xx response is recorded as a rejection; the observed group-state message is normalized for display. A 2xx response containing an exact matching ENTRY / SENT_TO_TRADING_ENGINE record with an order ID and empty error fields becomes `submission_pending`; it is not marked as booked or executed. A matching CONFIRMATION/BOOKED record with the same broker order ID confirms registration, not execution. The dispatcher does not yet persist `matchedQuantity`, `tradedQuantity`, `tradedPrice`, or `remainingQuantityOfTheOrder`; BOOKED orders therefore are not yet monitored for later partial/full execution. Other unrecognized 2xx responses remain `submission_unknown`.
+- A 4xx response is recorded as a rejection; the observed group-state message is normalized for display. A 2xx response containing an exact matching ENTRY / SENT_TO_TRADING_ENGINE record with an order ID and empty error fields becomes `submission_pending`; it is not marked as booked or executed. A matching CONFIRMATION/BOOKED record with the same broker order ID confirms registration, not execution. The read-only GET /orders poller continues tracking registered and partially filled orders, persists `matchedQuantity`, `tradedQuantity`, `tradedPrice`, `remainingQuantityOfTheOrder`, and the progress timestamp, and classifies partial/full fills. A fully filled order is no longer polled. Other unrecognized 2xx responses remain `submission_unknown`.
 - Network errors, 3xx responses, 5xx responses, and service restarts during submission are treated as ambiguous. Automatic retry is deliberately not performed to avoid duplicate orders.
 - An authenticated operator can reconcile `submission_unknown` after manually checking the official Daya panel. A confirmed registration requires a broker order ID; the action is local-only and never resubmits.
 - The session monitor continues to perform read-only `GET /orders` checks only.
