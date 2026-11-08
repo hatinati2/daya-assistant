@@ -43,6 +43,16 @@ A redacted order record supplied during implementation contains these fields:
 
 This establishes the shape of a confirmation/booked order record from an earlier supplied sample. It has not been correlated with the newly captured POST response or proven to come from a subsequent `GET /orders`. It is therefore retained as a separate observed record shape, not proof of a two-step ENTRY-to-BOOKED lifecycle.
 
+## Observed post-submit browser requests
+
+For the captured order submission, the operator observed this subsequent browser request sequence:
+
+1. `POST /orders` — returns the `ENTRY / SENT_TO_TRADING_ENGINE` record documented above.
+2. `GET /financials/buying-power` — HTTP 200; a buying-power refresh.
+3. `GET /market-data/market-view/trading-view/{instrumentId}/tradeVolumeAndCountOnCustomerType/on-minutes` — HTTP 200; a minute-interval market-data request for trade volume/count by customer type.
+
+Neither of the two observed follow-up GET requests is an order-list or final order-confirmation endpoint. This sequence does not establish where the earlier `CONFIRMATION / BOOKED` sample originated. A separate order-history/list view or another distinct request must be inspected before assigning that record to a specific endpoint. Do not infer that the browser automatically calls `GET /orders` after this POST.
+
 ## DevTools evidence supplied by the operator
 
 The operator clarified that the supplied fragments came from different panels of the same Network item named `order` (for example, Headers, Payload, and Preview). The snippets include:
