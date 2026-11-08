@@ -1205,7 +1205,6 @@ func main() {
 	registerDayaLocalOrderTestRoutes(mux, previewMode)
 	registerDayaOnlineTestRoutes(mux, previewMode, credentials)
 	registerDayaLiveOrderTestRoutes(mux, previewMode, credentials, store)
-	registerMockCaptchaQARoute(mux, previewMode)
 	registerDayaOrderReconciliationRoute(mux, store)
 	mux.HandleFunc("GET /api/server-time", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
