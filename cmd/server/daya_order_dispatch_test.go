@@ -377,3 +377,15 @@ func TestReconcilePendingOrdersStopsAfterBookedConfirmation(t *testing.T) {
 		t.Fatalf("BOOKED order must not be polled further: %#v", pending)
 	}
 }
+
+func TestDayaOrderAPICapableIsPreviewOnly(t *testing.T) {
+	t.Setenv("DAYA_PREVIEW_MODE", "false")
+	if dayaOrderAPICapable() {
+		t.Fatal("live Daya API dispatch must remain disabled outside Preview")
+	}
+
+	t.Setenv("DAYA_PREVIEW_MODE", "true")
+	if !dayaOrderAPICapable() {
+		t.Fatal("live Daya API dispatch must be enabled in Preview")
+	}
+}
