@@ -104,6 +104,10 @@ The operator clarified that `BOOKED` means the order is registered in the order 
 - The read-only `GET /orders` confirmation check runs only for pending ENTRY acknowledgements and stops at BOOKED.
 - The Preview `/daya-api-test` page remains a loopback-only mock and does not use saved broker credentials.
 
+## Manual Preview test route
+
+The Preview application now exposes a separately operator-triggered one-shot POST test. It is not part of the scheduler or automated CI. The operator manually supplies an exact ISIN, side, price and quantity, then confirms the live POST in the browser and with a required checkbox. The request is persisted in Preview history before the network call, is sent only once, and an ambiguous result is never retried automatically. A matching ENTRY can be checked once immediately through read-only GET /orders and then only until BOOKED. Scheduled API dispatch remains disabled.
+
 ## Test interpretation
 
 Local tests validate request construction, cookie allowlisting, fail-closed gate behavior, and conservative outcome classification. They do not prove broker connectivity, authentication, acceptance, or order placement.
