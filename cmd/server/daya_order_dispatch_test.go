@@ -295,7 +295,7 @@ func TestDayaEntryAcknowledgementAcceptsArrayPreviewShape(t *testing.T) {
 	}
 }
 
-func TestReconcilePendingOrdersTracksExecutionAfterBooked(t *testing.T) {
+func TestReconcilePendingOrdersStopsAfterBookedConfirmation(t *testing.T) {
 	now := time.Now().In(tehran())
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet || r.URL.Path != "/orders" {
@@ -349,11 +349,10 @@ func TestReconcilePendingOrdersTracksExecutionAfterBooked(t *testing.T) {
 		t.Fatal(err)
 	}
 	got := store.snapshot()
-	if len(got) != 1 || got[0].Status != statusPartiallyFilled ||
-		got[0].BrokerHostOrderNumber != 654 ||
-		got[0].BrokerTradedQuantity == nil || *got[0].BrokerTradedQuantity != 4 ||
-		got[0].BrokerRemainingQuantity == nil || *got[0].BrokerRemainingQuantity != 6 ||
-		got[0].BrokerTradedPrice == nil || *got[0].BrokerTradedPrice != 9710 {
-		t.Fatalf("BOOKED-to-partial execution was not reconciled: %#v", got)
+	if len(got) != 1 || got[0].Status != statusSubmitted || got[0].BrokerHostOrderNumber != 654 {
+		t.Fatalf("BOOKED registration was not confirmed: %#v", got)
+	}
+	if pending := store.pendingAPIOrders(); len(pending) != 0 {
+		t.Fatalf("BOOKED order must not be polled further: %#v", pending)
 	}
 }
