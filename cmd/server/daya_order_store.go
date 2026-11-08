@@ -161,7 +161,7 @@ func (s *Store) updateAPIOrderExecution(id string, record dayaOrderConfirmationR
 		if record.RemainingQuantityOfTheOrder != nil {
 			remaining = *record.RemainingQuantityOfTheOrder
 		}
-		if remaining > order.Quantity || traded+remaining > order.Quantity {
+		if remaining > order.Quantity-traded {
 			return errors.New("مقدار باقی‌مانده و معامله‌شده با تعداد کل سفارش سازگار نیست")
 		}
 		old := *order
