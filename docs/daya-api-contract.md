@@ -43,6 +43,15 @@ A redacted order record supplied during implementation contains these fields:
 
 This establishes the shape of a confirmation/booked order record from an earlier supplied sample. It has not been correlated with the newly captured POST response or proven to come from a subsequent `GET /orders`. It is therefore retained as a separate observed record shape, not proof of a two-step ENTRY-to-BOOKED lifecycle.
 
+## Observed order-list request
+
+The operator has now separately selected the `order` resource in the Daya interface and confirmed:
+
+- `GET https://mg.dayatrader.ir/orders`
+- HTTP `200 OK`
+
+This confirms that `GET /orders` is an actual reachable order-resource request in the browser, not a guessed path. The response Preview/body for this GET has not yet been supplied, so it is not yet confirmed that it contains the earlier `CONFIRMATION / BOOKED` record or that its body uses the direct-object/array shape currently supported by the parser.
+
 ## Observed post-submit browser requests
 
 For the captured order submission, the operator observed this subsequent browser request sequence:
