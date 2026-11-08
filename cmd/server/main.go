@@ -36,23 +36,23 @@ const (
 )
 
 type Order struct {
-	ID            string    `json:"id"`
-	Symbol        string    `json:"symbol"`
-	ISIN          string    `json:"isin,omitempty"`
-	Side          string    `json:"side"`
-	Price         int64     `json:"price"`
-	Quantity      int64     `json:"quantity"`
-	ExecuteAt     time.Time `json:"execute_at"`
-	ExecutionMode string    `json:"execution_mode,omitempty"`
-	Status        string    `json:"status"`
+	ID               string    `json:"id"`
+	Symbol           string    `json:"symbol"`
+	ISIN             string    `json:"isin,omitempty"`
+	Side             string    `json:"side"`
+	Price            int64     `json:"price"`
+	Quantity         int64     `json:"quantity"`
+	ExecuteAt        time.Time `json:"execute_at"`
+	ExecutionMode    string    `json:"execution_mode,omitempty"`
+	Status           string    `json:"status"`
 	BrokerOrderID    string    `json:"broker_order_id,omitempty"`
 	BrokerRequestID  string    `json:"broker_request_id,omitempty"`
 	BrokerHTTPStatus int       `json:"broker_http_status,omitempty"`
 	BrokerResponseAt time.Time `json:"broker_response_at,omitempty"`
 	BrokerMessage    string    `json:"broker_message,omitempty"`
 	AttemptedAt      time.Time `json:"attempted_at,omitempty"`
-	CreatedAt     time.Time `json:"created_at"`
-	UpdatedAt     time.Time `json:"updated_at"`
+	CreatedAt        time.Time `json:"created_at"`
+	UpdatedAt        time.Time `json:"updated_at"`
 }
 
 type Store struct {
@@ -548,7 +548,7 @@ th{font-size:10px;color:#667085}.tablewrap{overflow:auto}.tablewrap tbody td{fon
 <thead><tr><th>نماد</th><th>نوع</th><th>قیمت</th><th>تعداد</th><th>زمان تهران</th><th>مسیر</th><th>وضعیت</th><th>عملیات</th></tr></thead><tbody>
 {{range .Orders}}<tr><td><b>{{.Symbol}}</b>{{if .ISIN}}<div class="foot">{{.ISIN}}</div>{{end}}</td><td>{{if eq .Side "buy"}}<span class="buy">خرید</span>{{else}}<span class="sell">فروش</span>{{end}}</td>
 <td>{{.Price}}</td><td>{{.Quantity}}</td><td>{{jalali .ExecuteAt}}</td><td>{{executionMode .ExecutionMode}}</td>
-<td>{{if eq .Status "scheduled"}}<span class="status scheduled">زمان‌بندی‌شده</span>{{else if eq .Status "ready"}}<span class="status ready">{{if eq .ExecutionMode "api"}}آماده ارسال{{else}}آماده بررسی{{end}}</span>{{else if eq .Status "manual_done"}}<span class="status ready">ثبت دستی تأیید شد</span>{{else if eq .Status "submitting"}}<span class="status ready">در حال ارسال</span>{{else if eq .Status "submitted"}}<span class="status ready">ثبت در دایا</span>{{else if eq .Status "submission_failed"}}<span class="status cancelled">ارسال ناموفق</span>{{else if eq .Status "submission_unknown"}}<span class="status cancelled">نتیجه نامشخص — بررسی لازم</span>{{else}}<span class="status cancelled">لغوشده</span>{{end}}{{if .BrokerOrderID}}<div class="foot">شناسه سفارش دایا: {{.BrokerOrderID}}</div>{{end}}{{if .BrokerHTTPStatus}}<div class="foot">HTTP: {{.BrokerHTTPStatus}}</div>{{end}}{{if .BrokerRequestID}}<div class="foot">شناسه درخواست: {{.BrokerRequestID}}</div>{{end}}{{if .BrokerResponseAt.IsZero}}{{else}}<div class="foot">زمان پاسخ: {{jalali .BrokerResponseAt}}</div>{{end}}{{if .BrokerMessage}}<div class="foot">{{.BrokerMessage}}</div>{{end}}</td>
+<td>{{if eq .Status "scheduled"}}<span class="status scheduled">زمان‌بندی‌شده</span>{{else if eq .Status "ready"}}<span class="status ready">{{if eq .ExecutionMode "api"}}آماده ارسال{{else}}آماده بررسی{{end}}</span>{{else if eq .Status "manual_done"}}<span class="status ready">ثبت دستی تأیید شد</span>{{else if eq .Status "submitting"}}<span class="status ready">در حال ارسال</span>{{else if eq .Status "submitted"}}<span class="status ready">ثبت در دایا</span>{{else if eq .Status "submission_failed"}}<span class="status cancelled">ارسال ناموفق</span>{{else if eq .Status "submission_unknown"}}<span class="status cancelled">نتیجه نامشخص — بررسی لازم</span>{{else}}<span class="status cancelled">لغوشده</span>{{end}}{{if .BrokerOrderID}}<div class="foot">شناسه سفارش دایا: {{.BrokerOrderID}}</div>{{end}}{{if .BrokerHTTPStatus}}<div class="foot">HTTP: {{.BrokerHTTPStatus}}</div>{{end}}{{if .BrokerRequestID}}<div class="foot">شناسه درخواست: {{.BrokerRequestID}}</div>{{end}}{{if not .BrokerResponseAt.IsZero}}<div class="foot">زمان پاسخ: {{jalali .BrokerResponseAt}}</div>{{end}}{{if .BrokerMessage}}<div class="foot">{{.BrokerMessage}}</div>{{end}}</td>
 <td>{{if or (eq .Status "scheduled") (and (eq .Status "ready") (eq .ExecutionMode "api"))}}<form method="post" action="/orders/cancel"><input type="hidden" name="id" value="{{.ID}}"><button class="cancel">لغو</button></form>{{else if and $.History (eq .Status "ready") (manualMode .ExecutionMode)}}<form method="post" action="/orders/manual-confirm" onsubmit="return confirm('آیا سفارش را شخصاً در سامانه دایا ثبت کرده‌ای؟')"><input type="hidden" name="id" value="{{.ID}}"><button class="submit">ثبت دستی انجام شد</button></form>{{else if and $.History (eq .Status "submission_unknown") (eq .ExecutionMode "api")}}<form method="post" action="/orders/reconcile" class="reconcile-form"><input type="hidden" name="id" value="{{.ID}}"><select name="resolution" aria-label="نتیجه بررسی در دایا"><option value="registered">در دایا ثبت شده</option><option value="rejected">در دایا ثبت نشده</option></select><input name="broker_order_id" maxlength="128" placeholder="شناسه سفارش دایا (برای ثبت‌شده)"><input name="broker_message" maxlength="1000" placeholder="توضیح بررسی (اختیاری)"><button type="submit">ثبت نتیجه بررسی</button></form>{{else}}—{{end}}<button type="button" class="copy-order" data-symbol="{{.Symbol}}" data-isin="{{.ISIN}}" data-side="{{.Side}}" data-price="{{.Price}}" data-quantity="{{.Quantity}}" data-mode="{{.ExecutionMode}}" data-execute="{{jalali .ExecuteAt}}" style="margin-right:6px;background:#eff8ff;color:#175cd3;border:1px solid #b2ddff;padding:6px 9px">کپی سفارش</button></td></tr>
 {{else}}<tr><td colspan="8" class="empty">{{if .History}}هنوز موردی در تاریخچه ثبت نشده است.{{else}}سفارش فعالی ثبت نشده است.{{end}}</td></tr>{{end}}
 </tbody></table></div><div class="foot">{{if .History}}این صفحه سفارش‌های سررسیدشده و لغوشده را نگه می‌دارد؛ هیچ سفارشی از داده‌ها حذف نشده است.{{else}}ساعت سرور: {{.Now}} · سفارش‌های سررسیدشده در صفحه تاریخچه نمایش داده می‌شوند.{{end}} وضعیت «آماده بررسی» به معنی ارسال به کارگزاری نیست.</div>
