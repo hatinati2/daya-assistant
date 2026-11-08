@@ -20,12 +20,12 @@ The implementation fetches the image server-side, displays it in the Daya settin
 
 The currently available evidence records these fragments:
 
-- Candidate endpoint: `POST https://mg.dayatrader.ir/orders`.
+- Confirmed in the operator's latest DevTools capture for a newly created order: `POST https://mg.dayatrader.ir/orders`, returning HTTP `200 OK`.
 - The local request builder represents these JSON fields: `instrumentId`, `orderPrice`, `orderQuantity`, `orderSide`, `orderValidityDate`, and `orderValidityType`.
 - The represented side values are `BUY` and `SELL`; the represented validity type is `JUST_TODAY`.
 - A Daya HTTP 400 response has been observed with the group-state rejection message: `امکان ثبت سفارش با توجه به وضعیت گروه وجود ندارد`.
 
-This is not a complete authenticated request/response capture. In particular, the exact required headers, whether the observed session cookies are sufficient for order submission, the accepted enum values, and the successful response schema have not been verified from a successful broker response. The request shape in code is therefore a candidate adapter contract, not proof that the broker will accept it.
+The method, URL, and HTTP status are now confirmed for that captured request. HTTP `200 OK` is only the transport-level result; by itself it does not prove that the broker booked the order. The exact successful response body/schema, required headers, whether the observed session cookies are sufficient, and the full accepted enum set remain unverified. The request shape in code is therefore still a candidate adapter contract, not proof that the broker will accept or book it.
 
 
 ## Observed confirmation/order record
@@ -51,7 +51,7 @@ The operator clarified that the supplied fragments came from different panels of
 - An order record with `orderFunction: ENTRY`, `orderStatus: SENT_TO_TRADING_ENGINE`, a numeric `orderId`, and `hostOrderNumber: null`.
 - A confirmation-shaped record was also supplied earlier with `orderFunction: CONFIRMATION`, `orderStatus: BOOKED`, a numeric `orderId`, and a numeric `hostOrderNumber`.
 
-Because the snippets are partial views of one Network item, we must not infer from them alone that the ENTRY object is the immediate POST response and the BOOKED object came from a later `GET /orders`. The browser Network **Name** label `order` is also only a request label, not the URL. The actual Request URL, method, status, and exact Response body must be read from that same item before treating the lifecycle or endpoint mapping as fully verified.
+Because the snippets are partial views of one Network item, we must not infer from them alone that the ENTRY object is the immediate POST response and the BOOKED object came from a later `GET /orders`. The browser Network **Name** label `order` is only a request label, not the URL. The operator has now supplied the Request URL (`https://mg.dayatrader.ir/orders`), method (`POST`), and status (`200 OK`) for that item. The exact response body and the relationship between the supplied ENTRY and BOOKED fragments still need to be established before treating the lifecycle mapping as fully verified.
 
 The code can conservatively understand both observed record shapes: ENTRY is represented as pending, while only a matching CONFIRMATION/BOOKED record can become locally confirmed. Pending confirmation checks use read-only `GET /orders`; this is a defensive implementation path, not proof from the supplied fragments that Daya necessarily returns the BOOKED record there.
 
