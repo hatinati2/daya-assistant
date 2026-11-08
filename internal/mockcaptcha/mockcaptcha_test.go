@@ -24,7 +24,7 @@ func TestGenerateFixtureRendersFiveBlueDigitsAndBlackNoise(t *testing.T) {
 	if got := img.At(20, 6); got != Noise {
 		t.Fatalf("noise pixel = %#v, want pure black", got)
 	}
-	if got := img.At(firstGlyphX+2*glyphScale, firstGlyphY+2*glyphScale); got != DigitBlue {
+	if got := img.At(firstGlyphX, firstGlyphY); got != DigitBlue {
 		t.Fatalf("digit pixel = %#v, want blue", got)
 	}
 	if got := img.At(Width-2, Height-2); got != Background {
