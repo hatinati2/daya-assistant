@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 )
@@ -107,11 +108,87 @@ func (s *Store) pendingAPIOrders() []Order {
 	defer s.mu.Unlock()
 	out := make([]Order, 0)
 	for _, order := range s.orders {
-		if order.ExecutionMode == executionModeAPI && order.Status == statusSubmissionPending && order.BrokerOrderID != "" {
+		if order.ExecutionMode != executionModeAPI || strings.TrimSpace(order.BrokerOrderID) == "" {
+			continue
+		}
+		switch order.Status {
+		case statusSubmissionPending, statusSubmitted, statusPartiallyFilled:
 			out = append(out, order)
 		}
 	}
 	return out
+}
+
+// updateAPIOrderExecution persists broker fill counters for the exact registered
+// order. The broker order ID is the primary identity; order attributes are
+// checked by the caller before this method is reached.
+func (s *Store) updateAPIOrderExecution(id string, record dayaOrderConfirmationRecord, now time.Time) error {
+	if record.OrderID <= 0 || record.TradedQuantity == nil || *record.TradedQuantity < 0 {
+		return errors.New("اطلاعات مقدار معامله‌شده از دایا معتبر نیست")
+	}
+	if record.MatchedQuantity != nil && *record.MatchedQuantity < 0 {
+		return errors.New("مقدار تطبیق‌شده از دایا معتبر نیست")
+	}
+	if record.TradedPrice != nil && *record.TradedPrice < 0 {
+		return errors.New("قیمت معامله‌شده از دایا معتبر نیست")
+	}
+	if record.RemainingQuantityOfTheOrder != nil && *record.RemainingQuantityOfTheOrder < 0 {
+		return errors.New("مقدار باقی‌مانده از دایا معتبر نیست")
+	}
+
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	for i := range s.orders {
+		order := &s.orders[i]
+		if order.ID != id {
+			continue
+		}
+		if order.ExecutionMode != executionModeAPI ||
+			(order.Status != statusSubmitted && order.Status != statusPartiallyFilled) ||
+			parseBrokerOrderID(order.BrokerOrderID) != record.OrderID {
+			return errors.New("رکورد معامله متعلق به همین سفارش ثبت‌شده نیست")
+		}
+		traded := *record.TradedQuantity
+		if traded > order.Quantity {
+			return errors.New("مقدار معامله‌شده از تعداد کل سفارش بیشتر است")
+		}
+		if order.BrokerTradedQuantity != nil && traded < *order.BrokerTradedQuantity {
+			return errors.New("مقدار معامله‌شده نسبت به پایش قبلی کاهش یافته است")
+		}
+		remaining := order.Quantity - traded
+		if record.RemainingQuantityOfTheOrder != nil {
+			remaining = *record.RemainingQuantityOfTheOrder
+		}
+		if traded == order.Quantity && remaining == 0 {
+			order.Status = statusFilled
+			order.BrokerMessage = "کل تعداد سفارش معامله شد."
+		} else if traded > 0 {
+			order.Status = statusPartiallyFilled
+			order.BrokerMessage = fmt.Sprintf("معامله جزئی انجام شده: %d از %d سهم؛ باقی‌مانده %d سهم.", traded, order.Quantity, remaining)
+		} else {
+			order.Status = statusSubmitted
+			order.BrokerMessage = "سفارش در دفتر سفارش‌های دایا ثبت شده و منتظر تطبیق با سفارش مقابل است."
+		}
+		if record.MatchedQuantity != nil {
+			v := *record.MatchedQuantity
+			order.BrokerMatchedQuantity = &v
+		}
+		v := traded
+		order.BrokerTradedQuantity = &v
+		if record.TradedPrice != nil {
+			price := *record.TradedPrice
+			order.BrokerTradedPrice = &price
+		}
+		remainingCopy := remaining
+		order.BrokerRemainingQuantity = &remainingCopy
+		order.BrokerProgressAt = now
+		order.UpdatedAt = now
+		if err := s.saveLocked(); err != nil {
+			return err
+		}
+		return nil
+	}
+	return errors.New("سفارش محلی برای ثبت پیشرفت معامله پیدا نشد")
 }
 
 func (s *Store) reconcileAPIOrder(id, resolution, brokerOrderID, message string, now time.Time) error {
