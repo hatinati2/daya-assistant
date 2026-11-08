@@ -61,7 +61,10 @@ func TestCompleteAPIOrderPersistsFinalBrokerResult(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := store.completeAPIOrder("api-1", statusSubmitted, "broker-123", "ثبت شد", now); err != nil {
+	if err := store.completeAPIOrder("api-1", DayaOrderOutcome{
+		Status: statusSubmitted, BrokerOrderID: "broker-123", RequestID: "request-123",
+		HTTPStatus: 201, Message: "ثبت شد", ReceivedAt: now,
+	}); err != nil {
 		t.Fatal(err)
 	}
 	reloaded, err := newStore(path)
@@ -72,17 +75,20 @@ func TestCompleteAPIOrderPersistsFinalBrokerResult(t *testing.T) {
 	if len(got) != 1 {
 		t.Fatalf("reloaded order count = %d, want 1", len(got))
 	}
-	if got[0].Status != statusSubmitted || got[0].BrokerOrderID != "broker-123" || got[0].BrokerMessage != "ثبت شد" || !got[0].UpdatedAt.Equal(now) {
+	if got[0].Status != statusSubmitted || got[0].BrokerOrderID != "broker-123" || got[0].BrokerRequestID != "request-123" || got[0].BrokerHTTPStatus != 201 || got[0].BrokerMessage != "ثبت شد" || !got[0].BrokerResponseAt.Equal(now) || !got[0].UpdatedAt.Equal(now) {
 		t.Fatalf("persisted completion = %#v", got[0])
 	}
-	if err := store.completeAPIOrder("api-1", statusSubmitted, "broker-123", "ثبت شد", now); err == nil {
+	if err := store.completeAPIOrder("api-1", DayaOrderOutcome{
+		Status: statusSubmitted, BrokerOrderID: "broker-123", RequestID: "request-123",
+		HTTPStatus: 201, Message: "ثبت شد", ReceivedAt: now,
+	}); err == nil {
 		t.Fatal("expected a second completion to be rejected")
 	}
 }
 
 func TestCompleteAPIOrderRejectsInvalidFinalStatus(t *testing.T) {
 	store := &Store{orders: []Order{{ID: "api-1", Status: statusSubmitting}}}
-	err := store.completeAPIOrder("api-1", statusSubmitting, "", "", time.Now().In(tehran()))
+	err := store.completeAPIOrder("api-1", DayaOrderOutcome{Status: statusSubmitting, ReceivedAt: time.Now().In(tehran())})
 	if err == nil {
 		t.Fatal("expected non-final status to be rejected")
 	}
