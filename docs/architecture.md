@@ -24,5 +24,5 @@ Daya Assistant is independent from Rabin Assistant in repository, process, confi
 - HTTP 401/403 stops monitoring and requires a new manual CAPTCHA login. HTTP 429 stops monitoring without aggressive retries.
 - Passwords, cookies, tokens, and CAPTCHA answers must never be committed to Git or printed in logs.
 - Manual order workflow is available. Live API dispatch remains disabled until Daya's actual order request/response contract has been captured and tested with mock HTTP tests.
-- No order endpoint is called during health checks, CI, diagnostics, or authentication tests.
+- CI and automated tests never call the live order-creation endpoint. A manual Preview-only online test can issue a read-only `GET /orders`; its separate one-shot form sends exactly one real `POST /orders` only after explicit operator confirmation. That one-shot order is not scheduled and is never automatically retried.
 - Preview and production must have separate configs, keys, data directories, and systemd units.
