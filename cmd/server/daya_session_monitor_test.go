@@ -223,11 +223,11 @@ func TestDayaMonitorPollsRepeatedlyWithoutTimeOfDayGate(t *testing.T) {
 }
 
 func TestVerifyCurrentEndpointsCallsEachVerifiedGETOnceAndPersistsRotation(t *testing.T) {
-	requestCounts := map[string]int{}
+	requests := make(chan string, 2)
 	saved := make(chan DayaSession, 2)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		requestCounts[r.URL.Path]++
+		requests <- r.URL.Path
 		if r.Method != http.MethodGet {
 			t.Errorf("%s method = %s, want GET", r.URL.Path, r.Method)
 		}
@@ -268,8 +268,10 @@ func TestVerifyCurrentEndpointsCallsEachVerifiedGETOnceAndPersistsRotation(t *te
 	if len(report.Results) != 2 {
 		t.Fatalf("result count = %d, want exactly 2: %#v", len(report.Results), report.Results)
 	}
-	if requestCounts["/orders"] != 1 || requestCounts["/financials/portfolio/instant"] != 1 {
-		t.Fatalf("request counts = %#v, want exactly one GET per endpoint", requestCounts)
+	seen := map[string]int{<-requests: 1}
+	seen[<-requests]++
+	if seen["/orders"] != 1 || seen["/financials/portfolio/instant"] != 1 {
+		t.Fatalf("request paths = %#v, want exactly one GET per endpoint", seen)
 	}
 	wantPaths := []string{"/orders", "/financials/portfolio/instant"}
 	wantStatuses := []int{http.StatusOK, http.StatusPartialContent}
@@ -312,9 +314,9 @@ func TestVerifyCurrentEndpointsCallsEachVerifiedGETOnceAndPersistsRotation(t *te
 }
 
 func TestVerifyCurrentEndpointsAttemptsBothPathsAfterFirstEndpointError(t *testing.T) {
-	requestCounts := map[string]int{}
+	requests := make(chan string, 2)
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		requestCounts[r.URL.Path]++
+		requests <- r.URL.Path
 		if r.URL.Path == "/orders" {
 			w.WriteHeader(http.StatusBadGateway)
 			return
@@ -329,8 +331,10 @@ func TestVerifyCurrentEndpointsAttemptsBothPathsAfterFirstEndpointError(t *testi
 
 	m := NewDayaSessionMonitor(monitorTestClient(server))
 	_, report := m.VerifyCurrentEndpoints(context.Background(), monitorSession())
-	if requestCounts["/orders"] != 1 || requestCounts["/financials/portfolio/instant"] != 1 {
-		t.Fatalf("request counts = %#v, want one request to both endpoints", requestCounts)
+	seen := map[string]int{<-requests: 1}
+	seen[<-requests]++
+	if seen["/orders"] != 1 || seen["/financials/portfolio/instant"] != 1 {
+		t.Fatalf("request paths = %#v, want one request to both endpoints", seen)
 	}
 	if len(report.Results) != 2 {
 		t.Fatalf("result count = %d, want 2", len(report.Results))
@@ -341,9 +345,9 @@ func TestVerifyCurrentEndpointsAttemptsBothPathsAfterFirstEndpointError(t *testi
 }
 
 func TestVerifyCurrentEndpointsDoesNotFollowRedirects(t *testing.T) {
-	requestCounts := map[string]int{}
+	requests := make(chan string, 4)
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		requestCounts[r.URL.Path]++
+		requests <- r.URL.Path
 		if r.URL.Path == "/orders" {
 			http.Redirect(w, r, "/orders-redirect-target", http.StatusFound)
 			return
@@ -354,8 +358,15 @@ func TestVerifyCurrentEndpointsDoesNotFollowRedirects(t *testing.T) {
 
 	m := NewDayaSessionMonitor(monitorTestClient(server))
 	_, report := m.VerifyCurrentEndpoints(context.Background(), monitorSession())
-	if requestCounts["/orders"] != 1 || requestCounts["/orders-redirect-target"] != 0 {
-		t.Fatalf("redirect request counts = %#v, want no redirect follow", requestCounts)
+	paths := []string{<-requests, <-requests}
+	seenRedirectTarget := false
+	for _, path := range paths {
+		if path == "/orders-redirect-target" {
+			seenRedirectTarget = true
+		}
+	}
+	if seenRedirectTarget || len(requests) != 0 {
+		t.Fatalf("unexpected redirect follow; paths=%#v pending=%d", paths, len(requests))
 	}
 	if len(report.Results) != 2 || report.Results[0].StatusCode != http.StatusFound {
 		t.Fatalf("redirect result = %#v, want HTTP 302 returned as-is", report.Results)
@@ -363,9 +374,9 @@ func TestVerifyCurrentEndpointsDoesNotFollowRedirects(t *testing.T) {
 }
 
 func TestVerifyCurrentEndpointsDoesNotPersistWhenNoSetCookieIsReturned(t *testing.T) {
-	requests := 0
+	requests := make(chan string, 2)
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		requests++
+		requests <- r.URL.Path
 		if r.Method != http.MethodGet {
 			t.Errorf("method = %s, want GET", r.Method)
 		}
@@ -381,8 +392,8 @@ func TestVerifyCurrentEndpointsDoesNotPersistWhenNoSetCookieIsReturned(t *testin
 	})
 	_, report := m.VerifyCurrentEndpoints(context.Background(), monitorSession())
 
-	if requests != 2 {
-		t.Fatalf("request count = %d, want exactly 2", requests)
+	if len(requests) != 2 {
+		t.Fatalf("request count = %d, want exactly 2", len(requests))
 	}
 	if len(report.Results) != 2 {
 		t.Fatalf("result count = %d, want 2", len(report.Results))
