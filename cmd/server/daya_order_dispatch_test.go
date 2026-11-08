@@ -295,7 +295,6 @@ func TestDayaEntryAcknowledgementAcceptsArrayPreviewShape(t *testing.T) {
 	}
 }
 
-
 func TestReconcilePendingOrdersTracksExecutionAfterBooked(t *testing.T) {
 	now := time.Now().In(tehran())
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -342,8 +341,8 @@ func TestReconcilePendingOrdersTracksExecutionAfterBooked(t *testing.T) {
 	}}}
 	dispatcher := &DayaOrderDispatcher{
 		store: store, credentials: credentials, http: monitorTestClient(server),
-		now: func() time.Time { return now },
-		nextPendingPoll: now.Add(-time.Second),
+		now:                 func() time.Time { return now },
+		nextPendingPoll:     now.Add(-time.Second),
 		pendingPollInterval: func() (time.Duration, error) { return time.Minute, nil },
 	}
 	if err := dispatcher.reconcilePendingOrders(context.Background()); err != nil {
