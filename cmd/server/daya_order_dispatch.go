@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"encoding/json"
 	"log"
 	"net/http"
 	"strings"
@@ -79,18 +80,16 @@ func (d *DayaOrderDispatcher) dispatchReady(ctx context.Context) error {
 	}
 	for _, order := range orders {
 		status, body, submitErr := postDayaOrder(ctx, d.http, session, order)
-		finalStatus := statusSubmissionUnknown
-		brokerOrderID := ""
-		message := "نتیجه ارسال مشخص نیست؛ وضعیت سفارش را در دایا بررسی کنید و ارسال مجدد خودکار انجام نمی‌شود."
-
+		outcome := DayaOrderOutcome{Status: statusSubmissionUnknown, Message: "نتیجه ارسال مشخص نیست؛ وضعیت سفارش را در دایا بررسی کنید و ارسال مجدد خودکار انجام نمی‌شود.", ReceivedAt: d.now()}
 		if submitErr != nil {
 			// A transport error can happen after the broker received the request.
 			// Treat it as ambiguous and never retry automatically.
-			message = "ارتباط هنگام ارسال قطع شد؛ ممکن است سفارش در دایا ثبت شده باشد. قبل از هر اقدام، وضعیت را در کارگزاری بررسی کنید."
+			outcome.Message = "ارتباط هنگام ارسال قطع شد؛ ممکن است سفارش در دایا ثبت شده باشد. قبل از هر اقدام، وضعیت را در کارگزاری بررسی کنید."
 		} else {
-			finalStatus, brokerOrderID, message = classifyDayaOrderResponse(status, body)
+			outcome = classifyDayaOrderResponse(status, body)
+			outcome.ReceivedAt = d.now()
 		}
-		if err := d.store.completeAPIOrder(order.ID, finalStatus, brokerOrderID, message, d.now()); err != nil {
+		if err := d.store.completeAPIOrder(order.ID, outcome); err != nil {
 			log.Printf("Daya order state update failed for local order %q: %v", order.ID, err)
 		}
 	}
@@ -165,22 +164,41 @@ func postDayaOrder(ctx context.Context, client *http.Client, session DayaSession
 // classifyDayaOrderResponse deliberately does not equate an arbitrary 2xx with
 // a confirmed order. The successful response schema and final order ID have
 // not yet been verified from broker traffic.
-func classifyDayaOrderResponse(status int, body []byte) (string, string, string) {
+func classifyDayaOrderResponse(status int, body []byte) DayaOrderOutcome {
+	var metadata struct {
+		RequestID string `json:"requestId"`
+		Message   string `json:"message"`
+		Error     string `json:"error"`
+	}
+	_ = json.Unmarshal(body, &metadata)
+	message := strings.TrimSpace(metadata.Message)
+	if message == "" {
+		message = strings.TrimSpace(metadata.Error)
+	}
+	outcome := DayaOrderOutcome{HTTPStatus: status, RequestID: strings.TrimSpace(metadata.RequestID), ReceivedAt: time.Now().In(tehran())}
 	switch {
 	case status >= 200 && status < 300:
-		return statusSubmissionUnknown, "", fmt.Sprintf(
-			"دایا HTTP %d برگرداند، اما ساختار پاسخ موفق هنوز تأیید نشده است؛ وضعیت سفارش را در پنل دایا بررسی کنید. ارسال مجدد خودکار انجام نمی‌شود.", status)
+		outcome.Status = statusSubmissionUnknown
+		if message == "" {
+			message = fmt.Sprintf("دایا HTTP %d برگرداند، اما ساختار پاسخ موفق و شناسه سفارش هنوز تأیید نشده است.", status)
+		}
+		outcome.Message = message + " نتیجه را در پنل دایا بررسی کنید؛ ارسال مجدد خودکار انجام نمی‌شود."
 	case status >= 400 && status < 500:
-		message := fmt.Sprintf("دایا درخواست را با HTTP %d رد کرد.", status)
-		if result, err := DecodeDayaOrderError(body); err == nil && strings.TrimSpace(result.Message) != "" {
-			message = result.Message
-		} else if strings.Contains(string(body), "امكان ثبت سفارش با توجه به وضعيت كروه وجود ندارد") ||
+		outcome.Status = statusSubmissionFailed
+		if strings.Contains(string(body), "امكان ثبت سفارش با توجه به وضعيت كروه وجود ندارد") ||
 			strings.Contains(string(body), "امکان ثبت سفارش با توجه به وضعیت گروه وجود ندارد") {
 			message = "امکان ثبت سفارش با توجه به وضعیت گروه وجود ندارد"
 		}
-		return statusSubmissionFailed, "", message
+		if message == "" {
+			message = fmt.Sprintf("دایا درخواست را با HTTP %d رد کرد.", status)
+		}
+		outcome.Message = message
 	default:
-		return statusSubmissionUnknown, "", fmt.Sprintf(
-			"پاسخ دایا HTTP %d قطعی نیست؛ قبل از هر ارسال مجدد، وضعیت سفارش را در کارگزاری بررسی کنید.", status)
+		outcome.Status = statusSubmissionUnknown
+		if message == "" {
+			message = fmt.Sprintf("پاسخ دایا HTTP %d قطعی نیست.", status)
+		}
+		outcome.Message = message + " قبل از هر ارسال مجدد، وضعیت سفارش را در کارگزاری بررسی کنید."
 	}
+	return outcome
 }
