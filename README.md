@@ -32,7 +32,7 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/hatinati2/daya-assistant
 تا وقتی تغییرات شاخهٔ توسعه ادغام نشده‌اند، برای نصب همان نسخهٔ آزمایشی از دستور زیر استفاده کن:
 
 ```bash
-DAYA_INSTALL_REF=feature/project-scaffold bash -c "$(curl -fsSL https://raw.githubusercontent.com/hatinati2/daya-assistant/feature/project-scaffold/install-preview-public.sh)"
+DAYA_INSTALL_REF=feat/daya-order-dispatch-foundation bash -c "$(curl -fsSL https://raw.githubusercontent.com/hatinati2/daya-assistant/feat/daya-order-dispatch-foundation/install-preview-public.sh)"
 ```
 
 این دستور فقط Preview مستقل را نصب می‌کند؛ پورت آن 8102 است. پس از ادغام PR می‌توان از نصب‌کنندهٔ `main` استفاده کرد.
