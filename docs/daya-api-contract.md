@@ -56,6 +56,19 @@ The operator has now separately selected the `order` resource in the Daya interf
 
 This confirms that `GET /orders` is an actual reachable order-resource request in the browser, not a guessed path. Its Preview contains an array with a `CONFIRMATION / BOOKED` record. The record includes `matchedQuantity`, `tradedQuantity`, `tradedPrice`, and `remainingQuantityOfTheOrder`; the observed sample has zero matched/traded quantity and the full order quantity remaining.
 
+## Observed read-only order-list request headers
+
+The latest operator DevTools capture for the separate read-only `GET /orders` request showed these header names/values (credential values are intentionally not recorded):
+
+- `Accept: application/json`
+- `Content-Type: application/json`
+- `Origin: https://dayatrader.ir`
+- `Referer: https://dayatrader.ir/`
+- `x-client-type: WEB_CLIENT`
+- The `Cookie` header contained the cookie names `cookiesession1` and `token`; cookie values are excluded.
+
+This confirms the browser's observed headers for the read-only GET request only. It is useful corroborating evidence for the shared Daya session and client headers, but it does **not** prove that every one of these headers is required or sufficient for `POST /orders`. The POST authentication/header contract remains unverified until the corresponding POST request's headers are captured safely. No cookie or token values are stored in this repository.
+
 ## Observed post-submit browser requests
 
 For the captured order submission, the operator observed this subsequent browser request sequence:
