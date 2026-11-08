@@ -106,6 +106,15 @@ func GenerateFixture(id, answer string, expiresAt time.Time) (Fixture, error) {
 		drawGlyph(canvas, answer[i], x, firstGlyphY)
 	}
 
+	// A synthetic black line crosses the center row of all five glyphs.
+	// It is fixture noise only; no recognition or answer inference is done.
+	noiseY := firstGlyphY + 3*glyphScale
+	noiseStart := firstGlyphX - 4
+	noiseEnd := firstGlyphX + DigitCount*(glyphWidth*glyphScale+glyphGap) - glyphGap + 4
+	for x := noiseStart; x < noiseEnd; x++ {
+		canvas.SetRGBA(x, noiseY, Noise)
+	}
+
 	var encoded bytes.Buffer
 	if err := png.Encode(&encoded, canvas); err != nil {
 		return Fixture{}, fmt.Errorf("encode mock fixture PNG: %w", err)
