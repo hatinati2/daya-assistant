@@ -54,8 +54,10 @@ This matches the earlier observed HTTP 400 group-state rejection. The dispatcher
 - `dayaOrderAPICapable()` intentionally remains `false`; the API execution option is disabled.
 - A server-side dispatcher is now wired to the scheduler, but it exits before loading credentials or making any network request while the capability gate is closed.
 - The dormant dispatch path builds a POST using the fixed Daya endpoint and allowlisted session cookies only; redirects are not followed.
-- A 4xx response is recorded as a definite rejection. A 2xx response is **not** marked as a confirmed order because the success schema is not verified; it becomes `submission_unknown`.
+- Response HTTP status, Daya `requestId` (when returned), response timestamp, and broker message are persisted on the local order and displayed in history.
+- A 4xx response is recorded as a rejection; the observed group-state message is normalized for display. A 2xx response is **not** marked as a confirmed order because the success schema and broker order ID are not verified; it becomes `submission_unknown`.
 - Network errors, 3xx responses, 5xx responses, and service restarts during submission are treated as ambiguous. Automatic retry is deliberately not performed to avoid duplicate orders.
+- An authenticated operator can reconcile `submission_unknown` after manually checking the official Daya panel. A confirmed registration requires a broker order ID; the action is local-only and never resubmits.
 - The session monitor continues to perform read-only `GET /orders` checks only.
 - The Preview `/daya-api-test` page remains a loopback-only mock and does not use saved broker credentials.
 
