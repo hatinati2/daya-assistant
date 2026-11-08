@@ -137,3 +137,70 @@ func TestDayaOrderBookedConfirmationRejectsIncompleteRecord(t *testing.T) {
 		t.Fatalf("incomplete confirmation was accepted: %#v", got)
 	}
 }
+
+func TestDayaEntryAcknowledgementIsPendingUntilBooked(t *testing.T) {
+	expected := Order{
+		ExecutionMode: executionModeAPI,
+		ISIN:          "IRT1FPAF0001",
+		Side:          "buy",
+		Price:         9707,
+		Quantity:      617,
+	}
+	body := []byte(`{
+		"orderFunction":"ENTRY",
+		"orderStatus":"SENT_TO_TRADING_ENGINE",
+		"orderId":1787906,
+		"hostOrderNumber":null,
+		"instrumentId":"IRT1FPAF0001",
+		"orderPrice":9707,
+		"orderQuantity":617,
+		"orderValidityType":"JUST_TODAY",
+		"orderSide":"BUY",
+		"orderValidityDate":null,
+		"errorCode":null,
+		"errorText":null
+	}`)
+
+	got := classifyDayaOrderResponseForOrder(http.StatusOK, body, &expected)
+	if got.Status != statusSubmissionPending || got.BrokerOrderID != "1787906" || got.BrokerHostOrderNumber != 0 {
+		t.Fatalf("ENTRY acknowledgement must be pending, got %#v", got)
+	}
+
+	wrong := expected
+	wrong.Price++
+	got = classifyDayaOrderResponseForOrder(http.StatusOK, body, &wrong)
+	if got.Status != statusSubmissionUnknown || got.BrokerOrderID != "" {
+		t.Fatalf("ENTRY for a different order must remain unknown: %#v", got)
+	}
+}
+
+func TestFetchDayaOrdersIsReadOnlyAndUsesSessionCookies(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet || r.URL.Path != "/orders" {
+			t.Errorf("unexpected order-list request: %s %s", r.Method, r.URL.Path)
+		}
+		if cookie, err := r.Cookie("token"); err != nil || cookie.Value != "current-token" {
+			t.Errorf("current token cookie missing")
+		}
+		if cookie, err := r.Cookie("cookiesession1"); err != nil || cookie.Value != "captcha-session" {
+			t.Errorf("captcha session cookie missing")
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte("[]"))
+	}))
+	defer server.Close()
+
+	session := DayaSession{
+		Token: "current-token",
+		Cookies: []DayaSessionCookie{
+			{Name: "token", Value: "stale-token"},
+			{Name: "cookiesession1", Value: "captcha-session"},
+			{Name: "unrelated", Value: "must-not-be-sent"},
+		},
+	}
+	status, body, err := fetchDayaOrders(context.Background(), monitorTestClient(server), session)
+	if err != nil || status != http.StatusOK || string(body) != "[]" {
+		t.Fatalf("GET /orders result status=%d body=%q err=%v", status, body, err)
+	}
+}
