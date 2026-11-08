@@ -40,6 +40,12 @@ On 2026-11-08, a manual order attempt in the Daya panel during the reported clos
 
 This matches the earlier observed HTTP 400 group-state rejection. The dispatcher now recognizes this Persian rejection text when returned as plain text as well as through the structured JSON error parser. It still does not imply that all requests made outside trading hours are necessarily discarded or that another endpoint cannot queue an order.
 
+## Observed confirmation record
+
+A redacted broker order record supplied by the operator contains `orderFunction=CONFIRMATION`, `orderStatus=BOOKED`, numeric `orderId`, numeric `hostOrderNumber`, and the submitted instrument/price/quantity/side/validity fields. The implementation now recognizes a 2xx confirmation only when the record says `CONFIRMATION` and `BOOKED`, both identifiers are present, and instrument, side, price, quantity, and validity exactly match the local order. Both identifiers are persisted and displayed in order history.
+
+The sample's source endpoint is not yet established: it may be the immediate POST response or a subsequent order-list result. This record therefore improves the response parser but does not by itself prove the POST response contract.
+
 ## Still unverified
 
 - Full required headers and authentication requirements for order creation.
