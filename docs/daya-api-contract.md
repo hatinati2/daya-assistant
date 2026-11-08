@@ -76,14 +76,14 @@ The operator clarified that the supplied fragments came from different panels of
 
 The latest full Response panel for the POST confirms an ENTRY / SENT_TO_TRADING_ENGINE record. The ENTRY and BOOKED examples have different broker order IDs because several test orders were deleted and re-created between captures; they are separate orders and must not be correlated. The separate GET /orders capture independently confirms the BOOKED record shape.
 
-The code recognizes a matching ENTRY acknowledgement as `submission_pending` and a matching CONFIRMATION/BOOKED row as order-book registration. Matching requires the same broker `orderId`; the differing IDs in the supplied examples are expected because they came from different re-created orders. After BOOKED, the read-only poller continues checking the same broker order ID and updates the local order to `partially_filled` or `filled` from the broker's traded and remaining quantity fields. It never correlates records solely by symbol, side, price, or quantity.
+The code recognizes a matching ENTRY acknowledgement as `submission_pending` and a matching CONFIRMATION/BOOKED row as order-book registration. Matching requires the same broker `orderId`; the differing IDs in the supplied examples are expected because they came from different re-created orders. After BOOKED, no further polling or execution tracking is performed. The broker order ID is used only to confirm the pending ENTRY acknowledgement.
 
 ## Current implementation and gate
 
 - The order model, scheduling, batching, persistence, status lifecycle, calendar, and symbol search are implemented independently of the broker.
 - Manual execution remains available.
 - A server-side dispatcher is present, but `dayaOrderAPICapable()` remains hard-coded to `false`; it exits before loading credentials or making a network request.
-- The session monitor performs read-only `GET /orders` checks. It does not submit, modify, or cancel orders.
+- The confirmation check performs read-only `GET /orders` only while an ENTRY acknowledgement is pending. It does not submit, modify, or cancel orders.
 - No live order has been submitted by the implementation.
 - A matching ENTRY HTTP 2xx is recorded as pending, not confirmed or executed. A matching CONFIRMATION/BOOKED record is required for local registration. Once registered, the read-only GET /orders poller persists fill counters and tracks partial/full execution. An arbitrary or unrecognized HTTP 2xx remains ambiguous. Ambiguous results must not be automatically retried.
 
