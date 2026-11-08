@@ -136,7 +136,7 @@ func (s *Store) reconcileAPIOrder(id, resolution, brokerOrderID, message string,
 			return errors.New("نتیجه بررسی دستی معتبر نیست")
 		}
 		order.BrokerMessage = message
-		order.BrokerResponseAt = now
+		order.ReconciledAt = now
 		order.UpdatedAt = now
 		if err := s.saveLocked(); err != nil {
 			*order = old
