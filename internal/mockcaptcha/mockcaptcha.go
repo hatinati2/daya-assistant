@@ -141,6 +141,53 @@ func ValidateFixtureAnswer(f Fixture, submitted string, now time.Time) error {
 	return nil
 }
 
+// ColorDensity contains exact RGB-pixel counts inside one generator-authored
+// segment rectangle. It is intended for QA telemetry of synthetic fixtures;
+// the rectangle is supplied as ground truth and is never detected from pixels.
+type ColorDensity struct {
+	Index       int
+	BluePixels  int
+	BlackPixels int
+	WhitePixels int
+}
+
+// AnalyzeFixtureColors decodes a generated fixture and counts pure-blue,
+// pure-black, and pure-white pixels inside its known segment boxes. It does
+// not segment arbitrary images, infer characters, or return an answer.
+func AnalyzeFixtureColors(f Fixture) ([]ColorDensity, error) {
+	boxes, err := SegmentBoxes(f)
+	if err != nil || len(f.PNG) == 0 {
+		return nil, ErrInvalidFixture
+	}
+	img, err := png.Decode(bytes.NewReader(f.PNG))
+	if err != nil {
+		return nil, fmt.Errorf("decode mock fixture PNG: %w", err)
+	}
+
+	metrics := make([]ColorDensity, len(boxes))
+	for i, box := range boxes {
+		box = box.Intersect(img.Bounds())
+		if box.Empty() {
+			return nil, ErrInvalidFixture
+		}
+		metrics[i].Index = i
+		for y := box.Min.Y; y < box.Max.Y; y++ {
+			for x := box.Min.X; x < box.Max.X; x++ {
+				pixel := color.RGBAModel.Convert(img.At(x, y)).(color.RGBA)
+				switch {
+				case pixel.R == 0 && pixel.G == 0 && pixel.B == 255 && pixel.A == 255:
+					metrics[i].BluePixels++
+				case pixel.R == 0 && pixel.G == 0 && pixel.B == 0 && pixel.A == 255:
+					metrics[i].BlackPixels++
+				case pixel.R == 255 && pixel.G == 255 && pixel.B == 255 && pixel.A == 255:
+					metrics[i].WhitePixels++
+				}
+			}
+		}
+	}
+	return metrics, nil
+}
+
 // SegmentBoxes returns the fixture's known layout for assertions in rendering
 // tests. These boxes are authored during drawing and are not image-derived.
 func SegmentBoxes(f Fixture) ([]image.Rectangle, error) {
