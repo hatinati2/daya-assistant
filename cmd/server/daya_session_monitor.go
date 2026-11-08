@@ -6,13 +6,15 @@ import (
 	"encoding/binary"
 	"errors"
 	"io"
+	"log"
 	"net/http"
 	"sync"
 	"time"
 )
 
 const (
-	dayaOrdersURL  = dayaAPIOrigin + "/orders"
+	dayaOrdersURL    = dayaAPIOrigin + "/orders"
+	dayaPortfolioURL = dayaAPIOrigin + "/financials/portfolio/instant"
 	dayaMonitorMin = time.Minute
 	dayaMonitorMax = 7 * time.Minute
 )
@@ -25,6 +27,127 @@ type DayaMonitorSnapshot struct {
 	LastStatus int       `json:"last_status,omitempty"`
 	Checks     uint64    `json:"checks"`
 	LastError  string    `json:"last_error,omitempty"`
+}
+
+type DayaEndpointVerificationResult struct {
+	Method           string  `json:"method"`
+	Path             string  `json:"path"`
+	StatusCode       int     `json:"status_code"`
+	LatencyMS        float64 `json:"latency_ms"`
+	SetCookiePresent bool    `json:"set_cookie_present"`
+	SetCookieCount   int     `json:"set_cookie_count"`
+	SessionRotated   bool    `json:"session_rotated"`
+	SessionPersisted bool    `json:"session_persisted"`
+	Error            string  `json:"error,omitempty"`
+}
+
+type DayaEndpointVerificationReport struct {
+	CheckedAt time.Time                         `json:"checked_at"`
+	Results   []DayaEndpointVerificationResult `json:"results"`
+}
+
+// VerifyCurrentEndpoints makes exactly one explicit GET request to each
+// verified read-only endpoint. It never retries or follows redirects. Latency
+// is measured from request dispatch until response headers arrive. Only
+// allowlisted session cookies are processed; cookie values are never logged.
+func (m *DayaSessionMonitor) VerifyCurrentEndpoints(ctx context.Context, session DayaSession) (DayaSession, DayaEndpointVerificationReport) {
+	report := DayaEndpointVerificationReport{
+		CheckedAt: time.Now().UTC(),
+		Results:   make([]DayaEndpointVerificationResult, 0, 2),
+	}
+	if session.Token == "" {
+		report.Results = append(report.Results,
+			DayaEndpointVerificationResult{Method: http.MethodGet, Path: "/orders", Error: "نشست فعال موجود نیست"},
+			DayaEndpointVerificationResult{Method: http.MethodGet, Path: "/financials/portfolio/instant", Error: "نشست فعال موجود نیست"},
+		)
+		return session, report
+	}
+
+	endpoints := []struct {
+		path string
+		url  string
+	}{
+		{path: "/orders", url: dayaOrdersURL},
+		{path: "/financials/portfolio/instant", url: dayaPortfolioURL},
+	}
+
+	m.mu.Lock()
+	update := m.update
+	client := *m.http
+	m.mu.Unlock()
+	// Force one transport-level request per endpoint: redirects are returned
+	// as responses rather than followed, and no implicit cookie jar is used.
+	client.CheckRedirect = func(*http.Request, []*http.Request) error {
+		return http.ErrUseLastResponse
+	}
+	client.Jar = nil
+
+	for _, endpoint := range endpoints {
+		result := DayaEndpointVerificationResult{
+			Method: http.MethodGet,
+			Path:   endpoint.path,
+		}
+		req, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint.url, nil)
+		if err != nil {
+			result.Error = "ساخت درخواست بررسی ناموفق بود"
+			report.Results = append(report.Results, result)
+			log.Printf("daya endpoint verification method=GET path=%s status=0 latency_ms=0 set_cookie=false error=request_build", endpoint.path)
+			continue
+		}
+		req.Header.Set("Accept", "application/json")
+		for _, cookie := range session.Cookies {
+			if (cookie.Name == "token" || cookie.Name == "cookiesession1") && cookie.Value != "" {
+				req.AddCookie(cookie.httpCookie())
+			}
+		}
+
+		started := time.Now()
+		resp, requestErr := client.Do(req)
+		result.LatencyMS = float64(time.Since(started).Microseconds()) / 1000
+		if requestErr != nil {
+			result.Error = "ارتباط با endpoint برقرار نشد"
+			report.Results = append(report.Results, result)
+			log.Printf("daya endpoint verification method=GET path=%s status=0 latency_ms=%.3f set_cookie=false error=request", endpoint.path, result.LatencyMS)
+			continue
+		}
+
+		result.StatusCode = resp.StatusCode
+		setCookieHeaders := resp.Header.Values("Set-Cookie")
+		result.SetCookieCount = len(setCookieHeaders)
+		result.SetCookiePresent = result.SetCookieCount > 0
+
+		receivedCookies := resp.Cookies()
+		if len(receivedCookies) > 0 {
+			candidate := session
+			candidate.Cookies = append([]DayaSessionCookie(nil), session.Cookies...)
+			rotated, applyErr := dayaApplySessionCookies(&candidate, receivedCookies, time.Now().UTC())
+			if applyErr != nil {
+				result.Error = "کوکی بازگشتی قابل اعتبارسنجی نبود"
+			} else if rotated {
+				result.SessionRotated = true
+				if update != nil {
+					if saveErr := update(candidate); saveErr != nil {
+						result.Error = "ذخیره امن تغییر نشست ناموفق بود"
+					} else {
+						result.SessionPersisted = true
+						session = candidate
+					}
+				} else {
+					session = candidate
+				}
+			}
+		}
+
+		_, _ = io.Copy(io.Discard, io.LimitReader(resp.Body, 2<<20))
+		_ = resp.Body.Close()
+		report.Results = append(report.Results, result)
+		log.Printf(
+			"daya endpoint verification method=GET path=%s status=%d latency_ms=%.3f set_cookie=%t set_cookie_count=%d session_rotated=%t session_persisted=%t",
+			result.Path, result.StatusCode, result.LatencyMS, result.SetCookiePresent,
+			result.SetCookieCount, result.SessionRotated, result.SessionPersisted,
+		)
+	}
+	return session, report
 }
 
 type DayaSessionMonitor struct {
