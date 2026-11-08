@@ -1376,7 +1376,18 @@ func main() {
 			sessionMonitor.Stop(false, "بررسی دستی endpointها در حال انجام است")
 		}
 		updated, report := sessionMonitor.VerifyCurrentEndpoints(ctx, session)
-		if monitorWasRunning {
+		resumeMonitor := monitorWasRunning
+		for _, result := range report.Results {
+			switch result.StatusCode {
+			case http.StatusUnauthorized, http.StatusForbidden:
+				resumeMonitor = false
+				sessionMonitor.Stop(true, "نشست توسط دایا پذیرفته نشد؛ ورود دستی لازم است")
+			case http.StatusTooManyRequests:
+				resumeMonitor = false
+				sessionMonitor.Stop(false, "دایا محدودیت درخواست اعلام کرد؛ پایش متوقف شد")
+			}
+		}
+		if resumeMonitor {
 			// Restart with any officially rotated cookies persisted by the
 			// explicit check, even when neither endpoint rotated the session.
 			if err := sessionMonitor.Start(context.Background(), updated); err != nil {
