@@ -11,9 +11,9 @@ import (
 
 func TestParseDayaLiveOrderTestFormBuildsOnlyValidatedOneShotPayload(t *testing.T) {
 	form := url.Values{
-		"isin": {"IR0000000001"},
-		"side": {"buy"},
-		"price": {"12345"},
+		"isin":     {"IR0000000001"},
+		"side":     {"buy"},
+		"price":    {"12345"},
 		"quantity": {"2"},
 	}
 	req := httptest.NewRequest(http.MethodPost, "/daya-online-test/one/send", strings.NewReader(form.Encode()))
