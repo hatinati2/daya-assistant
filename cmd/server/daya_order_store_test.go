@@ -250,4 +250,3 @@ func TestPendingAPIOrdersIncludesOnlyEntryAcknowledgements(t *testing.T) {
 		t.Fatalf("pending API orders = %#v, want only ENTRY acknowledgement", got)
 	}
 }
-
