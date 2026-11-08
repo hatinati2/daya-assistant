@@ -63,10 +63,10 @@ type DayaOrderOutcome struct {
 }
 
 func (s *Store) completeAPIOrder(id string, outcome DayaOrderOutcome) error {
-	if outcome.Status != statusSubmitted && outcome.Status != statusSubmissionFailed && outcome.Status != statusSubmissionUnknown {
+	if outcome.Status != statusSubmitted && outcome.Status != statusSubmissionPending && outcome.Status != statusSubmissionFailed && outcome.Status != statusSubmissionUnknown {
 		return errors.New("وضعیت نهایی ارسال سفارش نامعتبر است")
 	}
-	if outcome.Status == statusSubmitted && strings.TrimSpace(outcome.BrokerOrderID) == "" {
+	if (outcome.Status == statusSubmitted || outcome.Status == statusSubmissionPending) && strings.TrimSpace(outcome.BrokerOrderID) == "" {
 		return errors.New("برای تأیید ثبت سفارش، شناسه سفارش دایا الزامی است")
 	}
 	s.mu.Lock()
@@ -76,8 +76,10 @@ func (s *Store) completeAPIOrder(id string, outcome DayaOrderOutcome) error {
 		if order.ID != id {
 			continue
 		}
-		if order.Status != statusSubmitting || order.ExecutionMode != executionModeAPI {
-			return errors.New("سفارش در وضعیت ارسال API نیست")
+		validSourceState := order.Status == statusSubmitting ||
+			(order.Status == statusSubmissionPending && outcome.Status == statusSubmitted)
+		if !validSourceState || order.ExecutionMode != executionModeAPI {
+			return errors.New("سفارش در وضعیت معتبر برای ثبت نتیجه API نیست")
 		}
 		old := *order
 		order.Status = outcome.Status
@@ -100,6 +102,18 @@ func (s *Store) completeAPIOrder(id string, outcome DayaOrderOutcome) error {
 	return errors.New("سفارش پیدا نشد")
 }
 
+func (s *Store) pendingAPIOrders() []Order {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	out := make([]Order, 0)
+	for _, order := range s.orders {
+		if order.ExecutionMode == executionModeAPI && order.Status == statusSubmissionPending && order.BrokerOrderID != "" {
+			out = append(out, order)
+		}
+	}
+	return out
+}
+
 func (s *Store) reconcileAPIOrder(id, resolution, brokerOrderID, message string, now time.Time) error {
 	id = strings.TrimSpace(id)
 	brokerOrderID = strings.TrimSpace(brokerOrderID)
@@ -117,8 +131,9 @@ func (s *Store) reconcileAPIOrder(id, resolution, brokerOrderID, message string,
 		if order.ID != id {
 			continue
 		}
-		if order.ExecutionMode != executionModeAPI || order.Status != statusSubmissionUnknown {
-			return errors.New("فقط سفارش API با نتیجه نامشخص قابل تطبیق دستی است")
+		if order.ExecutionMode != executionModeAPI ||
+			(order.Status != statusSubmissionUnknown && order.Status != statusSubmissionPending) {
+			return errors.New("فقط سفارش API در انتظار تأیید یا با نتیجه نامشخص قابل تطبیق دستی است")
 		}
 		old := *order
 		switch resolution {
