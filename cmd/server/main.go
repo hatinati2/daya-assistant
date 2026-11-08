@@ -531,7 +531,7 @@ th{font-size:10px;color:#667085}.tablewrap{overflow:auto}.tablewrap tbody td{fon
 .reconcile-form button{padding:6px 8px;font-size:10px;background:#175cd3}
 @media(max-width:900px){.grid{grid-template-columns:1fr}.head{align-items:flex-start;gap:10px;flex-direction:column}}@media(max-width:560px){.form-grid{grid-template-columns:1fr}.form-field.wide,.form-grid>.wide{grid-column:auto}.batch-plan-controls{grid-template-columns:1fr}}
 </style></head><body data-jyear="{{.JYear}}" data-jmonth="{{.JMonth}}" data-jday="{{.JDay}}"><main class="wrap">
-<div class="head"><div><h1>دستیار دایا</h1><div class="muted" style="margin-top:7px">مدیریت سفارش‌ها · ساعت تهران</div></div><div class="nav"><a class="{{if not .History}}active{{end}}" href="/">سفارش‌های فعال</a><a class="{{if .History}}active{{end}}" href="/history">تاریخچه</a><a href="/settings">اتصال به دایا</a>{{if .PreviewMode}}<a href="/daya-api-test">تست API محلی</a>{{end}}</div><span class="tag">{{if .APIAvailable}}ارسال واقعی API فعال است{{else}}ارسال واقعی API غیرفعال است{{end}}</span></div>
+<div class="head"><div><h1>دستیار دایا</h1><div class="muted" style="margin-top:7px">مدیریت سفارش‌ها · ساعت تهران</div></div><div class="nav"><a class="{{if not .History}}active{{end}}" href="/">سفارش‌های فعال</a><a class="{{if .History}}active{{end}}" href="/history">تاریخچه</a><a href="/settings">اتصال به دایا</a>{{if .PreviewMode}}<a href="/daya-api-test">تست API محلی</a><a href="/daya-online-test">تست آنلاین دایا</a>{{end}}</div><span class="tag">{{if .APIAvailable}}ارسال واقعی API فعال است{{else}}ارسال واقعی API غیرفعال است{{end}}</span></div>
 <div class="note"><b>دو مسیر اجرا:</b> مسیر «بدون API» سفارش را برای ثبت دستی آماده می‌کند. مسیر «با API» تا زمان تأیید endpoint و ساختار درخواست سفارش دایا غیرفعال است؛ مدل سفارش و زمان‌بندی آماده‌اند.</div>
 {{if .Error}}<div class="msg err">{{.Error}}</div>{{end}}{{if .Notice}}<div class="msg">{{.Notice}}</div>{{end}}
 <div class="grid{{if .History}} history{{end}}">{{if not .History}}<section class="card"><h2>تعریف سفارش</h2>
@@ -1208,6 +1208,7 @@ func main() {
 	mux := http.NewServeMux()
 	previewMode := strings.EqualFold(env("DAYA_PREVIEW_MODE", "false"), "true")
 	registerDayaLocalOrderTestRoutes(mux, previewMode)
+	registerDayaOnlineTestRoutes(mux, previewMode, credentials)
 	registerDayaOrderReconciliationRoute(mux, store)
 	mux.HandleFunc("GET /api/server-time", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
