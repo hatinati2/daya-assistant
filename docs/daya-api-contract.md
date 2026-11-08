@@ -28,6 +28,10 @@ The currently available evidence records these fragments:
 The method, URL, HTTP status, and one actual response body are now confirmed. The captured POST returned HTTP `200 OK` with an `ENTRY / SENT_TO_TRADING_ENGINE` record, a positive broker `orderId`, `hostOrderNumber: null`, and empty `errorCode`/`errorText`. The response echoed the submitted instrument, side, price, quantity, and validity values. This proves that this particular request reached the trading engine and received an ENTRY acknowledgement; it does not prove final BOOKED confirmation or a trade execution. The exact required headers, whether the observed session cookies are sufficient in general, and the full accepted enum set remain unverified.
 
 
+## Meaning of BOOKED versus execution
+
+The latest observed `GET /orders` Preview contains a `CONFIRMATION / BOOKED` row with `matchedQuantity: 0`, `tradedQuantity: 0`, `tradedPrice: 0`, and `remainingQuantityOfTheOrder` equal to the submitted quantity. The operator clarified the exchange lifecycle: BOOKED means the order has been registered in the order book; execution happens later only when a counterparty order matches. Thus registration and execution are separate states. The broker fields `matchedQuantity`, `tradedQuantity`, `tradedPrice`, and remaining quantity are execution-progress data, not proof of a fill when zero. The current dispatcher confirms broker registration only; it does not yet track fill progress or declare the order traded.
+
 ## Observed confirmation/order record
 
 A redacted order record supplied during implementation contains these fields:
