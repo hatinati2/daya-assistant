@@ -476,17 +476,12 @@ func (d *DayaOrderDispatcher) reconcilePendingOrders(ctx context.Context) error 
 					BrokerOrderID:         order.BrokerOrderID,
 					BrokerHostOrderNumber: record.HostOrderNumber,
 					HTTPStatus:            status,
-					Message:               "ثبت سفارش در دایا تأیید شد؛ پایش مقدار معامله‌شده و باقی‌مانده ادامه دارد.",
+					Message:               "ثبت سفارش در دفتر سفارش‌های دایا با وضعیت BOOKED تأیید شد.",
 					ReceivedAt:            now,
 				}
 				if err := d.store.completeAPIOrder(order.ID, outcome); err != nil {
 					log.Printf("Daya confirmation persistence failed for local order %q: %v", order.ID, err)
 					break
-				}
-			}
-			if record.TradedQuantity != nil {
-				if err := d.store.updateAPIOrderExecution(order.ID, record, now); err != nil {
-					log.Printf("Daya execution progress persistence failed for local order %q: %v", order.ID, err)
 				}
 			}
 			break
