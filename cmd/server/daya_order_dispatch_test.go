@@ -87,3 +87,53 @@ func TestDayaDispatcherDoesNothingWhileLiveGateIsClosed(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+func TestDayaOrderBookedConfirmationRequiresFullMatch(t *testing.T) {
+	expected := Order{
+		ExecutionMode: executionModeAPI,
+		ISIN:          "IRT1FPAF0001",
+		Side:          "buy",
+		Price:         9707,
+		Quantity:      617,
+	}
+	body := []byte(`[{
+		"orderFunction":"CONFIRMATION",
+		"orderStatus":"BOOKED",
+		"orderId":12345,
+		"hostOrderNumber":6789,
+		"instrumentId":"IRT1FPAF0001",
+		"orderPrice":9707,
+		"orderQuantity":617,
+		"orderValidityType":"JUST_TODAY",
+		"orderSide":"BUY",
+		"orderValidityDate":null
+	}]`)
+
+	got := classifyDayaOrderResponseForOrder(http.StatusOK, body, &expected)
+	if got.Status != statusSubmitted || got.BrokerOrderID != "12345" || got.BrokerHostOrderNumber != 6789 {
+		t.Fatalf("matching BOOKED confirmation was not recognized: %#v", got)
+	}
+
+	// A 2xx payload must remain ambiguous when it belongs to a different order.
+	wrongOrder := expected
+	wrongOrder.Quantity++
+	got = classifyDayaOrderResponseForOrder(http.StatusOK, body, &wrongOrder)
+	if got.Status != statusSubmissionUnknown || got.BrokerOrderID != "" {
+		t.Fatalf("non-matching BOOKED record was treated as this order: %#v", got)
+	}
+
+	// The same confirmation record cannot be attributed without the submitted
+	// order context, preventing an arbitrary order-history row being accepted.
+	got = classifyDayaOrderResponse(http.StatusOK, body)
+	if got.Status != statusSubmissionUnknown || got.BrokerOrderID != "" {
+		t.Fatalf("BOOKED row without matching context was confirmed: %#v", got)
+	}
+}
+
+func TestDayaOrderBookedConfirmationRejectsIncompleteRecord(t *testing.T) {
+	expected := Order{ExecutionMode: executionModeAPI, ISIN: "IRT1FPAF0001", Side: "buy", Price: 9707, Quantity: 617}
+	body := []byte(`{"orderFunction":"CONFIRMATION","orderStatus":"BOOKED","orderId":0,"hostOrderNumber":6789,"instrumentId":"IRT1FPAF0001","orderPrice":9707,"orderQuantity":617,"orderValidityType":"JUST_TODAY","orderSide":"BUY","orderValidityDate":null}`)
+	got := classifyDayaOrderResponseForOrder(http.StatusOK, body, &expected)
+	if got.Status != statusSubmissionUnknown || got.BrokerOrderID != "" {
+		t.Fatalf("incomplete confirmation was accepted: %#v", got)
+	}
+}
