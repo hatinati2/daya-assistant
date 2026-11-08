@@ -317,10 +317,22 @@ func fetchDayaOrders(ctx context.Context, client *http.Client, session DayaSessi
 	if err != nil {
 		return 0, nil, fmt.Errorf("ساخت درخواست خواندن سفارش‌های دایا ناموفق بود")
 	}
+	seen := make(map[string]bool, 2)
 	for _, cookie := range session.Cookies {
-		if (cookie.Name == "token" || cookie.Name == "cookiesession1") && cookie.Value != "" {
-			req.AddCookie(cookie.httpCookie())
+		if cookie.Name != "token" && cookie.Name != "cookiesession1" {
+			continue
 		}
+		if cookie.Name == "token" {
+			cookie.Value = session.Token
+		}
+		if cookie.Value == "" || seen[cookie.Name] {
+			continue
+		}
+		seen[cookie.Name] = true
+		req.AddCookie(cookie.httpCookie())
+	}
+	if !seen["token"] {
+		req.AddCookie(&http.Cookie{Name: "token", Value: session.Token})
 	}
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Origin", dayaWebOrigin)
