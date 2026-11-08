@@ -15,8 +15,8 @@ import (
 const (
 	dayaOrdersURL    = dayaAPIOrigin + "/orders"
 	dayaPortfolioURL = dayaAPIOrigin + "/financials/portfolio/instant"
-	dayaMonitorMin = time.Minute
-	dayaMonitorMax = 7 * time.Minute
+	dayaMonitorMin   = time.Minute
+	dayaMonitorMax   = 7 * time.Minute
 )
 
 type DayaMonitorSnapshot struct {
@@ -103,7 +103,7 @@ func (m *DayaSessionMonitor) VerifyCurrentEndpoints(ctx context.Context, session
 
 		started := time.Now()
 		resp, requestErr := client.Do(req)
-		result.LatencyMS = float64(time.Since(started).Microseconds()) / 1000
+		result.LatencyMS = float64(time.Since(started)) / float64(time.Millisecond)
 		if requestErr != nil {
 			result.Error = "ارتباط با endpoint برقرار نشد"
 			report.Results = append(report.Results, result)
