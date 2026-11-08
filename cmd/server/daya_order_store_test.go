@@ -152,7 +152,7 @@ func TestClaimReadyAPIOrdersRollsBackWhenPersistenceFails(t *testing.T) {
 }
 
 func TestReconcileAPIOrderRequiresBrokerIDToConfirmRegistration(t *testing.T) {
-	store := &Store{orders: []Order{{ID: "unknown", ExecutionMode: executionModeAPI, Status: statusSubmissionUnknown}}}
+	store := &Store{path: filepath.Join(t.TempDir(), "orders.json"), orders: []Order{{ID: "unknown", ExecutionMode: executionModeAPI, Status: statusSubmissionUnknown}}}
 	now := time.Now().In(tehran())
 	if err := store.reconcileAPIOrder("unknown", "registered", "", "", now); err == nil {
 		t.Fatal("expected broker order ID to be required")
@@ -169,7 +169,7 @@ func TestReconcileAPIOrderRequiresBrokerIDToConfirmRegistration(t *testing.T) {
 }
 
 func TestReconcileAPIOrderCanRecordManualRejection(t *testing.T) {
-	store := &Store{orders: []Order{{ID: "unknown", ExecutionMode: executionModeAPI, Status: statusSubmissionUnknown}}}
+	store := &Store{path: filepath.Join(t.TempDir(), "orders.json"), orders: []Order{{ID: "unknown", ExecutionMode: executionModeAPI, Status: statusSubmissionUnknown}}}
 	now := time.Now().In(tehran())
 	if err := store.reconcileAPIOrder("unknown", "rejected", "", "ثبت نشد", now); err != nil {
 		t.Fatal(err)
