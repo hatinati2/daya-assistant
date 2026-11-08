@@ -142,8 +142,8 @@ func (s *Store) addMany(orders []Order) error {
 	return nil
 }
 
-// clearHistory removes terminal history entries while preserving every
-// active order, including broker-BOOKED orders that are still waiting for a counterparty.
+// clearHistory removes terminal history entries while preserving scheduled,
+// in-flight, and unresolved orders. BOOKED is terminal for this application.
 func (s *Store) clearHistory() error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
