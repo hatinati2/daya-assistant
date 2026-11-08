@@ -77,7 +77,6 @@ func TestDayaMonitorSendsBothCookiesAndStopsOnUnauthorized(t *testing.T) {
 	defer server.Close()
 
 	m := NewDayaSessionMonitor(monitorTestClient(server))
-	m.windowCheck = func(time.Time) (bool, time.Duration) { return true, 0 }
 	m.interval = func() (time.Duration, error) {
 		return time.Millisecond, nil
 	}
@@ -103,7 +102,6 @@ func TestDayaMonitorPersistsRotatedToken(t *testing.T) {
 
 	saved := make(chan DayaSession, 1)
 	m := NewDayaSessionMonitor(monitorTestClient(server))
-	m.windowCheck = func(time.Time) (bool, time.Duration) { return true, 0 }
 	m.interval = func() (time.Duration, error) {
 		return time.Millisecond, nil
 	}
@@ -135,7 +133,6 @@ func TestDayaMonitorDoesNotExtendExpiryWithoutCookieRotation(t *testing.T) {
 
 	saved := make(chan DayaSession, 1)
 	m := NewDayaSessionMonitor(monitorTestClient(server))
-	m.windowCheck = func(time.Time) (bool, time.Duration) { return true, 0 }
 	m.interval = func() (time.Duration, error) {
 		return time.Millisecond, nil
 	}
@@ -164,7 +161,6 @@ func TestDayaMonitorStopsOnRateLimit(t *testing.T) {
 	defer server.Close()
 
 	m := NewDayaSessionMonitor(monitorTestClient(server))
-	m.windowCheck = func(time.Time) (bool, time.Duration) { return true, 0 }
 	m.interval = func() (time.Duration, error) {
 		return time.Millisecond, nil
 	}
@@ -191,36 +187,8 @@ func TestDayaApplySessionCookiesIgnoresUnrelatedCookies(t *testing.T) {
 	}
 }
 
-func TestDayaMonitorWindowUsesTehranTime(t *testing.T) {
-	location := tehran()
-	tests := []struct {
-		name   string
-		hour   int
-		minute int
-		open   bool
-	}{
-		{name: "before closing boundary", hour: 1, minute: 59, open: true},
-		{name: "closing boundary", hour: 2, minute: 0, open: false},
-		{name: "before opening boundary", hour: 15, minute: 29, open: false},
-		{name: "opening boundary", hour: 15, minute: 30, open: true},
-		{name: "evening", hour: 22, minute: 0, open: true},
-	}
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			now := time.Date(2026, time.November, 7, test.hour, test.minute, 0, 0, location)
-			open, wait := dayaMonitorWindow(now)
-			if open != test.open {
-				t.Fatalf("window open=%v, want %v", open, test.open)
-			}
-			if !open && wait <= 0 {
-				t.Fatalf("closed window must return positive wait, got %v", wait)
-			}
-		})
-	}
-}
-
-func TestDayaMonitorWaitsForWindowThenChecks(t *testing.T) {
-	requests := make(chan struct{}, 1)
+func TestDayaMonitorPollsRepeatedlyWithoutTimeOfDayGate(t *testing.T) {
+	requests := make(chan struct{}, 2)
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet || r.URL.Path != "/orders" {
 			t.Errorf("unexpected request %s %s", r.Method, r.URL.Path)
@@ -231,37 +199,25 @@ func TestDayaMonitorWaitsForWindowThenChecks(t *testing.T) {
 	defer server.Close()
 
 	m := NewDayaSessionMonitor(monitorTestClient(server))
-	var windowChecks int
-	m.windowCheck = func(time.Time) (bool, time.Duration) {
-		windowChecks++
-		if windowChecks == 1 {
-			return false, 60 * time.Millisecond
-		}
-		return true, 0
-	}
 	m.interval = func() (time.Duration, error) {
-		return time.Millisecond, nil
+		return 5 * time.Millisecond, nil
 	}
 	if err := m.Start(context.Background(), monitorSession()); err != nil {
 		t.Fatal(err)
 	}
 	defer m.Stop(false, "test done")
 
-	select {
-	case <-requests:
-		t.Fatal("monitor must not call Daya while the monitoring window is closed")
-	case <-time.After(20 * time.Millisecond):
-	}
-
-	select {
-	case <-requests:
-		snapshot := waitForMonitor(t, m, func(s DayaMonitorSnapshot) bool {
-			return s.Checks > 0
-		})
-		if snapshot.LastStatus != http.StatusOK {
-			t.Fatalf("unexpected response status: %d", snapshot.LastStatus)
+	for i := 0; i < 2; i++ {
+		select {
+		case <-requests:
+		case <-time.After(time.Second):
+			t.Fatalf("monitor did not perform polling request %d", i+1)
 		}
-	case <-time.After(time.Second):
-		t.Fatal("monitor did not resume checks after the window opened")
+	}
+	snapshot := waitForMonitor(t, m, func(s DayaMonitorSnapshot) bool {
+		return s.Checks >= 2
+	})
+	if snapshot.LastStatus != http.StatusOK || !snapshot.Running {
+		t.Fatalf("unexpected monitor state after repeated polling: %#v", snapshot)
 	}
 }
