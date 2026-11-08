@@ -32,13 +32,12 @@ func TestNewDayaOrderRequestUsesObservedEndpointAndSessionCookies(t *testing.T) 
 		t.Fatalf("request target = %s %s", req.Method, req.URL)
 	}
 	for name, want := range map[string]string{
-		"Accept": "application/json",
-		"Content-Type": "application/json",
-		"Origin": dayaWebOrigin,
-		"Referer": dayaWebOrigin + "/",
+		"Accept":        "application/json",
+		"Content-Type":  "application/json",
+		"Origin":        dayaWebOrigin,
+		"Referer":       dayaWebOrigin + "/",
+		"User-Agent":    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36",
 		"x-client-type": "WEB_CLIENT",
-			"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36",
-		"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36",
 	} {
 		if got := req.Header.Get(name); got != want {
 			t.Errorf("%s = %q, want %q", name, got, want)
@@ -193,21 +192,11 @@ func TestFetchDayaOrdersIsReadOnlyAndUsesSessionCookies(t *testing.T) {
 			t.Errorf("unexpected order-list request: %s %s", r.Method, r.URL.Path)
 		}
 		for name, want := range map[string]string{
-			"Accept": "application/json",
-			"Content-Type": "application/json",
-			"Origin": dayaWebOrigin,
-			"Referer": dayaWebOrigin + "/",
-			"x-client-type": "WEB_CLIENT",
-		} {
-			if got := r.Header.Get(name); got != want {
-				t.Errorf("%s = %q, want %q", name, got, want)
-			}
-		}
-		for name, want := range map[string]string{
-			"Accept": "application/json",
-			"Content-Type": "application/json",
-			"Origin": dayaWebOrigin,
-			"Referer": dayaWebOrigin + "/",
+			"Accept":        "application/json",
+			"Content-Type":  "application/json",
+			"Origin":        dayaWebOrigin,
+			"Referer":       dayaWebOrigin + "/",
+			"User-Agent":    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36",
 			"x-client-type": "WEB_CLIENT",
 		} {
 			if got := r.Header.Get(name); got != want {
