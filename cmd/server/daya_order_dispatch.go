@@ -2,9 +2,9 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
-	"encoding/json"
 	"log"
 	"net/http"
 	"strings"
