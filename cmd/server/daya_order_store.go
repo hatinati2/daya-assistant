@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"strings"
 	"time"
 )
 
@@ -46,9 +47,21 @@ func (s *Store) claimReadyAPIOrders(now time.Time) ([]Order, error) {
 	return claimed, nil
 }
 
-func (s *Store) completeAPIOrder(id, finalStatus, brokerOrderID, message string, now time.Time) error {
-	if finalStatus != statusSubmitted && finalStatus != statusSubmissionFailed && finalStatus != statusSubmissionUnknown {
+type DayaOrderOutcome struct {
+	Status         string
+	HTTPStatus     int
+	RequestID      string
+	BrokerOrderID  string
+	Message        string
+	ReceivedAt     time.Time
+}
+
+func (s *Store) completeAPIOrder(id string, outcome DayaOrderOutcome) error {
+	if outcome.Status != statusSubmitted && outcome.Status != statusSubmissionFailed && outcome.Status != statusSubmissionUnknown {
 		return errors.New("وضعیت نهایی ارسال سفارش نامعتبر است")
+	}
+	if outcome.Status == statusSubmitted && strings.TrimSpace(outcome.BrokerOrderID) == "" {
+		return errors.New("برای تأیید ثبت سفارش، شناسه سفارش دایا الزامی است")
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -57,14 +70,20 @@ func (s *Store) completeAPIOrder(id, finalStatus, brokerOrderID, message string,
 		if order.ID != id {
 			continue
 		}
-		if order.Status != statusSubmitting {
-			return errors.New("سفارش در وضعیت ارسال نیست")
+		if order.Status != statusSubmitting || order.ExecutionMode != executionModeAPI {
+			return errors.New("سفارش در وضعیت ارسال API نیست")
 		}
 		old := *order
-		order.Status = finalStatus
-		order.BrokerOrderID = brokerOrderID
-		order.BrokerMessage = message
-		order.UpdatedAt = now
+		order.Status = outcome.Status
+		order.BrokerOrderID = strings.TrimSpace(outcome.BrokerOrderID)
+		order.BrokerRequestID = strings.TrimSpace(outcome.RequestID)
+		order.BrokerHTTPStatus = outcome.HTTPStatus
+		order.BrokerMessage = outcome.Message
+		order.BrokerResponseAt = outcome.ReceivedAt
+		order.UpdatedAt = outcome.ReceivedAt
+		if order.UpdatedAt.IsZero() {
+			order.UpdatedAt = time.Now().In(tehran())
+		}
 		if err := s.saveLocked(); err != nil {
 			*order = old
 			return err
