@@ -45,7 +45,7 @@ table{border-collapse:collapse;width:100%;margin-top:14px}td{padding:9px;border-
 <body><main>
 <h1>تست آنلاین اتصال به کارگزاری دایا</h1>
 <div class="muted">این تست از سرور Preview و نشست رمزنگاری‌شدهٔ ذخیره‌شده استفاده می‌کند.</div>
-<nav><a href="/">سفارش‌ها</a><a href="/settings">اتصال به دایا</a><a href="/daya-api-test">تست ساختگی محلی</a></nav>
+<nav><a href="/">سفارش‌ها</a><a href="/settings">اتصال به دایا</a><a href="/daya-api-test">تست ساختگی محلی</a><a href="/daya-online-test/one">ارسال یک سفارش واقعی</a></nav>
 <div class="warning"><b>مرز تست:</b> با فشردن دکمه فقط درخواست واقعی و خواندنی GET /orders به سرور دایا فرستاده می‌شود. هیچ POST /orders، خرید، فروش، لغو یا تغییری در سفارش‌ها انجام نمی‌شود. پاسخ خام، شناسه‌ها، قیمت‌ها، تعدادها و کوکی‌ها در این صفحه نمایش داده نمی‌شوند.</div>
 <section class="card">
 <h2>بررسی ارتباط و نشست</h2>
