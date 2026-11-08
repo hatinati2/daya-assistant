@@ -112,7 +112,7 @@ func (s *Store) pendingAPIOrders() []Order {
 			continue
 		}
 		switch order.Status {
-		case statusSubmissionPending, statusSubmitted, statusPartiallyFilled:
+		case statusSubmissionPending:
 			out = append(out, order)
 		}
 	}
