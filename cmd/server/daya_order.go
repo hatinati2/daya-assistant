@@ -1,9 +1,9 @@
 package main
 
-// A POST /orders request and ENTRY / SENT_TO_TRADING_ENGINE acknowledgement
-// are now observed. Required authentication details and the final BOOKED
-// confirmation/reconciliation source remain unverified, so live dispatch
-// stays disabled until those parts are captured and reviewed.
+import "strings"
+
+// Live Daya API dispatch is enabled only in the isolated Preview environment.
+// Production remains fail-closed even if this code is deployed there.
 func dayaOrderAPICapable() bool {
-	return false
+	return strings.EqualFold(env("DAYA_PREVIEW_MODE", "false"), "true")
 }
