@@ -1182,6 +1182,11 @@ func main() {
 		}
 	}()
 
+	// The dispatcher is connected to the scheduler, but its live capability
+	// gate remains closed in daya_order.go until the broker contract is verified.
+	orderDispatcher := NewDayaOrderDispatcher(store, credentials)
+	go orderDispatcher.Run(context.Background())
+
 	mux := http.NewServeMux()
 	previewMode := strings.EqualFold(env("DAYA_PREVIEW_MODE", "false"), "true")
 	registerDayaLocalOrderTestRoutes(mux, previewMode)
