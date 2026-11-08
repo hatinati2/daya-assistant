@@ -55,11 +55,11 @@ type Order struct {
 	BrokerResponseAt      time.Time `json:"broker_response_at,omitempty"`
 	ReconciledAt          time.Time `json:"reconciled_at,omitempty"`
 	BrokerMessage         string    `json:"broker_message,omitempty"`
-	BrokerMatchedQuantity *int64    `json:"broker_matched_quantity,omitempty"`
-	BrokerTradedQuantity  *int64    `json:"broker_traded_quantity,omitempty"`
-	BrokerTradedPrice     *int64    `json:"broker_traded_price,omitempty"`
-	BrokerRemainingQuantity *int64  `json:"broker_remaining_quantity,omitempty"`
-	BrokerProgressAt      time.Time `json:"broker_progress_at,omitempty"`
+	BrokerMatchedQuantity   *int64    `json:"broker_matched_quantity,omitempty"`
+	BrokerTradedQuantity    *int64    `json:"broker_traded_quantity,omitempty"`
+	BrokerTradedPrice       *int64    `json:"broker_traded_price,omitempty"`
+	BrokerRemainingQuantity *int64    `json:"broker_remaining_quantity,omitempty"`
+	BrokerProgressAt        time.Time `json:"broker_progress_at,omitempty"`
 	AttemptedAt           time.Time `json:"attempted_at,omitempty"`
 	CreatedAt             time.Time `json:"created_at"`
 	UpdatedAt             time.Time `json:"updated_at"`
