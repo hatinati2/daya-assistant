@@ -205,3 +205,17 @@ func TestFetchDayaOrdersIsReadOnlyAndUsesSessionCookies(t *testing.T) {
 		t.Fatalf("GET /orders result status=%d body=%q err=%v", status, body, err)
 	}
 }
+
+func TestResumePendingPollingClearsStopAndSchedule(t *testing.T) {
+	d := &DayaOrderDispatcher{
+		pendingPollingStopped: true,
+		nextPendingPoll:       time.Now().Add(time.Hour),
+	}
+	d.ResumePendingPolling()
+	if d.pendingPollingStopped {
+		t.Fatal("fresh login must resume read-only confirmation polling")
+	}
+	if !d.nextPendingPoll.IsZero() {
+		t.Fatalf("pending poll schedule was not reset: %v", d.nextPendingPoll)
+	}
+}
