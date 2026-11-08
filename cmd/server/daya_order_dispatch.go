@@ -288,7 +288,7 @@ func classifyDayaOrderResponseForOrder(status int, body []byte, expected *Order)
 				outcome.Status = statusSubmitted
 				outcome.BrokerOrderID = fmt.Sprintf("%d", record.OrderID)
 				outcome.BrokerHostOrderNumber = record.HostOrderNumber
-				outcome.Message = "سفارش با وضعیت BOOKED و تطبیق کامل مشخصات سفارش در پاسخ دایا تأیید شد."
+				outcome.Message = "سفارش با وضعیت BOOKED در دایا ثبت شد؛ این وضعیت به معنی انجام معامله نیست و تا تطبیق با سفارش مقابل باید فعال بماند."
 				return outcome
 			}
 			if dayaEntryAcknowledgementMatches(record, expected) {
@@ -469,7 +469,7 @@ func (d *DayaOrderDispatcher) reconcilePendingOrders(ctx context.Context) error 
 				BrokerOrderID:         order.BrokerOrderID,
 				BrokerHostOrderNumber: record.HostOrderNumber,
 				HTTPStatus:            status,
-				Message:               "تأیید نهایی دایا: CONFIRMATION/BOOKED با شناسه منطبق در GET /orders.",
+				Message:               "ثبت سفارش در دایا تأیید شد: CONFIRMATION/BOOKED با شناسه منطبق در GET /orders؛ انجام معامله جداگانه از روی مقادیر معامله‌شده پیگیری می‌شود.",
 				ReceivedAt:            now,
 			}
 			if err := d.store.completeAPIOrder(order.ID, outcome); err != nil {
