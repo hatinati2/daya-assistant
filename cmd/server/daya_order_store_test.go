@@ -151,7 +151,6 @@ func TestClaimReadyAPIOrdersRollsBackWhenPersistenceFails(t *testing.T) {
 	}
 }
 
-
 func TestReconcileAPIOrderRequiresBrokerIDToConfirmRegistration(t *testing.T) {
 	store := &Store{orders: []Order{{ID: "unknown", ExecutionMode: executionModeAPI, Status: statusSubmissionUnknown}}}
 	now := time.Now().In(tehran())
