@@ -125,7 +125,7 @@ button{border:0;border-radius:8px;background:#175cd3;color:#fff;padding:10px 14p
 <div class="foot">بررسی بعدی: <time id="daya-monitor-next">{{if not .Monitor.NextCheck.IsZero}}{{.Monitor.NextCheck.Format "2006-01-02 15:04:05 MST"}}{{else}}—{{end}}</time> · پایش شبانه‌روزی با فاصله تصادفی ۱ تا ۷ دقیقه</div>
 <p id="daya-monitor-error" class="foot">{{.Monitor.LastError}}</p>
 {{if .PreviewMode}}
-<div class="row"><button type="button" id="daya-verify-endpoints">بررسی دستی مسیرهای نشست</button></div>
+<div class="row"><button type="button" id="daya-verify-endpoints" {{if not .HasSession}}disabled title="ابتدا وارد دایا شوید"{{end}}>بررسی دستی مسیرهای نشست</button></div>
 <pre id="daya-verify-results" class="foot" aria-live="polite" style="white-space:pre-wrap;margin-top:10px"></pre>
 {{end}}
 </section>
