@@ -243,7 +243,7 @@ func dayaEntryAcknowledgementMatches(record dayaOrderConfirmationRecord, expecte
 		record.OrderStatus == "SENT_TO_TRADING_ENGINE" &&
 		record.OrderID > 0 &&
 		record.HostOrderNumber == 0 &&
-	
+		dayaConfirmationMatches(record, expected)
 }
 
 // classifyDayaOrderResponse keeps the legacy no-context call fail-closed.
