@@ -30,7 +30,7 @@ The method, URL, HTTP status, and one actual response body are now confirmed. Th
 
 ## Meaning of BOOKED versus execution
 
-The latest observed `GET /orders` Preview contains a `CONFIRMATION / BOOKED` row with `matchedQuantity: 0`, `tradedQuantity: 0`, `tradedPrice: 0`, and `remainingQuantityOfTheOrder` equal to the submitted quantity. BOOKED means the order is registered in the order book; execution happens later only when a counterparty order matches. The implementation now continues read-only polling after BOOKED and records `matchedQuantity`, `tradedQuantity`, `tradedPrice`, and `remainingQuantityOfTheOrder` when present. It distinguishes an unfilled registered order, a partially filled order, and a fully filled order. Partial/full counter transitions are covered by local mock tests; real partial/full snapshots have not yet been captured.
+The latest observed `GET /orders` Preview contains a `CONFIRMATION / BOOKED` row with `matchedQuantity: 0`, `tradedQuantity: 0`, `tradedPrice: 0`, and `remainingQuantityOfTheOrder` equal to the submitted quantity. BOOKED means the order is registered in the order book; execution happens later only when a counterparty order matches. The implementation checks for a matching BOOKED record only while an ENTRY acknowledgement is pending. Once BOOKED is confirmed, tracking stops; execution and fill progress are outside scope.
 
 ## Observed confirmation/order record
 
@@ -85,7 +85,7 @@ The code recognizes a matching ENTRY acknowledgement as `submission_pending` and
 - A server-side dispatcher is present, but `dayaOrderAPICapable()` remains hard-coded to `false`; it exits before loading credentials or making a network request.
 - The confirmation check performs read-only `GET /orders` only while an ENTRY acknowledgement is pending. It does not submit, modify, or cancel orders.
 - No live order has been submitted by the implementation.
-- A matching ENTRY HTTP 2xx is recorded as pending, not confirmed or executed. A matching CONFIRMATION/BOOKED record is required for local registration. Once registered, the read-only GET /orders poller persists fill counters and tracks partial/full execution. An arbitrary or unrecognized HTTP 2xx remains ambiguous. Ambiguous results must not be automatically retried.
+- A matching ENTRY HTTP 2xx is recorded as pending, not confirmed or executed. A matching CONFIRMATION/BOOKED record is required for local registration. The read-only GET /orders check stops after registration is confirmed. An arbitrary or unrecognized HTTP 2xx remains ambiguous. Ambiguous results must not be automatically retried.
 
 ## Fastest safe next step: sanitized browser capture
 
@@ -104,4 +104,4 @@ To finish the contract without sharing credentials or trade details:
 
 The sanitizer is a defensive aid, not a guarantee: manually remove any newly introduced sensitive field before sharing. Never send the raw HAR, Cookie, Set-Cookie, Authorization, token, username, password, account number, or customer ID.
 
-The ENTRY response shape and the separate read-only GET /orders BOOKED shape are captured and supported by the conservative adapter. The adapter now polls registered orders for execution progress and persists fill counters. Real partial-fill and full-fill snapshots, plus complete POST authentication/header requirements, remain to be verified before any separate review of the live capability gate.
+The ENTRY response shape and the separate read-only GET /orders BOOKED shape are captured and supported by the conservative adapter. The adapter stops checking after BOOKED confirmation. Complete POST authentication/header requirements remain to be verified before any separate review of the live capability gate.
