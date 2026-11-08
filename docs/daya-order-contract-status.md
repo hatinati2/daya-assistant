@@ -32,6 +32,14 @@ A browser request returned HTTP 400 from `/orders` with the message:
 
 This proves only that one observed request reached the endpoint and was rejected for a group-state condition. It does not establish the successful response schema.
 
+## Additional observed rejection
+
+On 2026-11-08, a manual order attempt in the Daya panel during the reported closed-group period displayed:
+
+> امكان ثبت سفارش با توجه به وضعيت كروه وجود ندارد
+
+This matches the earlier observed HTTP 400 group-state rejection. The dispatcher now recognizes this Persian rejection text when returned as plain text as well as through the structured JSON error parser. It still does not imply that all requests made outside trading hours are necessarily discarded or that another endpoint cannot queue an order.
+
 ## Still unverified
 
 - Full required headers and authentication requirements for order creation.
