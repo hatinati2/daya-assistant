@@ -15,13 +15,13 @@ import (
 // is wired into the Preview/Production process, but the live capability gate
 // remains fail-closed in daya_order.go until the broker contract is verified.
 type DayaOrderDispatcher struct {
-	store       *Store
-	credentials *DayaCredentialStore
-	http        *http.Client
-	liveEnabled          func() bool
-	now                  func() time.Time
-	nextPendingPoll      time.Time
-	pendingPollInterval  func() (time.Duration, error)
+	store                 *Store
+	credentials           *DayaCredentialStore
+	http                  *http.Client
+	liveEnabled           func() bool
+	now                   func() time.Time
+	nextPendingPoll       time.Time
+	pendingPollInterval   func() (time.Duration, error)
 	pendingPollingStopped bool
 }
 
@@ -172,16 +172,16 @@ func postDayaOrder(ctx context.Context, client *http.Client, session DayaSession
 // It may be returned directly or as an array. It is not assumed to be the
 // immediate POST response unless it matches the exact submitted order.
 type dayaOrderConfirmationRecord struct {
-	OrderFunction      string  `json:"orderFunction"`
-	OrderStatus        string  `json:"orderStatus"`
-	OrderID            int64   `json:"orderId"`
-	HostOrderNumber    int64   `json:"hostOrderNumber"`
-	InstrumentID       string  `json:"instrumentId"`
-	OrderPrice         int64   `json:"orderPrice"`
-	OrderQuantity      int64   `json:"orderQuantity"`
-	OrderSide          string  `json:"orderSide"`
-	OrderValidityType  string  `json:"orderValidityType"`
-	OrderValidityDate  *string `json:"orderValidityDate"`
+	OrderFunction     string  `json:"orderFunction"`
+	OrderStatus       string  `json:"orderStatus"`
+	OrderID           int64   `json:"orderId"`
+	HostOrderNumber   int64   `json:"hostOrderNumber"`
+	InstrumentID      string  `json:"instrumentId"`
+	OrderPrice        int64   `json:"orderPrice"`
+	OrderQuantity     int64   `json:"orderQuantity"`
+	OrderSide         string  `json:"orderSide"`
+	OrderValidityType string  `json:"orderValidityType"`
+	OrderValidityDate *string `json:"orderValidityDate"`
 }
 
 // decodeDayaConfirmationRecords accepts only the observed direct object or
@@ -419,10 +419,12 @@ func (d *DayaOrderDispatcher) reconcilePendingOrders(ctx context.Context) error 
 				continue
 			}
 			outcome := DayaOrderOutcome{
-				Status: statusSubmitted, BrokerOrderID: order.BrokerOrderID,
+				Status:                statusSubmitted,
+				BrokerOrderID:         order.BrokerOrderID,
 				BrokerHostOrderNumber: record.HostOrderNumber,
-				HTTPStatus: status, Message: "تأیید نهایی دایا: CONFIRMATION/BOOKED با شناسه منطبق در GET /orders.",
-				ReceivedAt: now,
+				HTTPStatus:            status,
+				Message:               "تأیید نهایی دایا: CONFIRMATION/BOOKED با شناسه منطبق در GET /orders.",
+				ReceivedAt:            now,
 			}
 			if err := d.store.completeAPIOrder(order.ID, outcome); err != nil {
 				log.Printf("Daya confirmation persistence failed for local order %q: %v", order.ID, err)
