@@ -1311,7 +1311,7 @@ func main() {
 		} else if r.URL.Query().Get("notice") == "daya_login_ok" {
 			notice = "ورود عادی به دایا موفق بود و نشست رمزنگاری‌شده ذخیره شد."
 		}
-		credentials.RenderWithMonitor(w, "", notice, sessionMonitor.Snapshot())
+		credentials.RenderWithMonitorMode(w, "", notice, sessionMonitor.Snapshot(), previewMode)
 	})
 	mux.HandleFunc("POST /settings/daya-credentials", func(w http.ResponseWriter, r *http.Request) {
 		if !sameOrigin(r) {
@@ -1347,6 +1347,42 @@ func main() {
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.Header().Set("Cache-Control", "no-store")
 		_ = json.NewEncoder(w).Encode(sessionMonitor.Snapshot())
+	})
+
+	mux.HandleFunc("POST /api/daya/verify-endpoints", func(w http.ResponseWriter, r *http.Request) {
+		if !previewMode {
+			http.NotFound(w, r)
+			return
+		}
+		if !sameOrigin(r) {
+			http.Error(w, "درخواست نامعتبر", http.StatusForbidden)
+			return
+		}
+		session, _, err := credentials.LoadAccessSession()
+		if err != nil {
+			http.Error(w, "خواندن نشست دایا ناموفق بود", http.StatusInternalServerError)
+			return
+		}
+		if session.Token == "" || (!session.ExpiresAt.IsZero() && !session.ExpiresAt.After(time.Now())) {
+			http.Error(w, "نشست معتبر دایا موجود نیست؛ ابتدا ورود عادی را انجام بده", http.StatusConflict)
+			return
+		}
+		ctx, cancel := context.WithTimeout(r.Context(), 45*time.Second)
+		defer cancel()
+		updated, report := sessionMonitor.VerifyCurrentEndpoints(ctx, session)
+		for _, result := range report.Results {
+			if result.SessionPersisted {
+				// Keep the long-running read-only monitor aligned with any
+				// officially rotated cookies persisted by this explicit check.
+				if err := sessionMonitor.Start(context.Background(), updated); err != nil {
+					log.Printf("restart Daya session monitor after explicit verification failed")
+				}
+				break
+			}
+		}
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.Header().Set("Cache-Control", "no-store")
+		_ = json.NewEncoder(w).Encode(report)
 	})
 	mux.HandleFunc("GET /api/daya/captcha", func(w http.ResponseWriter, r *http.Request) {
 		ctx, cancel := context.WithTimeout(r.Context(), 12*time.Second)
