@@ -61,6 +61,20 @@ func TestDayaOrderResponseClassificationFailsClosed(t *testing.T) {
 	}
 }
 
+func TestDayaOrderResponseRecognizesRealGroupStateRejection(t *testing.T) {
+	body := []byte("امكان ثبت سفارش با توجه به وضعيت كروه وجود ندارد")
+	status, brokerID, message := classifyDayaOrderResponse(http.StatusBadRequest, body)
+	if status != statusSubmissionFailed {
+		t.Fatalf("status=%q, want definite submission failure", status)
+	}
+	if brokerID != "" {
+		t.Fatalf("broker order ID=%q, want empty", brokerID)
+	}
+	if message != "امکان ثبت سفارش با توجه به وضعیت گروه وجود ندارد" {
+		t.Fatalf("message=%q", message)
+	}
+}
+
 func TestDayaDispatcherDoesNothingWhileLiveGateIsClosed(t *testing.T) {
 	dispatcher := &DayaOrderDispatcher{
 		liveEnabled: func() bool { return false },
