@@ -48,12 +48,12 @@ func (s *Store) claimReadyAPIOrders(now time.Time) ([]Order, error) {
 }
 
 type DayaOrderOutcome struct {
-	Status         string
-	HTTPStatus     int
-	RequestID      string
-	BrokerOrderID  string
-	Message        string
-	ReceivedAt     time.Time
+	Status        string
+	HTTPStatus    int
+	RequestID     string
+	BrokerOrderID string
+	Message       string
+	ReceivedAt    time.Time
 }
 
 func (s *Store) completeAPIOrder(id string, outcome DayaOrderOutcome) error {
@@ -92,7 +92,6 @@ func (s *Store) completeAPIOrder(id string, outcome DayaOrderOutcome) error {
 	}
 	return errors.New("سفارش پیدا نشد")
 }
-
 
 func (s *Store) reconcileAPIOrder(id, resolution, brokerOrderID, message string, now time.Time) error {
 	id = strings.TrimSpace(id)
