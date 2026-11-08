@@ -27,6 +27,22 @@ The currently available evidence records these fragments:
 
 This is not a complete authenticated request/response capture. In particular, the exact required headers, whether the observed session cookies are sufficient for order submission, the accepted enum values, and the successful response schema have not been verified from a successful broker response. The request shape in code is therefore a candidate adapter contract, not proof that the broker will accept it.
 
+
+## Observed confirmation/order record
+
+A redacted order record supplied during implementation contains these fields:
+
+- `orderFunction: CONFIRMATION`
+- `orderStatus: BOOKED`
+- `orderId`: broker order identifier
+- `hostOrderNumber`: separate host-side order number
+- `instrumentId`, `orderPrice`, `orderQuantity`, `orderSide`
+- `orderValidityType: JUST_TODAY`
+- `orderValidityDate: null`
+- `errorCode: null` and `errorText: null`
+
+This establishes the shape of a confirmation/booked order record. It does **not** establish whether the sample came from the immediate `POST /orders` response or from a subsequent read of the order list. The code therefore recognizes it only when it appears in a 2xx dispatch response **and** its instrument, side, price, quantity, and validity exactly match the local order being dispatched. It stores both the broker `orderId` and `hostOrderNumber`. A response that does not match remains ambiguous.
+
 ## Current implementation and gate
 
 - The order model, scheduling, batching, persistence, status lifecycle, calendar, and symbol search are implemented independently of the broker.
