@@ -36,7 +36,7 @@ func TestNewDayaOrderRequestUsesObservedEndpointAndSessionCookies(t *testing.T) 
 		"Content-Type":  "application/json",
 		"Origin":        dayaWebOrigin,
 		"Referer":       dayaWebOrigin + "/",
-		"User-Agent":    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36",
+		"User-Agent":    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
 		"x-client-type": "WEB_CLIENT",
 	} {
 		if got := req.Header.Get(name); got != want {
@@ -196,7 +196,7 @@ func TestFetchDayaOrdersIsReadOnlyAndUsesSessionCookies(t *testing.T) {
 			"Content-Type":  "application/json",
 			"Origin":        dayaWebOrigin,
 			"Referer":       dayaWebOrigin + "/",
-			"User-Agent":    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36",
+			"User-Agent":    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
 			"x-client-type": "WEB_CLIENT",
 		} {
 			if got := r.Header.Get(name); got != want {
