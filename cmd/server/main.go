@@ -1369,15 +1369,18 @@ func main() {
 		}
 		ctx, cancel := context.WithTimeout(r.Context(), 45*time.Second)
 		defer cancel()
+		// Pause the periodic poller during this user-triggered two-request
+		// check so its traffic cannot overlap with the explicit telemetry.
+		monitorWasRunning := sessionMonitor.Snapshot().Running
+		if monitorWasRunning {
+			sessionMonitor.Stop(false, "بررسی دستی endpointها در حال انجام است")
+		}
 		updated, report := sessionMonitor.VerifyCurrentEndpoints(ctx, session)
-		for _, result := range report.Results {
-			if result.SessionPersisted {
-				// Keep the long-running read-only monitor aligned with any
-				// officially rotated cookies persisted by this explicit check.
-				if err := sessionMonitor.Start(context.Background(), updated); err != nil {
-					log.Printf("restart Daya session monitor after explicit verification failed")
-				}
-				break
+		if monitorWasRunning {
+			// Restart with any officially rotated cookies persisted by the
+			// explicit check, even when neither endpoint rotated the session.
+			if err := sessionMonitor.Start(context.Background(), updated); err != nil {
+				log.Printf("restart Daya session monitor after explicit verification failed")
 			}
 		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
