@@ -19,7 +19,7 @@ Daya Assistant is independent from Rabin Assistant in repository, process, confi
 - The Daya CAPTCHA image and challenge ID are fetched together; its session cookie is held server-side in short-lived memory.
 - CAPTCHA answer is manually entered and is not stored.
 - Daya's `token` and CAPTCHA `cookiesession1` cookies are encrypted together with AES-256-GCM using a separate 32-byte key file. Session-store v2 remains backward-compatible with encrypted v1 token-only records.
-- The session monitor sends only a read-only `GET /orders` at a cryptographically randomized 1–7 minute interval, only between 15:30 and 02:00 Tehran time, and only stores allowlisted cookies returned by Daya through `Set-Cookie`.
+- The session monitor sends only a read-only `GET /orders` around the clock at a cryptographically randomized 1–7 minute interval, and only stores allowlisted cookies returned by Daya through `Set-Cookie`. It stops at the known session expiry unless Daya returns a valid rotated cookie; polling does not bypass a hard token expiry.
 - A successful GET is not treated as proof of token renewal. Expiry is extended only when a refreshed token cookie includes a new Max-Age/Expires value or a later JWT expiration.
 - HTTP 401/403 stops monitoring and requires a new manual CAPTCHA login. HTTP 429 stops monitoring without aggressive retries.
 - Passwords, cookies, tokens, and CAPTCHA answers must never be committed to Git or printed in logs.
