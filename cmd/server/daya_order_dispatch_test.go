@@ -53,9 +53,12 @@ func TestDayaOrderResponseClassificationFailsClosed(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			got, _, message := classifyDayaOrderResponse(test.status, []byte(`{"status":400,"message":"rejected"}`))
-			if got != test.wantStatus {
-				t.Fatalf("status=%q, want %q (message: %s)", got, test.wantStatus, message)
+			got := classifyDayaOrderResponse(test.status, []byte(`{"status":400,"message":"rejected","requestId":"req-test"}`))
+			if got.Status != test.wantStatus {
+				t.Fatalf("status=%q, want %q (message: %s)", got.Status, test.wantStatus, got.Message)
+			}
+			if got.HTTPStatus != test.status || got.RequestID != "req-test" {
+				t.Fatalf("response metadata not preserved: %#v", got)
 			}
 		})
 	}
@@ -63,15 +66,15 @@ func TestDayaOrderResponseClassificationFailsClosed(t *testing.T) {
 
 func TestDayaOrderResponseRecognizesRealGroupStateRejection(t *testing.T) {
 	body := []byte("امكان ثبت سفارش با توجه به وضعيت كروه وجود ندارد")
-	status, brokerID, message := classifyDayaOrderResponse(http.StatusBadRequest, body)
-	if status != statusSubmissionFailed {
-		t.Fatalf("status=%q, want definite submission failure", status)
+	outcome := classifyDayaOrderResponse(http.StatusBadRequest, body)
+	if outcome.Status != statusSubmissionFailed {
+		t.Fatalf("status=%q, want definite submission failure", outcome.Status)
 	}
-	if brokerID != "" {
-		t.Fatalf("broker order ID=%q, want empty", brokerID)
+	if outcome.BrokerOrderID != "" {
+		t.Fatalf("broker order ID=%q, want empty", outcome.BrokerOrderID)
 	}
-	if message != "امکان ثبت سفارش با توجه به وضعیت گروه وجود ندارد" {
-		t.Fatalf("message=%q", message)
+	if outcome.Message != "امکان ثبت سفارش با توجه به وضعیت گروه وجود ندارد" {
+		t.Fatalf("message=%q", outcome.Message)
 	}
 }
 
