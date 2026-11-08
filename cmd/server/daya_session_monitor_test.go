@@ -222,7 +222,6 @@ func TestDayaMonitorPollsRepeatedlyWithoutTimeOfDayGate(t *testing.T) {
 	}
 }
 
-
 func TestVerifyCurrentEndpointsCallsEachVerifiedGETOnceAndPersistsRotation(t *testing.T) {
 	requestCounts := map[string]int{}
 	saved := make(chan DayaSession, 2)
@@ -360,5 +359,46 @@ func TestVerifyCurrentEndpointsDoesNotFollowRedirects(t *testing.T) {
 	}
 	if len(report.Results) != 2 || report.Results[0].StatusCode != http.StatusFound {
 		t.Fatalf("redirect result = %#v, want HTTP 302 returned as-is", report.Results)
+	}
+}
+
+func TestVerifyCurrentEndpointsDoesNotPersistWhenNoSetCookieIsReturned(t *testing.T) {
+	requests := 0
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		requests++
+		if r.Method != http.MethodGet {
+			t.Errorf("method = %s, want GET", r.Method)
+		}
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer server.Close()
+
+	saved := false
+	m := NewDayaSessionMonitor(monitorTestClient(server))
+	m.SetSessionUpdater(func(DayaSession) error {
+		saved = true
+		return nil
+	})
+	_, report := m.VerifyCurrentEndpoints(context.Background(), monitorSession())
+
+	if requests != 2 {
+		t.Fatalf("request count = %d, want exactly 2", requests)
+	}
+	if len(report.Results) != 2 {
+		t.Fatalf("result count = %d, want 2", len(report.Results))
+	}
+	for _, result := range report.Results {
+		if result.StatusCode != http.StatusOK {
+			t.Errorf("%s status = %d, want 200", result.Path, result.StatusCode)
+		}
+		if result.SetCookiePresent || result.SetCookieCount != 0 {
+			t.Errorf("%s unexpectedly reports Set-Cookie: %#v", result.Path, result)
+		}
+		if result.SessionRotated || result.SessionPersisted {
+			t.Errorf("%s unexpectedly reports session rotation: %#v", result.Path, result)
+		}
+	}
+	if saved {
+		t.Fatal("session updater must not be called when no cookie was rotated")
 	}
 }
