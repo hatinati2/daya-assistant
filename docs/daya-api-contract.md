@@ -104,4 +104,4 @@ To finish the contract without sharing credentials or trade details:
 
 The sanitizer is a defensive aid, not a guarantee: manually remove any newly introduced sensitive field before sharing. Never send the raw HAR, Cookie, Set-Cookie, Authorization, token, username, password, account number, or customer ID.
 
-The ENTRY response shape is now captured and supported by the conservative adapter. Remaining work is to verify the later confirmation/reconciliation source, required headers/authentication, and behavior for rejection/ambiguity before any separate review of the live capability gate.
+The ENTRY response shape and the separate read-only GET /orders BOOKED shape are captured and supported by the conservative adapter. The adapter now polls registered orders for execution progress and persists fill counters. Real partial-fill and full-fill snapshots, plus complete POST authentication/header requirements, remain to be verified before any separate review of the live capability gate.
