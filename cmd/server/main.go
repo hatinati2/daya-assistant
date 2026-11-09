@@ -528,7 +528,55 @@ th{font-size:10px;color:#667085}.tablewrap{overflow:auto}.tablewrap tbody td{fon
 .reconcile-form select,.reconcile-form input{min-height:30px;padding:5px 7px;font-size:10px}
 .reconcile-form button{padding:6px 8px;font-size:10px;background:#175cd3}
 @media(max-width:1100px){#account-balances-panel .account-balances-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(max-width:700px){#account-balances-panel .account-balances-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:900px){.grid{grid-template-columns:1fr}.head{align-items:flex-start;gap:10px;flex-direction:column}}@media(max-width:560px){.form-grid{grid-template-columns:1fr}.form-field.wide,.form-grid>.wide{grid-column:auto}.batch-plan-controls{grid-template-columns:1fr}}
-</style></head><body data-jyear="{{.JYear}}" data-jmonth="{{.JMonth}}" data-jday="{{.JDay}}"><main class="wrap">
+
+/* Preview 03 compact workspace for laptop-height displays */
+.preview-compact .wrap{width:calc(100% - 20px);max-width:1600px;margin:9px auto;padding:0 8px}
+.preview-compact .head{gap:8px;margin-bottom:8px}
+.preview-compact h1{font-size:17px}
+.preview-compact h2{font-size:13px;margin-bottom:6px}
+.preview-compact .nav{gap:5px}
+.preview-compact .nav a{padding:5px 8px;font-size:11px}
+.preview-compact .note,.preview-compact .msg{padding:5px 8px;margin:5px 0;line-height:1.4}
+.preview-compact .card{padding:9px;border-radius:10px}
+.preview-compact .grid{gap:9px}
+.preview-compact .form-grid{gap:3px 8px}
+.preview-compact .form-field label{margin:2px 0;font-size:10px}
+.preview-compact input,.preview-compact select{min-height:31px;padding:5px 7px;border-radius:7px}
+.preview-compact button{padding:6px 9px}
+.preview-compact .form-field .foot,.preview-compact .foot{font-size:9px;line-height:1.35;margin-top:3px}
+.preview-compact .form-field .server-clock{min-height:42px;margin:2px 0;padding:5px 8px}
+.preview-compact .server-clock{gap:7px;margin:3px 0;padding:5px 8px;border-radius:9px}
+.preview-compact .server-clock-value{font-size:18px;letter-spacing:.5px}
+.preview-compact .price-range-panel{padding:5px 8px;font-size:10px;line-height:1.4}
+.preview-compact .submit{margin-top:5px}
+.preview-compact .batch-planner{margin:3px 0;padding:5px 7px}
+.preview-compact .batch-planner-body{padding-top:5px}
+.preview-compact .batch-plan-note{font-size:9px;line-height:1.4;margin-bottom:4px}
+.preview-compact .batch-plan-controls{gap:4px 8px}
+.preview-compact .batch-plan-controls label{margin:2px 0;font-size:9px}
+.preview-compact .batch-plan-controls input{min-height:29px;padding:4px 6px;font-size:11px}
+.preview-compact .batch-plan-calc{margin-top:5px;padding:5px 8px;font-size:10px}
+.preview-compact .batch-plan-result{margin-top:5px;padding:5px}
+.preview-compact th,.preview-compact td{padding:6px 5px}
+.preview-compact .tablewrap tbody td{font-size:10.5px}
+.preview-compact #account-balances-panel .account-balances-grid{gap:5px;margin-top:6px}
+.preview-compact #account-balances-panel .account-balance-item{padding:5px 6px;gap:2px}
+.preview-compact #account-balances-panel .account-balance-item strong{font-size:14px}
+@media(min-width:901px){.preview-compact .grid{grid-template-columns:minmax(430px,470px) minmax(0,1fr)}}
+@media(max-height:900px) and (min-width:901px){
+ .preview-compact .wrap{margin:6px auto}
+ .preview-compact .head{margin-bottom:5px}
+ .preview-compact .card{padding:8px}
+ .preview-compact .form-grid{gap:2px 7px}
+ .preview-compact .form-field label{margin:1px 0}
+ .preview-compact input,.preview-compact select{min-height:29px;padding:4px 6px}
+ .preview-compact .form-field .server-clock{min-height:38px}
+ .preview-compact .server-clock{padding:4px 7px}
+ .preview-compact .server-clock-value{font-size:16px}
+ .preview-compact .note,.preview-compact .msg{margin:4px 0;padding:4px 7px}
+ .preview-compact th,.preview-compact td{padding:5px 4px}
+}
+</style></head><body class="{{if .PreviewMode}}preview-compact{{end}}" data-jyear="{{.JYear}}" data-jmonth="{{.JMonth}}" data-jday="{{.JDay}}"><main class="wrap">
 <div class="head"><div><h1>دستیار دایا</h1><div class="muted" style="margin-top:7px">مدیریت سفارش‌ها · ساعت تهران</div></div><div class="nav">{{if .PreviewMode}}<a href="/dashboard">داشبورد مرکزی</a>{{end}}<a class="{{if not .History}}active{{end}}" href="/">سفارش‌های فعال</a><a class="{{if .History}}active{{end}}" href="/history">تاریخچه</a><a href="/settings">اتصال به دایا</a>{{if .PreviewMode}}<a href="/daya-online-test">تست آنلاین دایا</a><a href="/daya-latency">کالیبراسیون تأخیر</a>{{end}}</div><span class="tag">{{if .APIAvailable}}ارسال واقعی API فعال است{{else}}ارسال واقعی API غیرفعال است{{end}}</span></div>
 <div class="note"><b>دو مسیر اجرا:</b> مسیر «بدون API» سفارش را برای ثبت دستی آماده می‌کند. مسیر «با API» تا زمان تأیید endpoint و ساختار درخواست سفارش دایا غیرفعال است؛ مدل سفارش و زمان‌بندی آماده‌اند.</div>
 {{if .Error}}<div class="msg err">{{.Error}}</div>{{end}}{{if .Notice}}<div class="msg">{{.Notice}}</div>{{end}}
@@ -555,7 +603,7 @@ th{font-size:10px;color:#667085}.tablewrap{overflow:auto}.tablewrap tbody td{fon
 <div class="form-field wide"><label>مسیر ثبت سفارش</label><select id="execution-mode" name="execution_mode"><option value="manual" selected>بدون API — ثبت دستی در دایا</option><option value="api" {{if not .APIAvailable}}disabled{{end}}>با API — پس از تأیید قرارداد ارسال دایا فعال می‌شود</option></select></div>
 <div class="form-field"><label>انتخاب نماد از فهرست</label><select id="symbol-preset"><option value="">انتخاب نماد (اختیاری)</option>{{range .Symbols}}<option value="{{.Symbol}}" data-isin="{{.ISIN}}">{{.Symbol}}{{if .CompanyName}} — {{.CompanyName}}{{end}}{{if .MarketType}} ({{.MarketType}}){{end}}</option>{{end}}</select><div class="foot">{{.SymbolCatalogStatus}}</div></div>
 <div class="form-field"><label>نماد نمایشی</label><input id="order-symbol" name="symbol" maxlength="24" placeholder="نماد را حرف‌به‌حرف تایپ کن..." autocomplete="off" aria-autocomplete="list" aria-controls="market-symbol-suggestions" aria-expanded="false" required><div id="market-symbol-suggestions" class="symbol-suggestions" role="listbox" aria-label="پیشنهادهای نماد" hidden></div><div id="symbol-lookup-status" class="foot" aria-live="polite">با واردکردن هر حرف، پیشنهاد نمادها نمایش داده می‌شود.</div></div>
-<div class="form-field wide"><label>شناسه ISIN (فقط برای مسیر API)</label><input id="order-isin" name="isin" maxlength="12" minlength="12" pattern="[A-Za-z]{2}[A-Za-z0-9]{9}[0-9]" placeholder="مثلاً IR..." autocomplete="off"></div>
+<div class="form-field"><label>شناسه ISIN (فقط برای مسیر API)</label><input id="order-isin" name="isin" maxlength="12" minlength="12" pattern="[A-Za-z]{2}[A-Za-z0-9]{9}[0-9]" placeholder="مثلاً IR..." autocomplete="off"></div>
 <div class="form-field"><label>نوع سفارش</label><select name="side"><option value="buy">خرید</option><option value="sell">فروش</option></select></div>
 <div class="form-field"><label>قیمت (ریال)</label><input id="order-price" name="price" type="number" min="1" step="1" required></div><div class="form-field wide"><div id="order-symbol-price-range" class="price-range-panel" aria-live="polite">برای نمایش کف، سقف و درصد دامنه نوسان، ابتدا نماد را انتخاب کن.</div></div>
 <div class="form-field"><label>تعداد</label><input name="quantity" type="number" min="1" step="1" required></div>
