@@ -33,15 +33,15 @@ type DayaAccountBalanceEndpoint struct {
 }
 
 type DayaAccountBalanceReport struct {
-	RetrievedAt  time.Time                    `json:"retrieved_at"`
-	NeedsLogin   bool                         `json:"needs_login"`
-	BuyingPower   DayaAccountBalanceMetric     `json:"buying_power"`
-	AccountBalance DayaAccountBalanceMetric    `json:"account_balance"`
-	CashBalance   DayaAccountBalanceMetric     `json:"cash_balance"`
-	TPlus1Amount  DayaAccountBalanceMetric     `json:"t_plus_1_amount"`
-	TPlus2Amount  DayaAccountBalanceMetric     `json:"t_plus_2_amount"`
-	Withdrawable  DayaAccountBalanceMetric     `json:"withdrawable"`
-	Endpoints    []DayaAccountBalanceEndpoint `json:"endpoints"`
+	RetrievedAt    time.Time                    `json:"retrieved_at"`
+	NeedsLogin     bool                         `json:"needs_login"`
+	BuyingPower    DayaAccountBalanceMetric     `json:"buying_power"`
+	AccountBalance DayaAccountBalanceMetric     `json:"account_balance"`
+	CashBalance    DayaAccountBalanceMetric     `json:"cash_balance"`
+	TPlus1Amount   DayaAccountBalanceMetric     `json:"t_plus_1_amount"`
+	TPlus2Amount   DayaAccountBalanceMetric     `json:"t_plus_2_amount"`
+	Withdrawable   DayaAccountBalanceMetric     `json:"withdrawable"`
+	Endpoints      []DayaAccountBalanceEndpoint `json:"endpoints"`
 }
 
 type dayaBalanceEndpointData struct {
