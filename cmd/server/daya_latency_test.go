@@ -29,7 +29,6 @@ func TestSummarizeDayaLatencyEmptySamples(t *testing.T) {
 	}
 }
 
-
 func TestSummarizeDayaLatencySeparatesHTTPResponsesFromAuthenticatedSuccess(t *testing.T) {
 	got := summarizeDayaLatency([]dayaLatencySample{
 		{Mode: "authenticated", HTTPStatus: 200, RTTMillis: 120, ResponseValid: true, Authenticated: true},
