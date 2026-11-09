@@ -76,7 +76,7 @@ func TestDayaLiveOrderTestNonceIsSingleUseAndExpires(t *testing.T) {
 
 func TestDayaLiveOrderTestRouteIsPreviewOnly(t *testing.T) {
 	mux := http.NewServeMux()
-	registerDayaLiveOrderTestRoutes(mux, false, nil, nil)
+	registerDayaLiveOrderTestRoutes(mux, false, nil, nil, TSESymbolClient{})
 	recorder := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodGet, "/daya-online-test/one", nil)
 	mux.ServeHTTP(recorder, request)
