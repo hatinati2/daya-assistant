@@ -119,15 +119,14 @@ func TestDayaBuyingPowerRecognizesCreditField(t *testing.T) {
 	}
 }
 
-
 func TestDayaCollectFinancialSchemaShowsSafePathsAndTypesOnly(t *testing.T) {
 	payload := map[string]any{
 		"data": []any{
 			map[string]any{
 				"cashAvailable": "6000000",
-				"portfolio": map[string]any{"withdrawable": json.Number("4500000")},
+				"portfolio":     map[string]any{"withdrawable": json.Number("4500000")},
 				"accountNumber": "123456789",
-				"customerName": "Sensitive Name",
+				"customerName":  "Sensitive Name",
 			},
 		},
 	}
