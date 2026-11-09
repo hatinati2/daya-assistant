@@ -185,6 +185,10 @@ main,.wrap{width:calc(100% - 32px);max-width:1400px}
    ids.checks.textContent=String(d.checks||0);
    ids.lastCheck.textContent=localTime(d.last_check);
    ids.nextCheck.textContent=localTime(d.next_check);
+   ids.firstCheck.textContent=localTime(d.first_check_at);
+   ids.disconnectedAt.textContent=localTime(d.disconnected_at||d.last_disconnected_at);
+   const disconnectDuration=Number(d.disconnected_for||d.last_disconnect_duration||0);
+   ids.disconnectedFor.textContent=(d.disconnected_at||d.last_disconnected_at)?duration(disconnectDuration):"—";
    ids.lastError.textContent="جزئیات خطا: "+(d.last_error||"موردی گزارش نشده است");
   }catch(e){ids.lastError.textContent="دریافت وضعیت پایش ناموفق بود؛ "+String(e.message||e)}
  }
