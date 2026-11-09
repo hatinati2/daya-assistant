@@ -12,6 +12,7 @@ import (
 func TestParseDayaLiveOrderTestFormBuildsOnlyValidatedOneShotPayload(t *testing.T) {
 	form := url.Values{
 		"isin":     {"IR0000000001"},
+		"symbol":   {"خودرو"},
 		"side":     {"buy"},
 		"price":    {"12345"},
 		"quantity": {"2"},
@@ -25,7 +26,7 @@ func TestParseDayaLiveOrderTestFormBuildsOnlyValidatedOneShotPayload(t *testing.
 	if err != nil {
 		t.Fatal(err)
 	}
-	if order.ISIN != "IR0000000001" || order.Side != "buy" || order.Price != 12345 || order.Quantity != 2 || order.ExecutionMode != executionModeAPI {
+	if order.ISIN != "IR0000000001" || order.Symbol != "خودرو" || order.Side != "buy" || order.Price != 12345 || order.Quantity != 2 || order.ExecutionMode != executionModeAPI {
 		t.Fatalf("parsed one-shot order = %#v", order)
 	}
 	if order.Status != "" || !order.ExecuteAt.IsZero() {
