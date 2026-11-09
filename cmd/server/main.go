@@ -587,16 +587,19 @@ th{font-size:10px;color:#667085}.tablewrap{overflow:auto}.tablewrap tbody td{fon
  .preview-compact th,.preview-compact td{padding:5px 4px}
 }
  
-/* Preview 03 order history: one full-width horizontal row per order */
-.preview-compact .grid.history .history-order-list{display:flex;flex-direction:column;gap:5px;margin-top:7px;width:100%}
-.preview-compact .grid.history .history-order-row{display:grid;grid-template-columns:minmax(105px,1.1fr) minmax(82px,.8fr) minmax(55px,.55fr) minmax(165px,1.55fr) minmax(85px,.85fr) minmax(140px,1.35fr) minmax(125px,auto);align-items:center;gap:9px;width:100%;min-width:0;padding:7px 9px;background:#fff;border:1px solid #e4e7ec;border-radius:9px}
+/* Preview 03 order history: keep the list and every order row inside the full-width panel */
+.preview-compact .grid.history{display:block;width:100%;min-width:0}
+.preview-compact .grid.history>.card{display:block;width:100%;max-width:100%;min-width:0}
+.preview-compact .grid.history .history-order-list{display:flex;flex-direction:column;align-items:stretch;gap:5px;margin-top:7px;width:100%;min-width:0}
+.preview-compact .grid.history .history-order-row{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.8fr) minmax(0,.55fr) minmax(0,1.5fr) minmax(0,.8fr) minmax(0,1.25fr) auto;align-items:center;gap:7px;width:100%;max-width:100%;min-width:0;overflow:hidden;padding:7px 9px;background:#fff;border:1px solid #e4e7ec;border-radius:9px}
+.preview-compact .grid.history .history-order-row>*{min-width:0;max-width:100%;overflow-wrap:anywhere}
 .preview-compact .grid.history .history-order-symbol{display:flex;align-items:center;gap:6px;min-width:0;flex-wrap:wrap}
 .preview-compact .grid.history .history-order-symbol b{font-size:12px}
 .preview-compact .grid.history .history-order-symbol small{font-size:9px;color:#667085;direction:ltr}
 .preview-compact .grid.history .history-order-field{display:flex;flex-direction:column;gap:1px;min-width:0}
 .preview-compact .grid.history .history-order-field small{font-size:9px;color:#667085;line-height:1.2}
 .preview-compact .grid.history .history-order-field b{font-size:11px;line-height:1.35;overflow-wrap:anywhere}
-.preview-compact .grid.history .history-order-time b{white-space:nowrap;font-size:10px}
+.preview-compact .grid.history .history-order-time b{white-space:normal;font-size:10px;overflow-wrap:anywhere}
 .preview-compact .grid.history .history-order-state{min-width:0}
 .preview-compact .grid.history .history-order-state .status{white-space:normal;line-height:1.3}
 .preview-compact .grid.history .history-order-actions{display:flex;align-items:center;justify-content:flex-start;gap:5px;min-width:0;white-space:nowrap}
@@ -612,7 +615,7 @@ th{font-size:10px;color:#667085}.tablewrap{overflow:auto}.tablewrap tbody td{fon
 .preview-compact .grid.history .history-order-details-body .reconcile-form button{padding:5px 7px;font-size:10px}
 .preview-compact .grid.history .history-order-empty{width:100%;padding:18px;border:1px dashed #d0d5dd;border-radius:9px}
 @media(max-width:1050px){
- .preview-compact .grid.history .history-order-row{grid-template-columns:minmax(100px,1fr) minmax(75px,.7fr) minmax(55px,.5fr) minmax(155px,1.3fr) minmax(80px,.7fr) minmax(130px,1.2fr) minmax(125px,auto);gap:6px;padding:6px}
+ .preview-compact .grid.history .history-order-row{grid-template-columns:minmax(0,1fr) minmax(0,.75fr) minmax(0,.55fr) minmax(0,1.35fr) minmax(0,.75fr) minmax(0,1.15fr) auto;gap:5px;padding:6px}
 }
 @media(max-width:780px){
  .preview-compact .grid.history .history-order-row{grid-template-columns:repeat(3,minmax(0,1fr))}
