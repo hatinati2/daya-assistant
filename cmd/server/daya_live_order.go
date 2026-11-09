@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"html/template"
 	"net/http"
@@ -99,7 +100,7 @@ main,.wrap{width:calc(100% - 32px);max-width:1400px}
 <div class="warning"><b>این فرم درخواست واقعی POST /orders می‌فرستد.</b> سفارش وارد زمان‌بندی نمی‌شود. فقط یک بار ارسال می‌شود و در صورت نامشخص‌بودن پاسخ، هیچ ارسال مجدد خودکاری انجام نمی‌شود. سفارش ممکن است در کارگزاری ثبت شود.</div>
 <section class="card page-card">
 {{if not .Result}}
-<form method="post" action="/daya-online-test/one/send" onsubmit="return confirm('تأیید نهایی: همین یک سفارش واقعی با مشخصات واردشده به دایا ارسال شود؟')">
+<form method="post" action="/daya-online-test/one/send">
 <input type="hidden" name="submission_nonce" value="{{.Nonce}}">
 <div class="grid">
 <div class="symbol-search">
@@ -110,9 +111,10 @@ main,.wrap{width:calc(100% - 32px);max-width:1400px}
 <input type="hidden" id="selected-isin" name="isin">
 <input type="hidden" id="selected-symbol" name="symbol">
 <div id="symbol-selection" class="muted" aria-live="polite"></div>
+<div id="symbol-price-range" class="muted" aria-live="polite">پس از انتخاب نماد، کف و سقف قیمت مجاز نمایش داده می‌شود.</div>
 </div>
 <div><label>سمت</label><select name="side"><option value="buy">خرید BUY</option><option value="sell">فروش SELL</option></select></div>
-<div><label>قیمت به ریال</label><input name="price" type="number" min="1" step="1" required></div>
+<div><label>قیمت به ریال</label><input id="order-price" name="price" type="number" min="1" step="1" required></div>
 <div><label>تعداد</label><input name="quantity" type="number" min="1" step="1" required></div>
 </div>
 <label style="display:flex;gap:9px;align-items:flex-start;font-weight:normal"><input type="checkbox" name="confirm_live_order" value="yes" required><span>ارسال همین سفارش واقعی را با مشخصات بالا تأیید می‌کنم.</span></label>
@@ -140,12 +142,53 @@ ISIN: {{.Result.ISIN}} · سمت: {{.Result.Side}}<br>
   const symbolField = document.getElementById('selected-symbol');
   const results = document.getElementById('symbol-search-results');
   const selection = document.getElementById('symbol-selection');
-  if (!input || !isinField || !symbolField || !results || !selection) return;
+  const rangePanel = document.getElementById('symbol-price-range');
+  const priceInput = document.getElementById('order-price');
+  if (!input || !isinField || !symbolField || !results || !selection || !rangePanel || !priceInput) return;
   let timer = null;
   let requestNumber = 0;
+  let priceRange = null;
+  const formatPrice = (value) => new Intl.NumberFormat('fa-IR').format(value);
+  const validatePrice = () => {
+    if (!priceRange || !priceInput.value) { priceInput.setCustomValidity(''); return false; }
+    const price = Number(priceInput.value);
+    const valid = Number.isSafeInteger(price) && price >= priceRange.min_price && price <= priceRange.max_price;
+    priceInput.setCustomValidity(valid ? '' : 'قیمت باید بین کف و سقف مجاز همین نماد باشد.');
+    return valid;
+  };
+  const loadPriceRange = async (isin) => {
+    priceRange = null;
+    rangePanel.textContent = 'در حال دریافت کف و سقف مجاز قیمت از بازار...';
+    priceInput.setCustomValidity('ابتدا باید حدود قیمت معتبر بازار دریافت شود.');
+    try {
+      const response = await fetch('/api/symbols/price-range?isin=' + encodeURIComponent(isin), {
+        headers: {'Accept': 'application/json'}, credentials: 'same-origin', cache: 'no-store'
+      });
+      if (!response.ok) throw new Error('price range unavailable');
+      const data = await response.json();
+      if (!Number.isSafeInteger(data.min_price) || !Number.isSafeInteger(data.max_price) ||
+          data.min_price <= 0 || data.max_price <= data.min_price) throw new Error('invalid price range');
+      priceRange = data;
+      let percentText = '';
+      if (Number.isFinite(data.min_percent) && Number.isFinite(data.max_percent) && data.reference_price > 0) {
+        percentText = ' · دامنه نسبت به قیمت مرجع: ' + data.min_percent.toFixed(2) + '% تا ' + (data.max_percent >= 0 ? '+' : '') + data.max_percent.toFixed(2) + '%';
+      }
+      rangePanel.textContent = 'کف مجاز: ' + formatPrice(data.min_price) + ' ریال · سقف مجاز: ' +
+        formatPrice(data.max_price) + ' ریال' + percentText + ' · دریافت: ' +
+        new Date(data.updated_at).toLocaleTimeString('fa-IR');
+      validatePrice();
+    } catch (_) {
+      priceRange = null;
+      rangePanel.textContent = 'دریافت حدود قیمت از بازار ممکن نشد؛ برای جلوگیری از ارسال با قیمت نامعتبر، فعلاً سفارش قابل ارسال نیست.';
+      priceInput.setCustomValidity('اطلاعات به‌روز کف و سقف قیمت در دسترس نیست.');
+    }
+  };
   const clearSelection = () => {
     isinField.value = '';
     symbolField.value = '';
+    priceRange = null;
+    priceInput.setCustomValidity('ابتدا نماد را انتخاب و حدود قیمت بازار را دریافت کن.');
+    rangePanel.textContent = 'پس از انتخاب نماد، کف و سقف قیمت مجاز نمایش داده می‌شود.';
     selection.textContent = 'هنوز نمادی انتخاب نشده است.';
   };
   const showMessage = (message) => {
@@ -194,6 +237,7 @@ ISIN: {{.Result.ISIN}} · سمت: {{.Result.Side}}<br>
             symbolField.value = item.symbol || '';
             selection.textContent = 'نماد انتخاب‌شده: ' + (item.symbol || '') + ' — ISIN: ' + (item.isin || '');
             results.replaceChildren();
+            loadPriceRange(item.isin || '');
           });
           results.append(button);
         }
@@ -209,6 +253,7 @@ ISIN: {{.Result.ISIN}} · سمت: {{.Result.Side}}<br>
     }
   });
   const form = input.closest('form');
+  priceInput.addEventListener('input', validatePrice);
   if (form) form.addEventListener('submit', (event) => {
     if (!isinField.value || !symbolField.value) {
       event.preventDefault();
@@ -216,7 +261,16 @@ ISIN: {{.Result.ISIN}} · سمت: {{.Result.Side}}<br>
       input.reportValidity();
       input.addEventListener('input', () => input.setCustomValidity(''), {once:true});
       input.focus();
+      return;
     }
+    if (!priceRange) {
+      event.preventDefault();
+      priceInput.setCustomValidity('اطلاعات معتبر کف و سقف قیمت دریافت نشده است.');
+      priceInput.reportValidity();
+      return;
+    }
+    if (!validatePrice()) { event.preventDefault(); priceInput.reportValidity(); return; }
+    if (!confirm('تأیید نهایی: همین یک سفارش واقعی با مشخصات واردشده و قیمت داخل محدوده مجاز به دایا ارسال شود؟')) event.preventDefault();
   });
 })();
 </script>
@@ -227,7 +281,17 @@ var dayaLiveOrderTestNonceStore = struct {
 	values map[string]time.Time
 }{values: make(map[string]time.Time)}
 
-func registerDayaLiveOrderTestRoutes(mux *http.ServeMux, previewMode bool, credentials *DayaCredentialStore, store *Store) {
+func registerDayaLiveOrderTestRoutes(mux *http.ServeMux, previewMode bool, credentials *DayaCredentialStore, store *Store, symbolClient TSESymbolClient) {
+	mux.HandleFunc("GET /api/symbols/price-range", func(w http.ResponseWriter, r *http.Request) {
+		if !previewMode { http.NotFound(w, r); return }
+		ctx, cancel := context.WithTimeout(r.Context(), 4*time.Second)
+		defer cancel()
+		priceRange, err := symbolClient.FetchPriceRange(ctx, r.URL.Query().Get("isin"))
+		if err != nil { http.Error(w, err.Error(), http.StatusBadGateway); return }
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.Header().Set("Cache-Control", "no-store")
+		_ = json.NewEncoder(w).Encode(priceRange)
+	})
 	mux.HandleFunc("GET /daya-online-test/one", func(w http.ResponseWriter, r *http.Request) {
 		if !previewMode {
 			http.NotFound(w, r)
@@ -275,6 +339,17 @@ func registerDayaLiveOrderTestRoutes(mux *http.ServeMux, previewMode bool, crede
 		order, err := parseDayaLiveOrderTestForm(r)
 		if err != nil {
 			renderDayaLiveOrderTestError(w, err.Error())
+			return
+		}
+		rangeCtx, rangeCancel := context.WithTimeout(r.Context(), 4*time.Second)
+		priceRange, rangeErr := symbolClient.FetchPriceRange(rangeCtx, order.ISIN)
+		rangeCancel()
+		if rangeErr != nil {
+			renderDayaLiveOrderTestError(w, "حدود مجاز قیمت از بازار قابل تأیید نیست؛ سفارش ارسال نشد. "+rangeErr.Error())
+			return
+		}
+		if order.Price < priceRange.MinPrice || order.Price > priceRange.MaxPrice {
+			renderDayaLiveOrderTestError(w, "قیمت سفارش خارج از محدوده مجاز نماد است. کف: "+strconv.FormatInt(priceRange.MinPrice, 10)+" ریال، سقف: "+strconv.FormatInt(priceRange.MaxPrice, 10)+" ریال. سفارش ارسال نشد.")
 			return
 		}
 		ctx, cancel := context.WithTimeout(r.Context(), 20*time.Second)
