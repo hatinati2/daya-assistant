@@ -586,6 +586,39 @@ th{font-size:10px;color:#667085}.tablewrap{overflow:auto}.tablewrap tbody td{fon
  .preview-compact .note,.preview-compact .msg{margin:4px 0;padding:4px 7px}
  .preview-compact th,.preview-compact td{padding:5px 4px}
 }
+ 
+/* Preview 03 order history: one full-width horizontal row per order */
+.preview-compact .grid.history .history-order-list{display:flex;flex-direction:column;gap:5px;margin-top:7px;width:100%}
+.preview-compact .grid.history .history-order-row{display:grid;grid-template-columns:minmax(105px,1.1fr) minmax(82px,.8fr) minmax(55px,.55fr) minmax(165px,1.55fr) minmax(85px,.85fr) minmax(140px,1.35fr) minmax(125px,auto);align-items:center;gap:9px;width:100%;min-width:0;padding:7px 9px;background:#fff;border:1px solid #e4e7ec;border-radius:9px}
+.preview-compact .grid.history .history-order-symbol{display:flex;align-items:center;gap:6px;min-width:0;flex-wrap:wrap}
+.preview-compact .grid.history .history-order-symbol b{font-size:12px}
+.preview-compact .grid.history .history-order-symbol small{font-size:9px;color:#667085;direction:ltr}
+.preview-compact .grid.history .history-order-field{display:flex;flex-direction:column;gap:1px;min-width:0}
+.preview-compact .grid.history .history-order-field small{font-size:9px;color:#667085;line-height:1.2}
+.preview-compact .grid.history .history-order-field b{font-size:11px;line-height:1.35;overflow-wrap:anywhere}
+.preview-compact .grid.history .history-order-time b{white-space:nowrap;font-size:10px}
+.preview-compact .grid.history .history-order-state{min-width:0}
+.preview-compact .grid.history .history-order-state .status{white-space:normal;line-height:1.3}
+.preview-compact .grid.history .history-order-actions{display:flex;align-items:center;justify-content:flex-start;gap:5px;min-width:0;white-space:nowrap}
+.preview-compact .grid.history .history-order-actions form{margin:0}
+.preview-compact .grid.history .history-order-actions button{padding:5px 7px;font-size:10px}
+.preview-compact .grid.history .history-order-actions .copy-order{margin:0;background:#eff8ff;color:#175cd3;border:1px solid #b2ddff}
+.preview-compact .grid.history .history-order-details{grid-column:1/-1;min-width:0;border-top:1px solid #f0f2f5;padding-top:4px}
+.preview-compact .grid.history .history-order-details summary{font-size:9px;color:#475467;cursor:pointer}
+.preview-compact .grid.history .history-order-details-body{display:flex;flex-wrap:wrap;align-items:center;gap:5px 14px;padding:6px 2px 2px;font-size:9px;color:#667085}
+.preview-compact .grid.history .history-order-details-body .reconcile-form{display:flex;flex-wrap:wrap;align-items:center;gap:5px;min-width:0;max-width:none;white-space:normal}
+.preview-compact .grid.history .history-order-details-body .reconcile-form select,
+.preview-compact .grid.history .history-order-details-body .reconcile-form input{width:auto;min-width:150px;min-height:28px;padding:4px 6px;font-size:10px}
+.preview-compact .grid.history .history-order-details-body .reconcile-form button{padding:5px 7px;font-size:10px}
+.preview-compact .grid.history .history-order-empty{width:100%;padding:18px;border:1px dashed #d0d5dd;border-radius:9px}
+@media(max-width:1050px){
+ .preview-compact .grid.history .history-order-row{grid-template-columns:minmax(100px,1fr) minmax(75px,.7fr) minmax(55px,.5fr) minmax(155px,1.3fr) minmax(80px,.7fr) minmax(130px,1.2fr) minmax(125px,auto);gap:6px;padding:6px}
+}
+@media(max-width:780px){
+ .preview-compact .grid.history .history-order-row{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .preview-compact .grid.history .history-order-actions{grid-column:1/-1}
+ .preview-compact .grid.history .history-order-details{grid-column:1/-1}
+}
 </style></head><body class="{{if .PreviewMode}}preview-compact{{end}}" data-jyear="{{.JYear}}" data-jmonth="{{.JMonth}}" data-jday="{{.JDay}}"><main class="wrap">
 <div class="head"><div><h1>دستیار دایا</h1><div class="muted" style="margin-top:7px">مدیریت سفارش‌ها · ساعت تهران</div></div><div class="nav">{{if .PreviewMode}}<a href="/dashboard">داشبورد مرکزی</a>{{end}}<a class="{{if not .History}}active{{end}}" href="/">مدیریت سفارش‌ها</a><a class="{{if .History}}active{{end}}" href="/history">تاریخچه</a><a href="/settings">اتصال و نشست دایا</a>{{if .PreviewMode}}<a href="/daya-online-test">تست آنلاین خواندنی</a><a href="/daya-latency">کالیبراسیون تأخیر</a><a href="/daya-online-test/one">ارسال یک‌باره واقعی</a>{{end}}</div><span class="tag">{{if .APIAvailable}}ارسال واقعی API فعال است{{else}}ارسال واقعی API غیرفعال است{{end}}</span></div>
 <div class="note"><b>دو مسیر اجرا:</b> مسیر «بدون API» سفارش را برای ثبت دستی آماده می‌کند. مسیر «با API» تا زمان تأیید endpoint و ساختار درخواست سفارش دایا غیرفعال است؛ مدل سفارش و زمان‌بندی آماده‌اند.</div>
@@ -630,14 +663,57 @@ th{font-size:10px;color:#667085}.tablewrap{overflow:auto}.tablewrap tbody td{fon
 </div></details>
 <button class="submit wide" type="submit">ذخیره سفارش زمان‌بندی‌شده</button><button class="dry-run wide" type="button" id="order-dry-run">اعتبارسنجی سفارش آزمایشی (بدون ارسال و ذخیره)</button><div class="dry-run-result wide" id="order-dry-run-result" role="status" aria-live="polite" hidden></div></div></form>
 <div class="foot">قیمت به ریال و تعداد به عدد سهم وارد شود. در مسیر API، ISIN دقیق نماد الزامی است.</div></section>{{end}}
-<section class="card"><div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap"><h2 style="margin:0">{{if .History}}تاریخچه سفارش‌ها{{else}}سفارش‌های فعال{{end}} (<span id="orders-visible-count">{{len .Orders}}</span>)</h2>{{if .History}}<form method="post" action="/history/clear" onsubmit="return confirm('تمام موارد نمایش‌داده‌شده در تاریخچه، حتی سفارش‌های آماده، درحال‌ارسال و با نتیجه نامشخص، برای همیشه حذف شوند؟ سفارش‌های زمان‌بندی‌شده فعال باقی می‌مانند. با حذف سوابق درحال‌ارسال یا نامشخص، امکان پیگیری آن‌ها در این پنل از بین می‌رود.')"><button type="submit" class="cancel">پاک کردن تاریخچه</button></form>{{else if .HasScheduledOrders}}<form id="cancel-all-scheduled-form" method="post" action="/orders/cancel-all" onsubmit="return confirm('تمام سفارش‌های زمان‌بندی‌شده لغو شوند؟ سفارش‌های آماده ارسال، درحال ارسال و ثبت‌شده دست‌نخورده می‌مانند. این عملیات قابل بازگشت نیست.')"><button type="submit" class="cancel">لغو همه</button></form>{{end}}</div><div class="tablewrap"><table>
+<section class="card"><div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap"><h2 style="margin:0">{{if .History}}تاریخچه سفارش‌ها{{else}}سفارش‌های فعال{{end}} (<span id="orders-visible-count">{{len .Orders}}</span>)</h2>{{if .History}}<form method="post" action="/history/clear" onsubmit="return confirm('تمام موارد نمایش‌داده‌شده در تاریخچه، حتی سفارش‌های آماده، درحال‌ارسال و با نتیجه نامشخص، برای همیشه حذف شوند؟ سفارش‌های زمان‌بندی‌شده فعال باقی می‌مانند. با حذف سوابق درحال‌ارسال یا نامشخص، امکان پیگیری آن‌ها در این پنل از بین می‌رود.')"><button type="submit" class="cancel">پاک کردن تاریخچه</button></form>{{else if .HasScheduledOrders}}<form id="cancel-all-scheduled-form" method="post" action="/orders/cancel-all" onsubmit="return confirm('تمام سفارش‌های زمان‌بندی‌شده لغو شوند؟ سفارش‌های آماده ارسال، درحال ارسال و ثبت‌شده دست‌نخورده می‌مانند. این عملیات قابل بازگشت نیست.')"><button type="submit" class="cancel">لغو همه</button></form>{{end}}</div>
+{{if and .History .PreviewMode}}
+<div class="history-order-list">
+{{range .Orders}}
+<article class="history-order-row" data-order-id="{{.ID}}">
+ <div class="history-order-symbol"><b>{{.Symbol}}</b>{{if .ISIN}}<small>{{.ISIN}}</small>{{end}}<span class="{{if eq .Side "buy"}}buy{{else}}sell{{end}}">{{if eq .Side "buy"}}خرید{{else}}فروش{{end}}</span></div>
+ <div class="history-order-field"><small>قیمت</small><b>{{.Price}}</b></div>
+ <div class="history-order-field"><small>تعداد</small><b>{{.Quantity}}</b></div>
+ <div class="history-order-field history-order-time"><small>زمان تهران</small><b>{{jalali .ExecuteAt}}</b></div>
+ <div class="history-order-field"><small>مسیر</small><b>{{executionMode .ExecutionMode}}</b></div>
+ <div class="history-order-state">
+  {{if eq .Status "scheduled"}}<span class="status scheduled">زمان‌بندی‌شده</span>{{else if eq .Status "ready"}}<span class="status ready">{{if eq .ExecutionMode "api"}}آماده ارسال{{else}}آماده بررسی{{end}}</span>{{else if eq .Status "manual_done"}}<span class="status ready">ثبت دستی تأیید شد</span>{{else if eq .Status "submitting"}}<span class="status ready">در حال ارسال</span>{{else if eq .Status "submission_pending"}}<span class="status scheduled">در انتظار تأیید دایا</span>{{else if eq .Status "submitted"}}<span class="status ready">در دایا ثبت شد</span>{{else if eq .Status "submission_failed"}}<span class="status cancelled">ارسال ناموفق</span>{{else if eq .Status "submission_unknown"}}<span class="status cancelled">نتیجه نامشخص</span>{{else}}<span class="status cancelled">لغوشده</span>{{end}}
+ </div>
+ <div class="history-order-actions">
+  {{if or (eq .Status "scheduled") (and (eq .Status "ready") (eq .ExecutionMode "api"))}}
+   <form method="post" action="/orders/cancel"><input type="hidden" name="id" value="{{.ID}}"><button class="cancel">لغو</button></form>
+  {{else if and (eq .Status "ready") (manualMode .ExecutionMode)}}
+   <form method="post" action="/orders/manual-confirm" onsubmit="return confirm('آیا سفارش را شخصاً در سامانه دایا ثبت کرده‌ای؟')"><input type="hidden" name="id" value="{{.ID}}"><button class="submit">ثبت دستی انجام شد</button></form>
+  {{end}}
+  <button type="button" class="copy-order" data-symbol="{{.Symbol}}" data-isin="{{.ISIN}}" data-side="{{.Side}}" data-price="{{.Price}}" data-quantity="{{.Quantity}}" data-mode="{{.ExecutionMode}}" data-execute="{{jalali .ExecuteAt}}">کپی</button>
+ </div>
+ {{if or .BrokerOrderID .BrokerHostOrderNumber .BrokerHTTPStatus .BrokerRTTMillis .BrokerRequestID (not .BrokerResponseAt.IsZero) (not .ReconciledAt.IsZero) .BrokerMessage (eq .Status "submission_unknown") (eq .Status "submission_pending")}}
+ <details class="history-order-details"><summary>جزئیات و پیگیری</summary>
+  <div class="history-order-details-body">
+   {{if .BrokerOrderID}}<span>شناسه سفارش دایا: {{.BrokerOrderID}}</span>{{end}}
+   {{if .BrokerHostOrderNumber}}<span>شماره میزبان دایا: {{.BrokerHostOrderNumber}}</span>{{end}}
+   {{if .BrokerHTTPStatus}}<span>HTTP: {{.BrokerHTTPStatus}}</span>{{end}}
+   {{if .BrokerRTTMillis}}<span>زمان پاسخ POST دایا: {{.BrokerRTTMillis}} ms</span>{{end}}
+   {{if .BrokerRequestID}}<span>شناسه درخواست: {{.BrokerRequestID}}</span>{{end}}
+   {{if not .BrokerResponseAt.IsZero}}<span>زمان پاسخ دایا: {{jalali .BrokerResponseAt}}</span>{{end}}
+   {{if not .ReconciledAt.IsZero}}<span>زمان تطبیق دستی: {{jalali .ReconciledAt}}</span>{{end}}
+   {{if .BrokerMessage}}<span>{{.BrokerMessage}}</span>{{end}}
+   {{if and (or (eq .Status "submission_unknown") (eq .Status "submission_pending")) (eq .ExecutionMode "api")}}
+   <form method="post" action="/orders/reconcile" class="reconcile-form"><input type="hidden" name="id" value="{{.ID}}"><select name="resolution" aria-label="نتیجه بررسی در دایا"><option value="registered">در دایا ثبت شده</option><option value="rejected">در دایا ثبت نشده</option></select><input name="broker_order_id" maxlength="128" placeholder="شناسه سفارش دایا (برای ثبت‌شده)"><input name="broker_message" maxlength="1000" placeholder="توضیح بررسی (اختیاری)"><button type="submit">ثبت نتیجه بررسی</button></form>
+   {{end}}
+  </div>
+ </details>
+ {{end}}
+</article>
+{{else}}<div class="empty history-order-empty">هنوز موردی در تاریخچه ثبت نشده است.</div>{{end}}
+</div>
+{{else}}
+<div class="tablewrap"><table>
 <thead><tr><th>نماد</th><th>نوع</th><th>قیمت</th><th>تعداد</th><th>زمان تهران</th><th>مسیر</th><th>وضعیت</th><th>عملیات</th></tr></thead><tbody id="orders-table-body">
 {{range .Orders}}<tr data-order-id="{{.ID}}"><td><b>{{.Symbol}}</b>{{if .ISIN}}<div class="foot">{{.ISIN}}</div>{{end}}</td><td>{{if eq .Side "buy"}}<span class="buy">خرید</span>{{else}}<span class="sell">فروش</span>{{end}}</td>
 <td>{{.Price}}</td><td>{{.Quantity}}</td><td>{{jalali .ExecuteAt}}</td><td>{{executionMode .ExecutionMode}}</td>
 <td>{{if eq .Status "scheduled"}}<span class="status scheduled">زمان‌بندی‌شده</span>{{else if eq .Status "ready"}}<span class="status ready">{{if eq .ExecutionMode "api"}}آماده ارسال{{else}}آماده بررسی{{end}}</span>{{else if eq .Status "manual_done"}}<span class="status ready">ثبت دستی تأیید شد</span>{{else if eq .Status "submitting"}}<span class="status ready">در حال ارسال</span>{{else if eq .Status "submission_pending"}}<span class="status scheduled">ارسال به موتور انجام شد؛ در انتظار تأیید</span>{{else if eq .Status "submitted"}}<span class="status ready">ثبت سفارش در دفتر سفارش‌های دایا تأیید شد</span>{{else if eq .Status "submission_failed"}}<span class="status cancelled">ارسال ناموفق</span>{{else if eq .Status "submission_unknown"}}<span class="status cancelled">نتیجه نامشخص — بررسی لازم</span>{{else}}<span class="status cancelled">لغوشده</span>{{end}}{{if .BrokerOrderID}}<div class="foot">شناسه سفارش دایا: {{.BrokerOrderID}}</div>{{end}}{{if .BrokerHostOrderNumber}}<div class="foot">شماره میزبان دایا: {{.BrokerHostOrderNumber}}</div>{{end}}{{if .BrokerHTTPStatus}}<div class="foot">HTTP: {{.BrokerHTTPStatus}}</div>{{end}}{{if .BrokerRTTMillis}}<div class="foot">زمان پاسخ POST دایا: {{.BrokerRTTMillis}} ms (اندازه‌گیری واقعی)</div>{{end}}{{if .BrokerRequestID}}<div class="foot">شناسه درخواست: {{.BrokerRequestID}}</div>{{end}}{{if not .BrokerResponseAt.IsZero}}<div class="foot">زمان پاسخ دایا: {{jalali .BrokerResponseAt}}</div>{{end}}{{if not .ReconciledAt.IsZero}}<div class="foot">زمان تطبیق دستی: {{jalali .ReconciledAt}}</div>{{end}}{{if .BrokerMessage}}<div class="foot">{{.BrokerMessage}}</div>{{end}}</td>
 <td>{{if or (eq .Status "scheduled") (and (eq .Status "ready") (eq .ExecutionMode "api"))}}<form method="post" action="/orders/cancel"><input type="hidden" name="id" value="{{.ID}}"><button class="cancel">لغو</button></form>{{else if and $.History (eq .Status "ready") (manualMode .ExecutionMode)}}<form method="post" action="/orders/manual-confirm" onsubmit="return confirm('آیا سفارش را شخصاً در سامانه دایا ثبت کرده‌ای؟')"><input type="hidden" name="id" value="{{.ID}}"><button class="submit">ثبت دستی انجام شد</button></form>{{else if and $.History (or (eq .Status "submission_unknown") (eq .Status "submission_pending")) (eq .ExecutionMode "api")}}<form method="post" action="/orders/reconcile" class="reconcile-form"><input type="hidden" name="id" value="{{.ID}}"><select name="resolution" aria-label="نتیجه بررسی در دایا"><option value="registered">در دایا ثبت شده</option><option value="rejected">در دایا ثبت نشده</option></select><input name="broker_order_id" maxlength="128" placeholder="شناسه سفارش دایا (برای ثبت‌شده)"><input name="broker_message" maxlength="1000" placeholder="توضیح بررسی (اختیاری)"><button type="submit">ثبت نتیجه بررسی</button></form>{{else}}—{{end}}<button type="button" class="copy-order" data-symbol="{{.Symbol}}" data-isin="{{.ISIN}}" data-side="{{.Side}}" data-price="{{.Price}}" data-quantity="{{.Quantity}}" data-mode="{{.ExecutionMode}}" data-execute="{{jalali .ExecuteAt}}" style="margin-right:6px;background:#eff8ff;color:#175cd3;border:1px solid #b2ddff;padding:6px 9px">کپی سفارش</button></td></tr>
 {{else}}<tr data-empty-active-orders><td colspan="8" class="empty">{{if .History}}هنوز موردی در تاریخچه ثبت نشده است.{{else}}سفارش فعالی ثبت نشده است.{{end}}</td></tr>{{end}}
-</tbody></table></div><div class="foot">{{if .History}}این صفحه سفارش‌های سررسیدشده و لغوشده را نگه می‌دارد؛ هیچ سفارشی از داده‌ها حذف نشده است.{{else}}ساعت سرور: {{.Now}} · سفارش‌های سررسیدشده در صفحه تاریخچه نمایش داده می‌شوند.{{end}} وضعیت «آماده بررسی» به معنی ارسال به کارگزاری نیست.</div>
+</tbody></table></div>
+{{end}}<div class="foot">{{if .History}}این صفحه سفارش‌های سررسیدشده و لغوشده را نگه می‌دارد؛ هیچ سفارشی از داده‌ها حذف نشده است.{{else}}ساعت سرور: {{.Now}} · سفارش‌های سررسیدشده در صفحه تاریخچه نمایش داده می‌شوند.{{end}} وضعیت «آماده بررسی» به معنی ارسال به کارگزاری نیست.</div>
 </section></div></main>
 <script>
 (() => {
