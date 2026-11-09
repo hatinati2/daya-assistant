@@ -129,9 +129,9 @@ func TestDayaCollectFinancialSchemaShowsSafePathsAndTypesOnly(t *testing.T) {
 				"tPlus1Amount":      json.Number("6000000"),
 				"tPlus2Amount":      json.Number("6000000"),
 				"cashAvailable":     "6000000",
-				"portfolio":      map[string]any{"withdrawable": json.Number("4500000")},
-				"accountNumber":  "123456789",
-				"customerName":   "Sensitive Name",
+				"portfolio":         map[string]any{"withdrawable": json.Number("4500000")},
+				"accountNumber":     "123456789",
+				"customerName":      "Sensitive Name",
 			},
 		},
 	}
