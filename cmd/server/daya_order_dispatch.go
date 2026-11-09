@@ -89,14 +89,17 @@ func (d *DayaOrderDispatcher) dispatchReady(ctx context.Context) error {
 		return fmt.Errorf("could not claim due API orders: %w", err)
 	}
 	for _, order := range orders {
+		postStarted := time.Now()
 		status, body, submitErr := postDayaOrder(ctx, d.http, session, order)
-		outcome := DayaOrderOutcome{Status: statusSubmissionUnknown, Message: "نتیجه ارسال مشخص نیست؛ وضعیت سفارش را در دایا بررسی کنید و ارسال مجدد خودکار انجام نمی‌شود.", ReceivedAt: d.now()}
+		postRTTMillis := time.Since(postStarted).Milliseconds()
+		outcome := DayaOrderOutcome{RTTMillis: postRTTMillis, Status: statusSubmissionUnknown, Message: "نتیجه ارسال مشخص نیست؛ وضعیت سفارش را در دایا بررسی کنید و ارسال مجدد خودکار انجام نمی‌شود.", ReceivedAt: d.now()}
 		if submitErr != nil {
 			// A transport error can happen after the broker received the request.
 			// Treat it as ambiguous and never retry automatically.
 			outcome.Message = "ارتباط هنگام ارسال قطع شد؛ ممکن است سفارش در دایا ثبت شده باشد. قبل از هر اقدام، وضعیت را در کارگزاری بررسی کنید."
 		} else {
 			outcome = classifyDayaOrderResponseForOrder(status, body, &order)
+			outcome.RTTMillis = postRTTMillis
 			outcome.ReceivedAt = d.now()
 		}
 		if err := d.store.completeAPIOrder(order.ID, outcome); err != nil {

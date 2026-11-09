@@ -110,7 +110,7 @@ main,.wrap{width:calc(100% - 32px);max-width:1400px}
 <div class="result">
 <h2>نتیجه سفارش ارسالی</h2>
 وضعیت: <b>{{.Result.BrokerMessage}}</b><br>
-HTTP: {{.Result.BrokerHTTPStatus}}<br>
+HTTP: {{.Result.BrokerHTTPStatus}}<br>{{if .Result.BrokerRTTMillis}}زمان واقعی پاسخ POST: <b>{{.Result.BrokerRTTMillis}} ms</b><br>{{end}}
 ISIN: {{.Result.ISIN}} · سمت: {{.Result.Side}}<br>
 قیمت: {{.Result.Price}} · تعداد: {{.Result.Quantity}}<br>
 {{if .Result.BrokerOrderID}}شناسه سفارش دایا: {{.Result.BrokerOrderID}}<br>{{end}}
@@ -273,9 +273,11 @@ func submitOneDayaOnlineTestOrder(ctx context.Context, credentials *DayaCredenti
 			return http.ErrUseLastResponse
 		},
 	}
+	postStarted := time.Now()
 	status, body, postErr := postDayaOrder(ctx, client, session, order)
+	postRTTMillis := time.Since(postStarted).Milliseconds()
 	outcome := DayaOrderOutcome{
-		Status: statusSubmissionUnknown, HTTPStatus: status,
+		Status: statusSubmissionUnknown, HTTPStatus: status, RTTMillis: postRTTMillis,
 		Message:    "نتیجه POST قطعی نیست؛ وضعیت را در پنل دایا بررسی کن و این سفارش را دوباره نفرست.",
 		ReceivedAt: time.Now().In(tehran()),
 	}
@@ -283,6 +285,7 @@ func submitOneDayaOnlineTestOrder(ctx context.Context, credentials *DayaCredenti
 		outcome.Message = "ارتباط هنگام POST قطع شد؛ ممکن است دایا درخواست را دریافت کرده باشد. سفارش را دوباره نفرست و پنل دایا را بررسی کن."
 	} else {
 		outcome = classifyDayaOrderResponseForOrder(status, body, &order)
+		outcome.RTTMillis = postRTTMillis
 		outcome.ReceivedAt = time.Now().In(tehran())
 	}
 	if err := store.completeAPIOrder(localID, outcome); err != nil {
