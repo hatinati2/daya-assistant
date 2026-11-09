@@ -1206,6 +1206,7 @@ func main() {
 	registerDayaOnlineTestRoutes(mux, previewMode, credentials)
 	registerDayaLiveOrderTestRoutes(mux, previewMode, credentials, store)
 	registerDayaOrderReconciliationRoute(mux, store)
+	registerDayaLatencyRoutes(mux, previewMode)
 	mux.HandleFunc("GET /api/server-time", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.Header().Set("Cache-Control", "no-store, no-cache, must-revalidate")
