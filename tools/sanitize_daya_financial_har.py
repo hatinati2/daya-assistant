@@ -32,6 +32,7 @@ MAX_FIELDS = 120
 MAX_DEPTH = 10
 MAX_ARRAY_SAMPLE = 3
 MAX_RESPONSE_BYTES = 2 * 1024 * 1024
+REFERENCE_AMOUNT = None
 
 
 def normalized_key(key: str) -> str:
@@ -93,6 +94,68 @@ def collect_schema(value, path: str, out: set[str], depth: int = 0) -> None:
             collect_schema(item, path + "[]", out, depth + 1)
 
 
+
+FINANCIAL_ENDPOINT_PREFIX = "/financials/"
+PAGINATION_KEYS = {"number", "size", "totalelements", "totalpages", "numberofelements"}
+
+
+def parse_numeric(value):
+    if isinstance(value, bool) or value is None:
+        return None
+    if isinstance(value, (int, float)):
+        try:
+            from decimal import Decimal, InvalidOperation
+            return Decimal(str(value))
+        except InvalidOperation:
+            return None
+    if isinstance(value, str):
+        normalized = value.strip()
+        normalized = "".join(
+            str(__import__("unicodedata").decimal(ch)) if ch.isdecimal() else ch
+            for ch in normalized
+        )
+        normalized = normalized.replace(",", "").replace("٬", "").replace("٫", ".")
+        if not normalized:
+            return None
+        try:
+            from decimal import Decimal, InvalidOperation
+            return Decimal(normalized)
+        except InvalidOperation:
+            return None
+    return None
+
+
+def collect_numeric_fingerprints(value, path: str, out: list[dict], reference, depth: int = 0) -> None:
+    if depth > MAX_DEPTH or len(out) >= MAX_FIELDS:
+        return
+    if isinstance(value, dict):
+        for key in sorted(value):
+            if len(out) >= MAX_FIELDS or not safe_key(str(key)):
+                continue
+            normalized = normalized_key(str(key))
+            if normalized in PAGINATION_KEYS:
+                continue
+            child = value[key]
+            child_path = f"\${path}.\${key}" if path else str(key)
+            numeric = parse_numeric(child)
+            if numeric is not None:
+                entry = {
+                    "path": child_path,
+                    "kind": "numeric-string" if isinstance(child, str) else "number",
+                    "sign": "zero" if numeric == 0 else ("positive" if numeric > 0 else "negative"),
+                }
+                if reference is not None:
+                    entry["matches_reference"] = numeric == reference
+                out.append(entry)
+            elif isinstance(child, dict):
+                collect_numeric_fingerprints(child, child_path, out, reference, depth + 1)
+            elif isinstance(child, list):
+                for item in child[:MAX_ARRAY_SAMPLE]:
+                    collect_numeric_fingerprints(item, child_path + "[]", out, reference, depth + 1)
+    elif isinstance(value, list):
+        for item in value[:MAX_ARRAY_SAMPLE]:
+            collect_numeric_fingerprints(item, path + "[]", out, reference, depth + 1)
+
 def extract_entries(har: dict) -> list[dict]:
     entries = []
     log = har.get("log", {}) if isinstance(har, dict) else {}
@@ -116,12 +179,18 @@ def extract_entries(har: dict) -> list[dict]:
 
         schema: set[str] = set()
         collect_schema(payload, "", schema)
-        entries.append({
+        entry_path = safe_path(raw_url)
+        item = {
             "method": "GET",
-            "path": safe_path(raw_url),
+            "path": entry_path,
             "status": response.get("status"),
             "schema": sorted(schema)[:MAX_FIELDS],
-        })
+        }
+        if entry_path.startswith(FINANCIAL_ENDPOINT_PREFIX):
+            fingerprints: list[dict] = []
+            collect_numeric_fingerprints(payload, "", fingerprints, REFERENCE_AMOUNT)
+            item["numeric_fingerprints"] = fingerprints[:MAX_FIELDS]
+        entries.append(item)
         if len(entries) >= MAX_ENTRIES:
             break
     return entries
@@ -132,7 +201,21 @@ def main() -> int:
         description="Extract schema-only diagnostics from Daya read-only GET responses."
     )
     parser.add_argument("har_file", help="Local HAR file exported from browser DevTools")
+    parser.add_argument(
+        "--reference-amount",
+        default=None,
+        help="Optional reference amount for boolean equality checks only; the amount is never printed.",
+    )
     args = parser.parse_args()
+
+    global REFERENCE_AMOUNT
+    REFERENCE_AMOUNT = None
+    if args.reference_amount is not None:
+        from decimal import Decimal, InvalidOperation
+        try:
+            REFERENCE_AMOUNT = Decimal(args.reference_amount.replace(",", "").replace("٬", ""))
+        except InvalidOperation:
+            parser.error("--reference-amount must be a valid number")
     try:
         with open(args.har_file, "r", encoding="utf-8") as source:
             har = json.load(source)
@@ -141,7 +224,7 @@ def main() -> int:
         return 2
 
     result = {
-        "notice": "Schema only: no values, cookies, headers, identifiers, or raw response bodies.",
+        "notice": "Schema and numeric fingerprints only: no financial values, cookies, headers, identifiers, or raw response bodies.",
         "entries": extract_entries(har),
     }
     json.dump(result, sys.stdout, ensure_ascii=False, indent=2)
