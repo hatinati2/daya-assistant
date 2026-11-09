@@ -606,9 +606,9 @@ th{font-size:10px;color:#667085}.tablewrap{overflow:auto}.tablewrap tbody td{fon
 .preview-compact .grid.history .history-order-actions form{margin:0}
 .preview-compact .grid.history .history-order-actions button{padding:5px 7px;font-size:10px}
 .preview-compact .grid.history .history-order-actions .copy-order{margin:0;background:#eff8ff;color:#175cd3;border:1px solid #b2ddff}
-.preview-compact .grid.history .history-order-details{grid-column:1/-1;min-width:0;border-top:1px solid #f0f2f5;padding-top:4px}
-.preview-compact .grid.history .history-order-details summary{font-size:9px;color:#475467;cursor:pointer}
-.preview-compact .grid.history .history-order-details-body{display:flex;flex-wrap:wrap;align-items:center;gap:5px 14px;padding:6px 2px 2px;font-size:9px;color:#667085}
+.preview-compact .grid.history .history-order-details{grid-column:1/-1;min-width:0;border-top:1px solid #f0f2f5;padding-top:4px;display:block}
+.preview-compact .grid.history .history-order-details-title{font-size:9px;font-weight:bold;color:#475467;margin-bottom:3px}
+.preview-compact .grid.history .history-order-details-body{display:flex;flex-wrap:wrap;align-items:center;gap:5px 14px;padding:2px 2px 1px;font-size:9px;color:#667085;line-height:1.4}
 .preview-compact .grid.history .history-order-details-body .reconcile-form{display:flex;flex-wrap:wrap;align-items:center;gap:5px;min-width:0;max-width:none;white-space:normal}
 .preview-compact .grid.history .history-order-details-body .reconcile-form select,
 .preview-compact .grid.history .history-order-details-body .reconcile-form input{width:auto;min-width:150px;min-height:28px;padding:4px 6px;font-size:10px}
@@ -687,8 +687,8 @@ th{font-size:10px;color:#667085}.tablewrap{overflow:auto}.tablewrap tbody td{fon
   {{end}}
   <button type="button" class="copy-order" data-symbol="{{.Symbol}}" data-isin="{{.ISIN}}" data-side="{{.Side}}" data-price="{{.Price}}" data-quantity="{{.Quantity}}" data-mode="{{.ExecutionMode}}" data-execute="{{jalali .ExecuteAt}}">کپی</button>
  </div>
- {{if or .BrokerOrderID .BrokerHostOrderNumber .BrokerHTTPStatus .BrokerRTTMillis .BrokerRequestID (not .BrokerResponseAt.IsZero) (not .ReconciledAt.IsZero) .BrokerMessage (eq .Status "submission_unknown") (eq .Status "submission_pending")}}
- <details class="history-order-details"><summary>جزئیات و پیگیری</summary>
+ <div class="history-order-details">
+  <div class="history-order-details-title">جزئیات و پیگیری</div>
   <div class="history-order-details-body">
    {{if .BrokerOrderID}}<span>شناسه سفارش دایا: {{.BrokerOrderID}}</span>{{end}}
    {{if .BrokerHostOrderNumber}}<span>شماره میزبان دایا: {{.BrokerHostOrderNumber}}</span>{{end}}
@@ -702,8 +702,7 @@ th{font-size:10px;color:#667085}.tablewrap{overflow:auto}.tablewrap tbody td{fon
    <form method="post" action="/orders/reconcile" class="reconcile-form"><input type="hidden" name="id" value="{{.ID}}"><select name="resolution" aria-label="نتیجه بررسی در دایا"><option value="registered">در دایا ثبت شده</option><option value="rejected">در دایا ثبت نشده</option></select><input name="broker_order_id" maxlength="128" placeholder="شناسه سفارش دایا (برای ثبت‌شده)"><input name="broker_message" maxlength="1000" placeholder="توضیح بررسی (اختیاری)"><button type="submit">ثبت نتیجه بررسی</button></form>
    {{end}}
   </div>
- </details>
- {{end}}
+ </div>
 </article>
 {{else}}<div class="empty history-order-empty">هنوز موردی در تاریخچه ثبت نشده است.</div>{{end}}
 </div>
