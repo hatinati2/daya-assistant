@@ -127,6 +127,22 @@ th{font-size:11px;color:#667085}
 pre{border-radius:10px}
 @media(max-width:640px){main,.wrap{padding-left:12px;padding-right:12px}.page-card{padding:14px}.nav{gap:6px}.nav a{padding:7px 8px;font-size:11px}}
 
+
+/* Wider content like the main order workspace; denser forms on desktop */
+main,.wrap{width:calc(100% - 32px);max-width:1400px}
+.page-content{width:100%;max-width:1360px;margin:0 auto}
+.page-card{width:100%;max-width:1360px;margin:12px auto;padding:20px}
+.page-content .grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.page-content .grid>*{min-width:0}
+@media(max-width:980px){
+ .page-content .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:600px){
+ main,.wrap{width:100%;padding-left:12px;padding-right:12px}
+ .page-content .grid{grid-template-columns:1fr}
+ .page-card{padding:14px}
+}
+
 </style></head>
 <body><main class="wrap">
 <div class="head"><div><h1>اتصال به سامانه دایا</h1><div class="muted" style="margin-top:7px">مدیریت اطلاعات ورود برای آزمایش اتصال</div></div>
