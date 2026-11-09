@@ -31,11 +31,67 @@ h1{font-size:20px}label{display:block;margin:12px 0 6px;font-weight:bold}input,s
 button{background:#b42318;color:#fff;border:0;border-radius:8px;padding:12px 18px;font:inherit;cursor:pointer;margin-top:12px}.error{padding:12px;background:#fef3f2;color:#b42318;border-radius:9px}.result{padding:12px;background:#ecfdf3;color:#05603a;border-radius:9px;line-height:1.9}
 a{color:#175cd3;text-decoration:none}.muted{color:#667085;line-height:1.9}input[type=checkbox]{width:auto;min-height:0}
 @media(max-width:600px){.grid{grid-template-columns:1fr}}
-</style></head><body><main>
-<h1>ارسال دستی یک سفارش واقعی به دایا</h1>
-<p class="muted"><a href="/dashboard">داشبورد مرکزی</a> · <a href="/daya-online-test">بازگشت به تست آنلاین</a> · فقط نسخه Preview</p>
+
+/* Preview 03 shared page chrome */
+body{background:#f4f6fa;color:#182230;font:12.5px Tahoma,Arial}
+main,.wrap{max-width:1400px;margin:18px auto;padding:0 16px}
+.page-header,.head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.page-header h1,.head h1{font-size:19px;margin:0}
+.page-subtitle{color:#667085;font-size:12px;line-height:1.8;margin-top:6px}
+.page-tag{display:inline-block;border-radius:18px;padding:7px 10px;background:#eef4ff;color:#1849a9;font-size:11px}
+.nav{display:flex;gap:7px;flex-wrap:wrap;margin:0 0 12px}
+.nav a{display:inline-block;padding:7px 10px;border:1px solid #d0d5dd;border-radius:9px;color:#344054;text-decoration:none;background:#fff;font-size:12px}
+.nav a.active{background:#175cd3;color:#fff;border-color:#175cd3}
+.nav a.danger-link{color:#b42318;border-color:#fecdca}
+.card,.page-card{background:#fff;border:1px solid #e4e7ec;border-radius:13px;padding:18px;margin:12px 0;min-width:0}
+.page-card{max-width:1080px;margin-left:auto;margin-right:auto}
+h1{font-size:19px;margin:0 0 8px}h2{font-size:14px;margin:0 0 10px}
+.muted,.foot{color:#667085;line-height:1.8}
+label{display:block;margin:10px 0 5px;font-weight:bold}
+input,select,textarea{width:100%;padding:8px 10px;border:1px solid #d0d5dd;border-radius:8px;background:#fff;color:#182230;font:inherit;min-height:36px}
+input:focus,select:focus,textarea:focus{outline:2px solid #b2ddff;outline-offset:1px;border-color:#84caff}
+button{border:0;border-radius:8px;background:#175cd3;color:#fff;padding:8px 12px;font:inherit;cursor:pointer}
+button:disabled{opacity:.5;cursor:not-allowed}
+.warning,.note{padding:11px 13px;border:1px solid #fedf89;border-radius:9px;background:#fffaeb;color:#93370d;line-height:1.8;margin:10px 0}
+.error,.err{padding:11px 13px;border-radius:9px;background:#fef3f2;color:#b42318;line-height:1.8;margin:10px 0}
+.success,.result,.msg{padding:11px 13px;border-radius:9px;background:#ecfdf3;color:#05603a;line-height:1.8;margin:10px 0}
+table{border-collapse:collapse;width:100%;margin-top:12px}
+th,td{padding:8px 9px;border-bottom:1px solid #eaecf0;text-align:right}
+th{font-size:11px;color:#667085}
+pre{border-radius:10px}
+@media(max-width:640px){main,.wrap{padding-left:12px;padding-right:12px}.page-card{padding:14px}.nav{gap:6px}.nav a{padding:7px 8px;font-size:11px}}
+
+
+/* Wider content like the main order workspace; denser forms on desktop */
+main,.wrap{width:calc(100% - 32px);max-width:1400px}
+.page-content{width:100%;max-width:1360px;margin:0 auto}
+.page-card{width:100%;max-width:1360px;margin:12px auto;padding:20px}
+.page-content .grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.page-content .grid>*{min-width:0}
+@media(max-width:980px){
+ .page-content .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:600px){
+ main,.wrap{width:100%;padding-left:12px;padding-right:12px}
+ .page-content .grid{grid-template-columns:1fr}
+ .page-card{padding:14px}
+}
+
+</style></head><body><main class="page-wrap">
+<header class="page-header"><div><h1>دستیار دایا</h1><div class="page-subtitle">ارسال دستی یک سفارش واقعی به دایا · فرم ارسال یک‌باره؛ فقط در صورت ضرورت و با تأیید صریح</div></div><span class="page-tag">Preview 03</span></header>
+<nav class="nav page-nav">
+<a href="/dashboard">داشبورد مرکزی</a>
+<a href="/">سفارش‌ها</a>
+<a href="/history">تاریخچه</a>
+<a href="/settings">اتصال و نشست</a>
+<a href="/daya-api-test">تست محلی API</a>
+<a href="/daya-online-test">تست آنلاین</a>
+<a href="/daya-latency">کالیبراسیون تأخیر</a>
+<a class="danger-link active" href="/daya-online-test/one">ارسال یک‌باره واقعی</a>
+</nav>
+<div class="page-content">
 <div class="warning"><b>این فرم درخواست واقعی POST /orders می‌فرستد.</b> سفارش وارد زمان‌بندی نمی‌شود. فقط یک بار ارسال می‌شود و در صورت نامشخص‌بودن پاسخ، هیچ ارسال مجدد خودکاری انجام نمی‌شود. سفارش ممکن است در کارگزاری ثبت شود.</div>
-<section class="card">
+<section class="card page-card">
 {{if not .Result}}
 <form method="post" action="/daya-online-test/one/send" onsubmit="return confirm('تأیید نهایی: همین یک سفارش واقعی با مشخصات واردشده به دایا ارسال شود؟')">
 <input type="hidden" name="submission_nonce" value="{{.Nonce}}">
@@ -62,7 +118,7 @@ ISIN: {{.Result.ISIN}} · سمت: {{.Result.Side}}<br>
 <div class="muted">این نتیجه ذخیره شده است. در وضعیت نامشخص، سفارش را دوباره نفرست.</div>
 </div>
 {{end}}
-</section></main></body></html>`))
+</section></div></main></body></html>`))
 
 var dayaLiveOrderTestNonceStore = struct {
 	sync.Mutex
