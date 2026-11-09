@@ -545,7 +545,7 @@ th{font-size:10px;color:#667085}.tablewrap{overflow:auto}.tablewrap tbody td{fon
  </div>
  <div id="account-balances-status" class="account-balances-status" aria-live="polite">در حال دریافت…</div>
  <div id="account-balances-updated" class="account-balances-updated">آخرین دریافت: —</div>
- <details class="account-balances-debug"><summary>جزئیات تشخیصی (فقط نام فیلدها)</summary><div id="account-balances-fields">—</div></details>
+ <details class="account-balances-debug"><summary>جزئیات تشخیصی (مسیر و نوع داده؛ بدون مقدار)</summary><div id="account-balances-fields">—</div></details>
 </section>
 {{end}}
 <div class="grid{{if .History}} history{{end}}">{{if not .History}}<section class="card"><h2>تعریف سفارش</h2>
@@ -1308,8 +1308,12 @@ th{font-size:10px;color:#667085}.tablewrap{overflow:auto}.tablewrap tbody td{fon
       showMetric("withdrawable", report.withdrawable);
       const diagnosticLines = (report.endpoints || []).map(item => {
         const endpointFields = [...new Set(item.fields || [])].sort();
+        const schema = [...new Set(item.schema || [])].sort().slice(0, 60);
+        const details = [];
+        if (endpointFields.length) details.push("فیلدهای عددی: " + endpointFields.join(" · "));
+        if (schema.length) details.push("ساختار: " + schema.join(" · "));
         return (item.path || "مسیر نامشخص") + ": " +
-          (endpointFields.length ? endpointFields.join(" · ") : "فیلد عددی قابل نمایش پیدا نشد");
+          (details.length ? details.join(" | ") : "ساختار قابل تشخیصی پیدا نشد");
       });
       const fieldsBox = document.getElementById("account-balances-fields");
       if (fieldsBox) fieldsBox.textContent = diagnosticLines.length
