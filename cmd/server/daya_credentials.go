@@ -150,7 +150,7 @@ main,.wrap{width:calc(100% - 32px);max-width:1400px}
 
 </style></head>
 <body><main class="wrap">
-<div class="head"><div><h1>اتصال به سامانه دایا</h1><div class="muted" style="margin-top:7px">مدیریت اطلاعات ورود برای آزمایش اتصال</div></div>
+<header class="page-header"><div><h1>دستیار دایا</h1><div class="page-subtitle">اتصال و نشست دایا · مدیریت ورود، CAPTCHA و پایش نشست</div></div><span class="page-tag">Preview 03</span></header>
 <nav class="nav page-nav">
 <a href="/dashboard">داشبورد مرکزی</a>
 <a href="/">سفارش‌ها</a>
@@ -160,7 +160,7 @@ main,.wrap{width:calc(100% - 32px);max-width:1400px}
 <a href="/daya-online-test">تست آنلاین</a>
 <a href="/daya-latency">کالیبراسیون تأخیر</a>
 <a class="danger-link" href="/daya-online-test/one">ارسال یک‌باره واقعی</a>
-</nav></div>
+</nav>
 {{if .Error}}<div class="msg err">{{.Error}}</div>{{end}}{{if .Notice}}<div class="msg">{{.Notice}}</div>{{end}}
 <section class="card page-card">
 <h2>اطلاعات حساب دایا</h2>
