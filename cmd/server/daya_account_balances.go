@@ -35,9 +35,12 @@ type DayaAccountBalanceEndpoint struct {
 type DayaAccountBalanceReport struct {
 	RetrievedAt  time.Time                    `json:"retrieved_at"`
 	NeedsLogin   bool                         `json:"needs_login"`
-	BuyingPower  DayaAccountBalanceMetric     `json:"buying_power"`
-	CashBalance  DayaAccountBalanceMetric     `json:"cash_balance"`
-	Withdrawable DayaAccountBalanceMetric     `json:"withdrawable"`
+	BuyingPower   DayaAccountBalanceMetric     `json:"buying_power"`
+	AccountBalance DayaAccountBalanceMetric    `json:"account_balance"`
+	CashBalance   DayaAccountBalanceMetric     `json:"cash_balance"`
+	TPlus1Amount  DayaAccountBalanceMetric     `json:"t_plus_1_amount"`
+	TPlus2Amount  DayaAccountBalanceMetric     `json:"t_plus_2_amount"`
+	Withdrawable  DayaAccountBalanceMetric     `json:"withdrawable"`
 	Endpoints    []DayaAccountBalanceEndpoint `json:"endpoints"`
 }
 
@@ -163,7 +166,7 @@ func dayaCollectFinancialFieldNames(value any, out map[string]struct{}, depth in
 			}
 			child := node[key]
 			normalized := dayaNormalizeFinancialKey(key)
-			if strings.Contains(normalized, "account") || strings.Contains(normalized, "customer") ||
+			if (strings.Contains(normalized, "account") && normalized != "accountbalance") || strings.Contains(normalized, "customer") ||
 				strings.Contains(normalized, "userid") || strings.Contains(normalized, "token") ||
 				strings.Contains(normalized, "cookie") || strings.Contains(normalized, "password") ||
 				strings.Contains(normalized, "phone") || strings.Contains(normalized, "mobile") ||
@@ -193,6 +196,9 @@ func dayaFinancialSchemaFieldAllowed(key string) bool {
 		return false
 	}
 	normalized := dayaNormalizeFinancialKey(key)
+	if normalized == "accountbalance" {
+		return true
+	}
 	for _, blocked := range []string{
 		"account", "customer", "userid", "username", "token", "cookie",
 		"password", "phone", "mobile", "email", "address", "national",
@@ -453,7 +459,8 @@ func ReadDayaAccountBalances(ctx context.Context, credentials *DayaCredentialSto
 	missing := DayaAccountBalanceMetric{Status: "not_found", Message: "مبلغ هنوز دریافت نشده است."}
 	report := DayaAccountBalanceReport{
 		RetrievedAt: time.Now().UTC(), BuyingPower: missing,
-		CashBalance: missing, Withdrawable: missing,
+		AccountBalance: missing, CashBalance: missing,
+		TPlus1Amount: missing, TPlus2Amount: missing, Withdrawable: missing,
 		Endpoints: make([]DayaAccountBalanceEndpoint, 0, 2),
 	}
 	if credentials == nil {
@@ -498,11 +505,20 @@ func ReadDayaAccountBalances(ctx context.Context, credentials *DayaCredentialSto
 	}
 
 	report.BuyingPower = dayaSelectBalanceMetric(&buying, &portfolio,
-		dayaMakeAliasSet("buyingPower", "availableBuyingPower", "cashBuyingPower", "buyingPowerAmount", "buyingPowerAvailable", "availableToPurchase", "buyingPowerValue", "credit"),
+		dayaMakeAliasSet("buyingPower", "availableBuyingPower", "cashBuyingPower", "buyingPowerAmount", "buyingPowerAvailable", "availableToPurchase", "buyingPowerValue"),
 		"قدرت خرید")
+	report.AccountBalance = dayaSelectBalanceMetric(&buying, &portfolio,
+		dayaMakeAliasSet("accountBalance"),
+		"موجودی حساب")
 	report.CashBalance = dayaSelectBalanceMetric(&portfolio, &buying,
 		dayaMakeAliasSet("cashBalance", "totalCashBalance", "accountCashBalance", "cashAmount", "cashBalanceAmount", "totalCash", "cash"),
 		"موجودی نقدی")
+	report.TPlus1Amount = dayaSelectBalanceMetric(&buying, &portfolio,
+		dayaMakeAliasSet("tPlus1Amount"),
+		"قابل برداشت پس از یک روز کاری (T+1)")
+	report.TPlus2Amount = dayaSelectBalanceMetric(&buying, &portfolio,
+		dayaMakeAliasSet("tPlus2Amount"),
+		"قابل برداشت پس از دو روز کاری (T+2)")
 	report.Withdrawable = dayaSelectBalanceMetric(&portfolio, &buying,
 		dayaMakeAliasSet("withdrawableCash", "cashWithdrawable", "withdrawableBalance", "cashAvailableToWithdraw", "availableToWithdraw", "withdrawableAmount", "availableWithdrawalAmount", "withdrawalAvailableAmount"),
 		"موجودی قابل برداشت")
