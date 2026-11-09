@@ -148,6 +148,7 @@ ISIN: {{.Result.ISIN}} · سمت: {{.Result.Side}}<br>
   let timer = null;
   let requestNumber = 0;
   let priceRange = null;
+  let rangeRequestNumber = 0;
   const formatPrice = (value) => new Intl.NumberFormat('fa-IR').format(value);
   const validatePrice = () => {
     if (!priceRange || !priceInput.value) { priceInput.setCustomValidity(''); return false; }
@@ -157,6 +158,7 @@ ISIN: {{.Result.ISIN}} · سمت: {{.Result.Side}}<br>
     return valid;
   };
   const loadPriceRange = async (isin) => {
+    const currentRangeRequest = ++rangeRequestNumber;
     priceRange = null;
     rangePanel.textContent = 'در حال دریافت کف و سقف مجاز قیمت از بازار...';
     priceInput.setCustomValidity('ابتدا باید حدود قیمت معتبر بازار دریافت شود.');
@@ -166,6 +168,7 @@ ISIN: {{.Result.ISIN}} · سمت: {{.Result.Side}}<br>
       });
       if (!response.ok) throw new Error('price range unavailable');
       const data = await response.json();
+      if (currentRangeRequest !== rangeRequestNumber || isinField.value !== isin) return;
       if (!Number.isSafeInteger(data.min_price) || !Number.isSafeInteger(data.max_price) ||
           data.min_price <= 0 || data.max_price <= data.min_price) throw new Error('invalid price range');
       priceRange = data;
@@ -178,6 +181,7 @@ ISIN: {{.Result.ISIN}} · سمت: {{.Result.Side}}<br>
         new Date(data.updated_at).toLocaleTimeString('fa-IR');
       validatePrice();
     } catch (_) {
+      if (currentRangeRequest !== rangeRequestNumber || isinField.value !== isin) return;
       priceRange = null;
       rangePanel.textContent = 'دریافت حدود قیمت از بازار ممکن نشد؛ برای جلوگیری از ارسال با قیمت نامعتبر، فعلاً سفارش قابل ارسال نیست.';
       priceInput.setCustomValidity('اطلاعات به‌روز کف و سقف قیمت در دسترس نیست.');
@@ -186,6 +190,7 @@ ISIN: {{.Result.ISIN}} · سمت: {{.Result.Side}}<br>
   const clearSelection = () => {
     isinField.value = '';
     symbolField.value = '';
+    rangeRequestNumber++;
     priceRange = null;
     priceInput.setCustomValidity('ابتدا نماد را انتخاب و حدود قیمت بازار را دریافت کن.');
     rangePanel.textContent = 'پس از انتخاب نماد، کف و سقف قیمت مجاز نمایش داده می‌شود.';
