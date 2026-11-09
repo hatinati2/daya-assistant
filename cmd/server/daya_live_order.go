@@ -33,7 +33,7 @@ a{color:#175cd3;text-decoration:none}.muted{color:#667085;line-height:1.9}input[
 @media(max-width:600px){.grid{grid-template-columns:1fr}}
 </style></head><body><main>
 <h1>ارسال دستی یک سفارش واقعی به دایا</h1>
-<p class="muted"><a href="/daya-online-test">بازگشت به تست آنلاین</a> · فقط نسخه Preview</p>
+<p class="muted"><a href="/dashboard">داشبورد مرکزی</a> · <a href="/daya-online-test">بازگشت به تست آنلاین</a> · فقط نسخه Preview</p>
 <div class="warning"><b>این فرم درخواست واقعی POST /orders می‌فرستد.</b> سفارش وارد زمان‌بندی نمی‌شود. فقط یک بار ارسال می‌شود و در صورت نامشخص‌بودن پاسخ، هیچ ارسال مجدد خودکاری انجام نمی‌شود. سفارش ممکن است در کارگزاری ثبت شود.</div>
 <section class="card">
 {{if not .Result}}
