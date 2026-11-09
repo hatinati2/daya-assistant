@@ -1336,9 +1336,13 @@ func main() {
 		http.Redirect(w, r, "/settings?notice=daya_saved", http.StatusSeeOther)
 	})
 	mux.HandleFunc("POST /settings/daya-logout", func(w http.ResponseWriter, r *http.Request) {
-		if !sameOrigin(r) { http.Error(w, "درخواست نامعتبر", http.StatusForbidden); return }
+		if !sameOrigin(r) {
+			http.Error(w, "درخواست نامعتبر", http.StatusForbidden)
+			return
+		}
 		if err := credentials.Logout(); err != nil {
-			credentials.RenderWithMonitor(w, "خروج از نشست دایا انجام نشد.", "", sessionMonitor.Snapshot()); return
+			credentials.RenderWithMonitor(w, "خروج از نشست دایا انجام نشد.", "", sessionMonitor.Snapshot())
+			return
 		}
 		sessionMonitor.Stop(false, "از نشست دایا خارج شدی؛ برای اتصال دوباره ورود لازم است")
 		http.Redirect(w, r, "/settings?notice=daya_logged_out", http.StatusSeeOther)
