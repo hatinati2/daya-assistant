@@ -116,12 +116,19 @@ main,.wrap{width:calc(100% - 32px);max-width:1400px}
  <div class="stat"><div class="stat-label">کل رکوردهای سفارش</div><div class="stat-value" id="total-orders">{{.Summary.TotalOrders}}</div></div>
  <div class="stat"><div class="stat-label">نشست ذخیره‌شده دایا</div><div class="stat-value" id="session-state">{{if .Summary.SessionAvailable}}موجود{{else}}نیازمند ورود{{end}}</div></div>
 </div>
-<div class="status" id="session-monitor-state">
-{{if .Summary.Monitor.Running}}پایش نشست فعال است.{{else if .Summary.Monitor.NeedsLogin}}نشست معتبر نیست؛ ورود دستی با CAPTCHA لازم است.{{else}}پایش نشست در حال حاضر فعال نیست.{{end}}
-آخرین HTTP: <b id="monitor-http">{{if .Summary.Monitor.LastStatus}}{{.Summary.Monitor.LastStatus}}{{else}}—{{end}}</b>
-· تعداد بررسی‌ها: <b id="monitor-checks">{{.Summary.Monitor.Checks}}</b>
-</div>
-<div class="foot" id="session-expiry">انقضای ثبت‌شده نشست: {{if .Summary.SessionExpiresAt}}{{.Summary.SessionExpiresAt}}{{else}}نامشخص / نشست موجود نیست{{end}}</div>
+<section class="card" id="session-monitor-panel">
+ <div class="head"><div><h2>پایش نشست دایا</h2><div class="muted">وضعیت زنده مانیتور نشست؛ فقط خواندن اطلاعات داخلی و بدون ارسال درخواست معاملاتی</div></div><button type="button" id="refresh-session-monitor">به‌روزرسانی وضعیت</button></div>
+ <div class="status" id="session-monitor-state">{{if .Summary.Monitor.Running}}پایش نشست فعال است.{{else if .Summary.Monitor.NeedsLogin}}نشست معتبر نیست؛ ورود دستی با CAPTCHA لازم است.{{else}}پایش نشست در حال حاضر فعال نیست.{{end}}</div>
+ <div class="grid">
+  <div class="stat"><div class="stat-label">آخرین کد HTTP</div><div class="stat-value" id="monitor-http">{{if .Summary.Monitor.LastStatus}}{{.Summary.Monitor.LastStatus}}{{else}}—{{end}}</div></div>
+  <div class="stat"><div class="stat-label">تعداد بررسی‌ها</div><div class="stat-value" id="monitor-checks">{{.Summary.Monitor.Checks}}</div></div>
+  <div class="stat"><div class="stat-label">آخرین بررسی</div><div class="stat-value" id="monitor-last-check" style="font-size:14px">—</div></div>
+  <div class="stat"><div class="stat-label">بررسی بعدی</div><div class="stat-value" id="monitor-next-check" style="font-size:14px">—</div></div>
+ </div>
+ <div class="foot" id="monitor-last-error">جزئیات خطا: —</div>
+ <div class="foot" id="session-expiry">انقضای ثبت‌شده نشست: {{if .Summary.SessionExpiresAt}}{{.Summary.SessionExpiresAt}}{{else}}نامشخص / نشست موجود نیست{{end}}</div>
+ <div class="foot">این نمایش، داده‌های endpoint پایش نشست را می‌خواند؛ هیچ ورود، تمدید دستی یا عملیات سفارش انجام نمی‌دهد.</div>
+</section>
 <div class="warn">این داشبورد امکانات را یک‌جا گردآوری می‌کند. تست آنلاین و کالیبراسیون نشست فقط GET خواندنی اجرا می‌کنند. ارسال خودکار سفارش از API همچنان غیرفعال است. بخش «ارسال یک سفارش واقعی» جداگانه و فقط با تأیید صریح عمل می‌کند.</div>
 <div class="sections">
  <section class="card">
@@ -162,7 +169,21 @@ main,.wrap{width:calc(100% - 32px);max-width:1400px}
 </div>
 <script>
 (async()=>{
- const ids={scheduled:document.getElementById("scheduled-orders"),ready:document.getElementById("ready-orders"),total:document.getElementById("total-orders"),session:document.getElementById("session-state"),monitor:document.getElementById("session-monitor-state"),http:document.getElementById("monitor-http"),checks:document.getElementById("monitor-checks"),expiry:document.getElementById("session-expiry"),clock:document.getElementById("current-time")};
+ const ids={scheduled:document.getElementById("scheduled-orders"),ready:document.getElementById("ready-orders"),total:document.getElementById("total-orders"),session:document.getElementById("session-state"),monitor:document.getElementById("session-monitor-state"),http:document.getElementById("monitor-http"),checks:document.getElementById("monitor-checks"),lastCheck:document.getElementById("monitor-last-check"),nextCheck:document.getElementById("monitor-next-check"),lastError:document.getElementById("monitor-last-error"),expiry:document.getElementById("session-expiry"),clock:document.getElementById("current-time")};
+ function localTime(value){if(!value)return "—";const d=new Date(value);return Number.isNaN(d.getTime())?"—":new Intl.DateTimeFormat("fa-IR",{dateStyle:"short",timeStyle:"medium",timeZone:"Asia/Tehran"}).format(d)}
+ async function refreshSessionMonitor(){
+  try{
+   const r=await fetch("/api/daya/session-monitor",{cache:"no-store",headers:{"Accept":"application/json"}});
+   if(!r.ok)throw new Error("HTTP "+r.status);
+   const d=await r.json();
+   ids.monitor.textContent=d.running?"پایش نشست فعال است.":(d.needs_login?"نشست معتبر نیست؛ ورود دستی با CAPTCHA لازم است.":"پایش نشست فعال نیست.");
+   ids.http.textContent=d.last_status?String(d.last_status):"—";
+   ids.checks.textContent=String(d.checks||0);
+   ids.lastCheck.textContent=localTime(d.last_check);
+   ids.nextCheck.textContent=localTime(d.next_check);
+   ids.lastError.textContent="جزئیات خطا: "+(d.last_error||"موردی گزارش نشده است");
+  }catch(e){ids.lastError.textContent="دریافت وضعیت پایش ناموفق بود؛ "+String(e.message||e)}
+ }
  async function refresh(){
   try{
    const r=await fetch("/api/dashboard/summary",{cache:"no-store",headers:{"Accept":"application/json"}});
@@ -183,7 +204,8 @@ main,.wrap{width:calc(100% - 32px);max-width:1400px}
    ids.clock.textContent=d.current_time;
   }catch(_){}
  }
- refresh();window.setInterval(refresh,15000);
+ refresh();refreshSessionMonitor();window.setInterval(refresh,15000);window.setInterval(refreshSessionMonitor,15000);
+ document.getElementById("refresh-session-monitor").addEventListener("click",refreshSessionMonitor);
 })();
 </script>
 </main></body></html>
