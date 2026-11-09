@@ -322,3 +322,53 @@ func TestTSESymbolClientSearchSymbolsMapsShortcutFields(t *testing.T) {
 		t.Fatalf("unexpected mapped instrument: %#v", got[0])
 	}
 }
+
+func TestTSESymbolClientFetchPriceRange(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet || r.URL.Path != "/InstrumentProvider/api/v1/Instrument/LiveInstrumentByIdQuery/fa" {
+			t.Fatalf("unexpected request: %s %s", r.Method, r.URL.Path)
+		}
+		if r.URL.Query().Get("InstrumentId") != "IRO1SHPL0001" {
+			t.Fatalf("InstrumentId = %q", r.URL.Query().Get("InstrumentId"))
+		}
+		if r.Header.Get("Referer") != "https://www.tse.ir/" {
+			t.Fatalf("missing TSE referer header")
+		}
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprint(w, `{"minValue":{"value":1000,"state":1},"maxValue":{"value":1200,"state":1},"yesterdayPrice":{"value":1100,"state":1}}`)
+	}))
+	defer server.Close()
+
+	got, err := (TSESymbolClient{BaseURL: server.URL, HTTP: server.Client()}).FetchPriceRange(context.Background(), "iro1shpl0001")
+	if err != nil {
+		t.Fatalf("FetchPriceRange: %v", err)
+	}
+	if got.ISIN != "IRO1SHPL0001" || got.MinPrice != 1000 || got.MaxPrice != 1200 || got.ReferencePrice != 1100 {
+		t.Fatalf("unexpected price range: %#v", got)
+	}
+	if got.MinPercent >= 0 || got.MaxPercent <= 0 {
+		t.Fatalf("expected negative/positive range percentages, got %#v", got)
+	}
+}
+
+func TestTSESymbolClientFetchPriceRangeRejectsInvalidOrMissingLimits(t *testing.T) {
+	tests := []string{
+		`{"minValue":1000,"maxValue":0,"yesterdayPrice":1100}`,
+		`{"minValue":1200,"maxValue":1000,"yesterdayPrice":1100}`,
+		`{"minValue":null,"maxValue":1200,"yesterdayPrice":1100}`,
+	}
+	for _, body := range tests {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			fmt.Fprint(w, body)
+		}))
+		_, err := (TSESymbolClient{BaseURL: server.URL, HTTP: server.Client()}).FetchPriceRange(context.Background(), "IRO1SHPL0001")
+		server.Close()
+		if err == nil {
+			t.Fatalf("invalid limits accepted: %s", body)
+		}
+	}
+	if _, err := (TSESymbolClient{}).FetchPriceRange(context.Background(), "invalid"); err == nil {
+		t.Fatal("invalid ISIN accepted")
+	}
+}

@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"html/template"
 	"net/http"
@@ -30,6 +31,12 @@ h1{font-size:20px}label{display:block;margin:12px 0 6px;font-weight:bold}input,s
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.warning{padding:13px;border:1px solid #fedf89;background:#fffaeb;border-radius:9px;color:#93370d;line-height:1.9}
 button{background:#b42318;color:#fff;border:0;border-radius:8px;padding:12px 18px;font:inherit;cursor:pointer;margin-top:12px}.error{padding:12px;background:#fef3f2;color:#b42318;border-radius:9px}.result{padding:12px;background:#ecfdf3;color:#05603a;border-radius:9px;line-height:1.9}
 a{color:#175cd3;text-decoration:none}.muted{color:#667085;line-height:1.9}input[type=checkbox]{width:auto;min-height:0}
+.symbol-results{display:grid;gap:6px;margin-top:8px}
+.symbol-results button{display:block;width:100%;text-align:right;background:#fff;color:#182230;border:1px solid #d0d5dd;border-radius:8px;padding:9px 11px;margin:0}
+.symbol-results button:hover,.symbol-results button:focus{background:#eff8ff;border-color:#84caff}
+.symbol-results small{display:block;color:#667085;margin-top:3px}
+.symbol-results:empty{display:none}
+.symbol-search{min-width:0}
 @media(max-width:600px){.grid{grid-template-columns:1fr}}
 
 /* Preview 03 shared page chrome */
@@ -93,12 +100,21 @@ main,.wrap{width:calc(100% - 32px);max-width:1400px}
 <div class="warning"><b>این فرم درخواست واقعی POST /orders می‌فرستد.</b> سفارش وارد زمان‌بندی نمی‌شود. فقط یک بار ارسال می‌شود و در صورت نامشخص‌بودن پاسخ، هیچ ارسال مجدد خودکاری انجام نمی‌شود. سفارش ممکن است در کارگزاری ثبت شود.</div>
 <section class="card page-card">
 {{if not .Result}}
-<form method="post" action="/daya-online-test/one/send" onsubmit="return confirm('تأیید نهایی: همین یک سفارش واقعی با مشخصات واردشده به دایا ارسال شود؟')">
+<form method="post" action="/daya-online-test/one/send">
 <input type="hidden" name="submission_nonce" value="{{.Nonce}}">
 <div class="grid">
-<div><label>ISIN</label><input name="isin" maxlength="12" minlength="12" pattern="[A-Za-z0-9]{12}" required></div>
+<div class="symbol-search">
+<label for="symbol-search-input">جست‌وجوی نماد یا نام شرکت</label>
+<input id="symbol-search-input" type="search" placeholder="مثلاً خودرو، فولاد، ایران‌خودرو..." autocomplete="off" aria-describedby="symbol-search-help" required>
+<div id="symbol-search-help" class="muted">نام یا بخشی از نماد را بنویس و یکی از نتایج را انتخاب کن؛ ISIN به‌صورت خودکار ثبت می‌شود.</div>
+<div id="symbol-search-results" class="symbol-results" role="listbox" aria-label="نتایج جست‌وجوی نماد"></div>
+<input type="hidden" id="selected-isin" name="isin">
+<input type="hidden" id="selected-symbol" name="symbol">
+<div id="symbol-selection" class="muted" aria-live="polite"></div>
+<div id="symbol-price-range" class="muted" aria-live="polite">پس از انتخاب نماد، کف و سقف قیمت مجاز نمایش داده می‌شود.</div>
+</div>
 <div><label>سمت</label><select name="side"><option value="buy">خرید BUY</option><option value="sell">فروش SELL</option></select></div>
-<div><label>قیمت به ریال</label><input name="price" type="number" min="1" step="1" required></div>
+<div><label>قیمت به ریال</label><input id="order-price" name="price" type="number" min="1" step="1" required></div>
 <div><label>تعداد</label><input name="quantity" type="number" min="1" step="1" required></div>
 </div>
 <label style="display:flex;gap:9px;align-items:flex-start;font-weight:normal"><input type="checkbox" name="confirm_live_order" value="yes" required><span>ارسال همین سفارش واقعی را با مشخصات بالا تأیید می‌کنم.</span></label>
@@ -118,14 +134,175 @@ ISIN: {{.Result.ISIN}} · سمت: {{.Result.Side}}<br>
 <div class="muted">این نتیجه ذخیره شده است. در وضعیت نامشخص، سفارش را دوباره نفرست.</div>
 </div>
 {{end}}
-</section></div></main></body></html>`))
+</section></div></main>
+<script>
+(() => {
+  const input = document.getElementById('symbol-search-input');
+  const isinField = document.getElementById('selected-isin');
+  const symbolField = document.getElementById('selected-symbol');
+  const results = document.getElementById('symbol-search-results');
+  const selection = document.getElementById('symbol-selection');
+  const rangePanel = document.getElementById('symbol-price-range');
+  const priceInput = document.getElementById('order-price');
+  if (!input || !isinField || !symbolField || !results || !selection || !rangePanel || !priceInput) return;
+  let timer = null;
+  let requestNumber = 0;
+  let priceRange = null;
+  let rangeRequestNumber = 0;
+  const formatPrice = (value) => new Intl.NumberFormat('fa-IR').format(value);
+  const validatePrice = () => {
+    if (!priceRange || !priceInput.value) { priceInput.setCustomValidity(''); return false; }
+    const price = Number(priceInput.value);
+    const valid = Number.isSafeInteger(price) && price >= priceRange.min_price && price <= priceRange.max_price;
+    priceInput.setCustomValidity(valid ? '' : 'قیمت باید بین کف و سقف مجاز همین نماد باشد.');
+    return valid;
+  };
+  const loadPriceRange = async (isin) => {
+    const currentRangeRequest = ++rangeRequestNumber;
+    priceRange = null;
+    rangePanel.textContent = 'در حال دریافت کف و سقف مجاز قیمت از بازار...';
+    priceInput.setCustomValidity('ابتدا باید حدود قیمت معتبر بازار دریافت شود.');
+    try {
+      const response = await fetch('/api/symbols/price-range?isin=' + encodeURIComponent(isin), {
+        headers: {'Accept': 'application/json'}, credentials: 'same-origin', cache: 'no-store'
+      });
+      if (!response.ok) throw new Error('price range unavailable');
+      const data = await response.json();
+      if (currentRangeRequest !== rangeRequestNumber || isinField.value !== isin) return;
+      if (!Number.isSafeInteger(data.min_price) || !Number.isSafeInteger(data.max_price) ||
+          data.min_price <= 0 || data.max_price <= data.min_price) throw new Error('invalid price range');
+      priceRange = data;
+      let percentText = '';
+      if (Number.isFinite(data.min_percent) && Number.isFinite(data.max_percent) && data.reference_price > 0) {
+        percentText = ' · دامنه نسبت به قیمت مرجع: ' + data.min_percent.toFixed(2) + '% تا ' + (data.max_percent >= 0 ? '+' : '') + data.max_percent.toFixed(2) + '%';
+      }
+      rangePanel.textContent = 'کف مجاز: ' + formatPrice(data.min_price) + ' ریال · سقف مجاز: ' +
+        formatPrice(data.max_price) + ' ریال' + percentText + ' · دریافت: ' +
+        new Date(data.updated_at).toLocaleTimeString('fa-IR');
+      validatePrice();
+    } catch (_) {
+      if (currentRangeRequest !== rangeRequestNumber || isinField.value !== isin) return;
+      priceRange = null;
+      rangePanel.textContent = 'دریافت حدود قیمت از بازار ممکن نشد؛ برای جلوگیری از ارسال با قیمت نامعتبر، فعلاً سفارش قابل ارسال نیست.';
+      priceInput.setCustomValidity('اطلاعات به‌روز کف و سقف قیمت در دسترس نیست.');
+    }
+  };
+  const clearSelection = () => {
+    isinField.value = '';
+    symbolField.value = '';
+    rangeRequestNumber++;
+    priceRange = null;
+    priceInput.setCustomValidity('ابتدا نماد را انتخاب و حدود قیمت بازار را دریافت کن.');
+    rangePanel.textContent = 'پس از انتخاب نماد، کف و سقف قیمت مجاز نمایش داده می‌شود.';
+    selection.textContent = 'هنوز نمادی انتخاب نشده است.';
+  };
+  const showMessage = (message) => {
+    results.replaceChildren();
+    const note = document.createElement('div');
+    note.className = 'muted';
+    note.textContent = message;
+    results.append(note);
+  };
+  input.addEventListener('input', () => {
+    clearSelection();
+    const query = input.value.trim();
+    const currentRequest = ++requestNumber;
+    clearTimeout(timer);
+    if (query.length < 2) {
+      results.replaceChildren();
+      return;
+    }
+    showMessage('در حال جست‌وجوی نمادها...');
+    timer = setTimeout(async () => {
+      try {
+        const response = await fetch('/api/symbols/suggest?q=' + encodeURIComponent(query), {
+          headers: {'Accept': 'application/json'},
+          credentials: 'same-origin'
+        });
+        if (!response.ok) throw new Error('search failed');
+        const items = await response.json();
+        if (currentRequest !== requestNumber) return;
+        results.replaceChildren();
+        if (!Array.isArray(items) || items.length === 0) {
+          showMessage('نمادی پیدا نشد؛ عبارت دیگری را امتحان کن.');
+          return;
+        }
+        for (const item of items) {
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.setAttribute('role', 'option');
+          const title = document.createElement('strong');
+          title.textContent = item.symbol || 'بدون نماد';
+          const detail = document.createElement('small');
+          detail.textContent = [item.company_name, item.market_type, item.isin].filter(Boolean).join(' · ');
+          button.append(title, detail);
+          button.addEventListener('click', () => {
+            input.value = item.symbol || '';
+            isinField.value = item.isin || '';
+            symbolField.value = item.symbol || '';
+            selection.textContent = 'نماد انتخاب‌شده: ' + (item.symbol || '') + ' — ISIN: ' + (item.isin || '');
+            results.replaceChildren();
+            loadPriceRange(item.isin || '');
+          });
+          results.append(button);
+        }
+      } catch (_) {
+        if (currentRequest === requestNumber) showMessage('جست‌وجوی نماد در دسترس نیست؛ کمی بعد دوباره تلاش کن.');
+      }
+    }, 250);
+  });
+  input.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter' && results.querySelector('button')) {
+      event.preventDefault();
+      results.querySelector('button').click();
+    }
+  });
+  const form = input.closest('form');
+  priceInput.addEventListener('input', validatePrice);
+  if (form) form.addEventListener('submit', (event) => {
+    if (!isinField.value || !symbolField.value) {
+      event.preventDefault();
+      input.setCustomValidity('ابتدا نماد را از نتایج جست‌وجو انتخاب کن.');
+      input.reportValidity();
+      input.addEventListener('input', () => input.setCustomValidity(''), {once:true});
+      input.focus();
+      return;
+    }
+    if (!priceRange) {
+      event.preventDefault();
+      priceInput.setCustomValidity('اطلاعات معتبر کف و سقف قیمت دریافت نشده است.');
+      priceInput.reportValidity();
+      return;
+    }
+    if (!validatePrice()) { event.preventDefault(); priceInput.reportValidity(); return; }
+    if (!confirm('تأیید نهایی: همین یک سفارش واقعی با مشخصات واردشده و قیمت داخل محدوده مجاز به دایا ارسال شود؟')) event.preventDefault();
+  });
+})();
+</script>
+</body></html>`))
 
 var dayaLiveOrderTestNonceStore = struct {
 	sync.Mutex
 	values map[string]time.Time
 }{values: make(map[string]time.Time)}
 
-func registerDayaLiveOrderTestRoutes(mux *http.ServeMux, previewMode bool, credentials *DayaCredentialStore, store *Store) {
+func registerDayaLiveOrderTestRoutes(mux *http.ServeMux, previewMode bool, credentials *DayaCredentialStore, store *Store, symbolClient TSESymbolClient) {
+	mux.HandleFunc("GET /api/symbols/price-range", func(w http.ResponseWriter, r *http.Request) {
+		if !previewMode {
+			http.NotFound(w, r)
+			return
+		}
+		ctx, cancel := context.WithTimeout(r.Context(), 4*time.Second)
+		defer cancel()
+		priceRange, err := symbolClient.FetchPriceRange(ctx, r.URL.Query().Get("isin"))
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadGateway)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.Header().Set("Cache-Control", "no-store")
+		_ = json.NewEncoder(w).Encode(priceRange)
+	})
 	mux.HandleFunc("GET /daya-online-test/one", func(w http.ResponseWriter, r *http.Request) {
 		if !previewMode {
 			http.NotFound(w, r)
@@ -173,6 +350,17 @@ func registerDayaLiveOrderTestRoutes(mux *http.ServeMux, previewMode bool, crede
 		order, err := parseDayaLiveOrderTestForm(r)
 		if err != nil {
 			renderDayaLiveOrderTestError(w, err.Error())
+			return
+		}
+		rangeCtx, rangeCancel := context.WithTimeout(r.Context(), 4*time.Second)
+		priceRange, rangeErr := symbolClient.FetchPriceRange(rangeCtx, order.ISIN)
+		rangeCancel()
+		if rangeErr != nil {
+			renderDayaLiveOrderTestError(w, "حدود مجاز قیمت از بازار قابل تأیید نیست؛ سفارش ارسال نشد. "+rangeErr.Error())
+			return
+		}
+		if order.Price < priceRange.MinPrice || order.Price > priceRange.MaxPrice {
+			renderDayaLiveOrderTestError(w, "قیمت سفارش خارج از محدوده مجاز نماد است. کف: "+strconv.FormatInt(priceRange.MinPrice, 10)+" ریال، سقف: "+strconv.FormatInt(priceRange.MaxPrice, 10)+" ریال. سفارش ارسال نشد.")
 			return
 		}
 		ctx, cancel := context.WithTimeout(r.Context(), 20*time.Second)
@@ -229,8 +417,12 @@ func parseDayaLiveOrderTestForm(r *http.Request) (Order, error) {
 	if priceErr != nil || quantityErr != nil {
 		return Order{}, errors.New("قیمت و تعداد باید عدد صحیح مثبت باشند.")
 	}
+	symbol := strings.TrimSpace(r.FormValue("symbol"))
+	if symbol == "" {
+		symbol = isin
+	}
 	order := Order{
-		ISIN: isin, Symbol: isin, Side: side, Price: price, Quantity: quantity,
+		ISIN: isin, Symbol: symbol, Side: side, Price: price, Quantity: quantity,
 		ExecutionMode: executionModeAPI,
 	}
 	if _, err := MarshalDayaOrderPayload(order); err != nil {

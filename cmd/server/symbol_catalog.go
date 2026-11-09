@@ -44,6 +44,117 @@ type tseMarketWatchResponse struct {
 	} `json:"Items"`
 }
 
+type InstrumentPriceRange struct {
+	ISIN           string    `json:"isin"`
+	MinPrice       int64     `json:"min_price"`
+	MaxPrice       int64     `json:"max_price"`
+	ReferencePrice int64     `json:"reference_price,omitempty"`
+	MinPercent     float64   `json:"min_percent,omitempty"`
+	MaxPercent     float64   `json:"max_percent,omitempty"`
+	UpdatedAt      time.Time `json:"updated_at"`
+}
+
+type tseLiveInstrumentPriceResponse struct {
+	MinValue       json.RawMessage `json:"minValue"`
+	MaxValue       json.RawMessage `json:"maxValue"`
+	YesterdayPrice json.RawMessage `json:"yesterdayPrice"`
+}
+
+func parseTSEPriceValue(raw json.RawMessage) (int64, error) {
+	if len(raw) == 0 || string(raw) == "null" {
+		return 0, errors.New("قیمت در پاسخ بازار موجود نیست")
+	}
+	var object map[string]json.RawMessage
+	if err := json.Unmarshal(raw, &object); err == nil && object != nil {
+		for _, key := range []string{"value", "Value", "price", "Price"} {
+			if value, ok := object[key]; ok {
+				return parseTSEPriceValue(value)
+			}
+		}
+		return 0, errors.New("ساختار قیمت بازار نامعتبر است")
+	}
+	var number json.Number
+	if err := json.Unmarshal(raw, &number); err == nil {
+		value, parseErr := strconv.ParseFloat(number.String(), 64)
+		if parseErr == nil && value > 0 && value <= 9e15 && value == float64(int64(value)) {
+			return int64(value), nil
+		}
+	}
+	var text string
+	if err := json.Unmarshal(raw, &text); err == nil {
+		value, parseErr := strconv.ParseFloat(strings.TrimSpace(text), 64)
+		if parseErr == nil && value > 0 && value <= 9e15 && value == float64(int64(value)) {
+			return int64(value), nil
+		}
+	}
+	return 0, errors.New("قیمت بازار عدد صحیح مثبت نیست")
+}
+
+// FetchPriceRange reads the current allowed price limits from TSE's
+// per-instrument live endpoint. It is read-only and never contacts the broker.
+func (c TSESymbolClient) FetchPriceRange(ctx context.Context, isin string) (InstrumentPriceRange, error) {
+	isin = strings.ToUpper(strings.TrimSpace(isin))
+	if !marketISINPattern.MatchString(isin) {
+		return InstrumentPriceRange{}, errors.New("شناسه نماد برای دریافت دامنه نوسان معتبر نیست")
+	}
+	baseURL := strings.TrimRight(strings.TrimSpace(c.BaseURL), "/")
+	if baseURL == "" {
+		baseURL = tseGatewayBaseURL
+	}
+	client := c.HTTP
+	if client == nil {
+		client = &http.Client{Timeout: 4 * time.Second}
+	}
+	values := url.Values{}
+	values.Set("InstrumentId", isin)
+	endpoint := baseURL + "/InstrumentProvider/api/v1/Instrument/LiveInstrumentByIdQuery/fa?" + values.Encode()
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint, nil)
+	if err != nil {
+		return InstrumentPriceRange{}, err
+	}
+	req.Header.Set("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/126 Safari/537.36")
+	req.Header.Set("Accept", "application/json,text/plain,*/*")
+	req.Header.Set("Referer", "https://www.tse.ir/")
+	req.Header.Set("Origin", "https://www.tse.ir")
+	resp, err := client.Do(req)
+	if err != nil {
+		return InstrumentPriceRange{}, fmt.Errorf("دریافت حدود قیمت از درگاه بازار ناموفق بود: %w", err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return InstrumentPriceRange{}, fmt.Errorf("درگاه بازار برای اطلاعات قیمت HTTP %d برگرداند", resp.StatusCode)
+	}
+	body, err := io.ReadAll(io.LimitReader(resp.Body, 2<<20+1))
+	if err != nil {
+		return InstrumentPriceRange{}, err
+	}
+	if len(body) > 2<<20 {
+		return InstrumentPriceRange{}, errors.New("پاسخ اطلاعات قیمت بیش از حد مجاز است")
+	}
+	var payload tseLiveInstrumentPriceResponse
+	if err := json.Unmarshal(body, &payload); err != nil {
+		return InstrumentPriceRange{}, fmt.Errorf("ساختار اطلاعات قیمت نماد نامعتبر است: %w", err)
+	}
+	minPrice, err := parseTSEPriceValue(payload.MinValue)
+	if err != nil {
+		return InstrumentPriceRange{}, fmt.Errorf("کف قیمت مجاز قابل تأیید نیست: %w", err)
+	}
+	maxPrice, err := parseTSEPriceValue(payload.MaxValue)
+	if err != nil {
+		return InstrumentPriceRange{}, fmt.Errorf("سقف قیمت مجاز قابل تأیید نیست: %w", err)
+	}
+	if minPrice >= maxPrice {
+		return InstrumentPriceRange{}, errors.New("محدوده قیمت دریافتی از بازار معتبر نیست")
+	}
+	result := InstrumentPriceRange{ISIN: isin, MinPrice: minPrice, MaxPrice: maxPrice, UpdatedAt: time.Now().In(tehran())}
+	if reference, refErr := parseTSEPriceValue(payload.YesterdayPrice); refErr == nil {
+		result.ReferencePrice = reference
+		result.MinPercent = (float64(minPrice)/float64(reference) - 1) * 100
+		result.MaxPercent = (float64(maxPrice)/float64(reference) - 1) * 100
+	}
+	return result, nil
+}
+
 type TSESymbolClient struct {
 	BaseURL string
 	HTTP    *http.Client
