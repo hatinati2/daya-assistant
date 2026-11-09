@@ -696,7 +696,9 @@ func (s *DayaCredentialStore) Logout() error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	err := os.Remove(s.sessionPath)
-	if errors.Is(err, os.ErrNotExist) { return nil }
+	if errors.Is(err, os.ErrNotExist) {
+		return nil
+	}
 	return err
 }
 
