@@ -99,7 +99,7 @@ button{border:0;border-radius:8px;background:#175cd3;color:#fff;padding:10px 14p
 </style></head>
 <body><main class="wrap">
 <div class="head"><div><h1>اتصال به سامانه دایا</h1><div class="muted" style="margin-top:7px">مدیریت اطلاعات ورود برای آزمایش اتصال</div></div>
-<nav class="nav"><a href="/">سفارش‌های فعال</a><a href="/history">تاریخچه</a><a class="active" href="/settings">اتصال به دایا</a></nav></div>
+<nav class="nav"><a href="/dashboard">داشبورد مرکزی</a><a href="/">سفارش‌های فعال</a><a href="/history">تاریخچه</a><a class="active" href="/settings">اتصال به دایا</a></nav></div>
 {{if .Error}}<div class="msg err">{{.Error}}</div>{{end}}{{if .Notice}}<div class="msg">{{.Notice}}</div>{{end}}
 <section class="card">
 <h2>اطلاعات حساب دایا</h2>
