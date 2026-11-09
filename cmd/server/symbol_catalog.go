@@ -55,8 +55,8 @@ type InstrumentPriceRange struct {
 }
 
 type tseLiveInstrumentPriceResponse struct {
-	MinValue      json.RawMessage `json:"minValue"`
-	MaxValue      json.RawMessage `json:"maxValue"`
+	MinValue       json.RawMessage `json:"minValue"`
+	MaxValue       json.RawMessage `json:"maxValue"`
 	YesterdayPrice json.RawMessage `json:"yesterdayPrice"`
 }
 
