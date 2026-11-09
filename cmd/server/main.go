@@ -1315,13 +1315,15 @@ th{font-size:10px;color:#667085}.tablewrap{overflow:auto}.tablewrap tbody td{fon
       if (fieldsBox) fieldsBox.textContent = diagnosticLines.length
         ? diagnosticLines.join("\n")
         : "اطلاعات تشخیصی در دسترس نیست.";
-      const failed = (report.endpoints || []).filter(item => item.error);
+      const missingMetrics = [report.buying_power, report.cash_balance, report.withdrawable]
+        .filter(metric => !metric || metric.status !== "ok").length;
       if (report.needs_login) {
         status.textContent = "نشست کارگزاری معتبر نیست؛ از بخش اتصال به دایا دوباره وارد شو.";
-      } else if (failed.length) {
-        status.textContent = "پاسخ دریافت شد؛ نام فیلدهای مالی هنوز تطبیق داده نشده است.";
+      } else if (missingMetrics > 0) {
+        status.textContent = "داده از کارگزاری دریافت شد؛ " + missingMetrics +
+          " مقدار مالی هنوز قابل شناسایی نیست.";
       } else {
-        status.textContent = "اطلاعات حساب به‌روزرسانی شد.";
+        status.textContent = "هر سه مقدار مالی از کارگزاری دریافت شد.";
       }
       const when = report.retrieved_at ? new Date(report.retrieved_at) : null;
       updated.textContent = "آخرین دریافت: " + (when && !Number.isNaN(when.getTime())
