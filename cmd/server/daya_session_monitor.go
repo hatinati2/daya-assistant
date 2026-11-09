@@ -20,13 +20,19 @@ const (
 )
 
 type DayaMonitorSnapshot struct {
-	Running    bool      `json:"running"`
-	NeedsLogin bool      `json:"needs_login"`
-	LastCheck  time.Time `json:"last_check,omitempty"`
-	NextCheck  time.Time `json:"next_check,omitempty"`
-	LastStatus int       `json:"last_status,omitempty"`
-	Checks     uint64    `json:"checks"`
-	LastError  string    `json:"last_error,omitempty"`
+	Running                bool          `json:"running"`
+	NeedsLogin             bool          `json:"needs_login"`
+	LastCheck              time.Time     `json:"last_check,omitempty"`
+	FirstCheckAt           time.Time     `json:"first_check_at,omitempty"`
+	DisconnectedAt         time.Time     `json:"disconnected_at,omitempty"`
+	LastDisconnectedAt     time.Time     `json:"last_disconnected_at,omitempty"`
+	LastDisconnectDuration time.Duration `json:"last_disconnect_duration,omitempty"`
+	DisconnectedFor        time.Duration `json:"disconnected_for,omitempty"`
+	LastReconnectAt        time.Time     `json:"last_reconnect_at,omitempty"`
+	NextCheck              time.Time     `json:"next_check,omitempty"`
+	LastStatus             int           `json:"last_status,omitempty"`
+	Checks                 uint64        `json:"checks"`
+	LastError              string        `json:"last_error,omitempty"`
 }
 
 type DayaEndpointVerificationResult struct {
@@ -200,7 +206,14 @@ func (m *DayaSessionMonitor) Start(parent context.Context, session DayaSession) 
 	}
 	ctx, cancel := context.WithCancel(parent)
 	m.cancel = cancel
-	m.state = DayaMonitorSnapshot{Running: true}
+	now := time.Now().UTC()
+	previous := m.state
+	m.state = DayaMonitorSnapshot{Running: true, FirstCheckAt: now, LastDisconnectedAt: previous.LastDisconnectedAt, LastDisconnectDuration: previous.LastDisconnectDuration}
+	if !previous.DisconnectedAt.IsZero() {
+		m.state.LastDisconnectedAt = previous.DisconnectedAt
+		m.state.LastDisconnectDuration = now.Sub(previous.DisconnectedAt)
+		m.state.LastReconnectAt = now
+	}
 	m.mu.Unlock()
 	go m.run(ctx, session)
 	return nil
@@ -222,10 +235,17 @@ func (m *DayaSessionMonitor) Stop(needsLogin bool, message string) {
 func (m *DayaSessionMonitor) Snapshot() DayaMonitorSnapshot {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	return m.state
+	snapshot := m.state
+	if !snapshot.DisconnectedAt.IsZero() {
+		snapshot.DisconnectedFor = time.Since(snapshot.DisconnectedAt)
+	} else if !snapshot.LastDisconnectedAt.IsZero() {
+		snapshot.DisconnectedFor = snapshot.LastDisconnectDuration
+	}
+	return snapshot
 }
 
 func (m *DayaSessionMonitor) run(ctx context.Context, session DayaSession) {
+	firstCheck := true
 	for {
 		delay, err := m.interval()
 		if err != nil {
@@ -242,15 +262,19 @@ func (m *DayaSessionMonitor) run(ctx context.Context, session DayaSession) {
 				delay = untilExpiry
 			}
 		}
-		m.mu.Lock()
-		m.state.NextCheck = time.Now().Add(delay)
-		m.mu.Unlock()
-		timer := time.NewTimer(delay)
-		select {
-		case <-ctx.Done():
-			timer.Stop()
-			return
-		case <-timer.C:
+		if firstCheck {
+			firstCheck = false
+		} else {
+			m.mu.Lock()
+			m.state.NextCheck = time.Now().Add(delay)
+			m.mu.Unlock()
+			timer := time.NewTimer(delay)
+			select {
+			case <-ctx.Done():
+				timer.Stop()
+				return
+			case <-timer.C:
+			}
 		}
 		if !session.ExpiresAt.IsZero() && !time.Now().Before(session.ExpiresAt) {
 			m.Stop(true, "زمان اعتبار نشست به پایان رسیده است؛ ورود دستی لازم است")
@@ -305,6 +329,11 @@ func (m *DayaSessionMonitor) run(ctx context.Context, session DayaSession) {
 
 		switch resp.StatusCode {
 		case http.StatusUnauthorized, http.StatusForbidden:
+			m.mu.Lock()
+			if m.state.DisconnectedAt.IsZero() {
+				m.state.DisconnectedAt = now
+			}
+			m.mu.Unlock()
 			m.Stop(true, "نشست توسط دایا پذیرفته نشد؛ ورود دستی با CAPTCHA لازم است")
 			return
 		case http.StatusTooManyRequests:

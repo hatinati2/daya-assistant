@@ -519,25 +519,139 @@ th{font-size:10px;color:#667085}.tablewrap{overflow:auto}.tablewrap tbody td{fon
 .symbol-suggestion{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;padding:10px 12px;border:0;border-radius:0;border-bottom:1px solid #eaecf0;background:#fff;color:#182230;text-align:right;cursor:pointer}
 .symbol-suggestion:last-child{border-bottom:0}.symbol-suggestion:hover,.symbol-suggestion:focus{background:#eff8ff;outline:none}
 .symbol-suggestion-main{display:flex;flex-direction:column;gap:4px;min-width:0}.symbol-suggestion-name{font-weight:bold}.symbol-suggestion-company{font-size:11px;color:#667085;white-space:normal}.symbol-suggestion-isin{direction:ltr;font-size:10px;color:#475467;white-space:nowrap}
+#account-balances-panel{min-width:0}#account-balances-panel .account-balances-head{display:flex;align-items:center;justify-content:space-between;gap:8px}#account-balances-panel .account-balances-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px;margin-top:8px}#account-balances-panel .account-balance-item{min-width:0;padding:7px 8px;border:1px solid #e4e7ec;border-radius:8px;background:#f8fafc;display:flex;flex-direction:column;gap:3px}#account-balances-panel .account-balance-item span{font-size:10px;color:#475467}#account-balances-panel .account-balance-item strong{font-size:16px;line-height:1.4;overflow-wrap:anywhere}#account-balances-panel .account-balance-item small{font-size:9px;color:#667085;min-height:12px}#account-balances-panel .account-balances-status,#account-balances-panel .account-balances-updated{font-size:9px;color:#667085;margin-top:4px}#account-balances-panel .account-balances-debug{margin-top:5px;font-size:9px;color:#667085}#account-balances-panel .account-balances-debug summary{cursor:pointer}#account-balances-fields{direction:ltr;text-align:left;white-space:pre-line;overflow-wrap:anywhere;padding-top:4px}@media(max-width:900px){#account-balances-panel .account-balances-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:560px){#account-balances-panel .account-balances-grid{gap:5px}#account-balances-panel .account-balance-item{padding:6px 5px}#account-balances-panel .account-balance-item strong{font-size:13px}}
+.price-range-panel{grid-column:1/-1;padding:8px 10px;border:1px solid #b2ddff;border-radius:9px;background:#f5faff;color:#1849a9;font-size:11px;line-height:1.9;overflow-wrap:anywhere}
 .datebox{position:relative}.datebar{display:flex;gap:8px}.datebar input{flex:1}.datebar button{white-space:nowrap}.calendar{margin-top:8px;padding:12px;border:1px solid #d0d5dd;border-radius:10px;background:#fff}.cal-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:12px}.cal-nav{background:#f2f4f7;color:#344054;padding:7px 10px}.cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;text-align:center}.cal-grid span{padding:7px 0;color:#667085;font-size:11px}.cal-day{background:#f8fafc;color:#182230;padding:9px 2px;border-radius:7px}.cal-day:hover,.cal-day.selected{background:#175cd3;color:#fff}.cal-day.today{outline:2px solid #84adff}.cal-empty{min-height:34px}
 .batch-planner{grid-column:1/-1;margin:4px 0;border:1px solid #d0d5dd;border-radius:9px;padding:7px 9px;background:#f8fafc}.batch-planner>summary{cursor:pointer;font-size:11px;font-weight:bold;color:#344054}.batch-planner-body{padding-top:7px}.batch-planner-note{font-size:10px;line-height:1.55;color:#667085;margin-bottom:6px}.batch-plan-controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 10px}.batch-plan-controls label{font-size:10px;margin:4px 0}.batch-plan-controls input{min-height:32px;padding:5px 8px;font-size:12px}.batch-plan-calc{margin-top:7px;font-size:11px;padding:7px 10px}.batch-plan-error{margin-top:6px;color:#b42318;font-size:10px}.batch-plan-result{margin-top:7px;padding:7px;background:#fff;border:1px solid #e4e7ec;border-radius:8px}.batch-plan-summary{display:flex;gap:10px;flex-wrap:wrap;font-size:10px}.batch-plan-table-wrap{max-height:140px;overflow:auto;margin-top:6px}.batch-plan-table{font-size:10px}.batch-plan-table th,.batch-plan-table td{padding:4px 6px}
 .dry-run{width:100%;margin-top:7px;background:#eff8ff;color:#175cd3;border:1px solid #b2ddff}.dry-run-result{margin-top:7px;padding:9px 11px;border:1px solid #b2ddff;border-radius:9px;background:#f5faff;color:#1849a9;line-height:1.7;white-space:pre-wrap}.dry-run-result.error{background:#fef3f2;border-color:#fecdca;color:#b42318}
 .reconcile-form{display:grid;gap:5px;min-width:180px;max-width:260px;white-space:normal}
 .reconcile-form select,.reconcile-form input{min-height:30px;padding:5px 7px;font-size:10px}
 .reconcile-form button{padding:6px 8px;font-size:10px;background:#175cd3}
-@media(max-width:900px){.grid{grid-template-columns:1fr}.head{align-items:flex-start;gap:10px;flex-direction:column}}@media(max-width:560px){.form-grid{grid-template-columns:1fr}.form-field.wide,.form-grid>.wide{grid-column:auto}.batch-plan-controls{grid-template-columns:1fr}}
-</style></head><body data-jyear="{{.JYear}}" data-jmonth="{{.JMonth}}" data-jday="{{.JDay}}"><main class="wrap">
-<div class="head"><div><h1>دستیار دایا</h1><div class="muted" style="margin-top:7px">مدیریت سفارش‌ها · ساعت تهران</div></div><div class="nav">{{if .PreviewMode}}<a href="/dashboard">داشبورد مرکزی</a>{{end}}<a class="{{if not .History}}active{{end}}" href="/">سفارش‌های فعال</a><a class="{{if .History}}active{{end}}" href="/history">تاریخچه</a><a href="/settings">اتصال به دایا</a>{{if .PreviewMode}}<a href="/daya-api-test">تست API محلی</a><a href="/daya-online-test">تست آنلاین دایا</a><a href="/daya-latency">کالیبراسیون تأخیر</a>{{end}}</div><span class="tag">{{if .APIAvailable}}ارسال واقعی API فعال است{{else}}ارسال واقعی API غیرفعال است{{end}}</span></div>
+@media(max-width:1100px){#account-balances-panel .account-balances-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(max-width:700px){#account-balances-panel .account-balances-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:900px){.grid{grid-template-columns:1fr}.head{align-items:flex-start;gap:10px;flex-direction:column}}@media(max-width:560px){.form-grid{grid-template-columns:1fr}.form-field.wide,.form-grid>.wide{grid-column:auto}.batch-plan-controls{grid-template-columns:1fr}}
+
+/* Preview 03 compact workspace for laptop-height displays */
+.preview-compact .wrap{width:calc(100% - 20px);max-width:1600px;margin:9px auto;padding:0 8px}
+.preview-compact .head{gap:8px;margin-bottom:8px}
+.preview-compact h1{font-size:17px}
+.preview-compact h2{font-size:13px;margin-bottom:6px}
+.preview-compact .nav{gap:5px}
+.preview-compact .nav a{padding:5px 8px;font-size:11px}
+.preview-compact .note,.preview-compact .msg{padding:5px 8px;margin:5px 0;line-height:1.4}
+.preview-compact .card{padding:9px;border-radius:10px}
+.preview-compact .grid{gap:9px}
+.preview-compact .form-grid{gap:3px 8px}
+.preview-compact .form-field label{margin:2px 0;font-size:10px}
+.preview-compact input,.preview-compact select{min-height:31px;padding:5px 7px;border-radius:7px}
+.preview-compact button{padding:6px 9px}
+.preview-compact .form-field .foot,.preview-compact .foot{font-size:9px;line-height:1.35;margin-top:3px}
+.preview-compact .form-field .server-clock{min-height:42px;margin:2px 0;padding:5px 8px}
+.preview-compact .server-clock{gap:7px;margin:3px 0;padding:5px 8px;border-radius:9px}
+.preview-compact .server-clock-value{font-size:18px;letter-spacing:.5px}
+.preview-compact .price-range-panel{padding:5px 8px;font-size:10px;line-height:1.4}
+.preview-compact .submit{margin-top:5px}
+.preview-compact .batch-planner{margin:3px 0;padding:5px 7px}
+.preview-compact .batch-planner-body{padding-top:5px}
+.preview-compact .batch-plan-note{font-size:9px;line-height:1.4;margin-bottom:4px}
+.preview-compact .batch-plan-controls{gap:4px 8px}
+.preview-compact .batch-plan-controls label{margin:2px 0;font-size:9px}
+.preview-compact .batch-plan-controls input{min-height:29px;padding:4px 6px;font-size:11px}
+.preview-compact .batch-plan-calc{margin-top:5px;padding:5px 8px;font-size:10px}
+.preview-compact .batch-plan-result{margin-top:5px;padding:5px}
+.preview-compact th,.preview-compact td{padding:6px 5px}
+.preview-compact .tablewrap tbody td{font-size:10.5px}
+.preview-compact #account-balances-panel{padding:6px 8px!important;margin:4px 0 6px!important;border-radius:8px}
+.preview-compact #account-balances-panel .account-balances-head{gap:5px}
+.preview-compact #account-balances-panel .account-balances-head h2{font-size:12px!important;margin:0}
+.preview-compact #account-balances-panel #refresh-account-balances{padding:4px 7px!important;font-size:10px!important}
+.preview-compact #account-balances-panel .account-balances-grid{gap:4px;margin-top:4px}
+.preview-compact #account-balances-panel .account-balance-item{padding:3px 5px;gap:1px;border-radius:7px}
+.preview-compact #account-balances-panel .account-balance-item span{font-size:9px;line-height:1.25}
+.preview-compact #account-balances-panel .account-balance-item strong{font-size:12px;line-height:1.25}
+.preview-compact #account-balances-panel .account-balance-item small{font-size:8px;line-height:1.1;min-height:9px}
+.preview-compact #account-balances-panel .account-balances-status,.preview-compact #account-balances-panel .account-balances-updated{font-size:8px;line-height:1.25;margin-top:2px}
+.preview-compact #account-balances-panel .account-balances-debug{margin-top:2px;font-size:8px}
+.preview-compact #account-balances-panel .account-balances-debug summary{font-size:8px}
+.preview-compact #account-balances-panel #account-balances-fields{font-size:8px;padding-top:2px}
+@media(min-width:901px){.preview-compact .grid{grid-template-columns:minmax(430px,470px) minmax(0,1fr)}}
+@media(max-height:900px) and (min-width:901px){
+ .preview-compact .wrap{margin:6px auto}
+ .preview-compact .head{margin-bottom:5px}
+ .preview-compact .card{padding:8px}
+ .preview-compact .form-grid{gap:2px 7px}
+ .preview-compact .form-field label{margin:1px 0}
+ .preview-compact input,.preview-compact select{min-height:29px;padding:4px 6px}
+ .preview-compact .form-field .server-clock{min-height:38px}
+ .preview-compact .server-clock{padding:4px 7px}
+ .preview-compact .server-clock-value{font-size:16px}
+ .preview-compact .note,.preview-compact .msg{margin:4px 0;padding:4px 7px}
+ .preview-compact th,.preview-compact td{padding:5px 4px}
+}
+ 
+/* Preview 03 order history: keep the list and every order row inside the full-width panel */
+.preview-compact .grid.history{display:block;width:100%;min-width:0}
+.preview-compact .grid.history>.card{display:block;width:100%;max-width:100%;min-width:0}
+.preview-compact .grid.history .history-order-list{display:flex;flex-direction:column;align-items:stretch;gap:5px;margin-top:7px;width:100%;min-width:0}
+.preview-compact .grid.history .history-order-row{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.8fr) minmax(0,.55fr) minmax(0,1.5fr) minmax(0,.8fr) minmax(0,1.25fr) auto;align-items:center;gap:7px;width:100%;max-width:100%;min-width:0;overflow:hidden;padding:7px 9px;background:#fff;border:1px solid #e4e7ec;border-radius:9px}
+.preview-compact .grid.history .history-order-row>*{min-width:0;max-width:100%;overflow-wrap:anywhere}
+.preview-compact .grid.history .history-order-symbol{display:flex;align-items:center;gap:6px;min-width:0;flex-wrap:wrap}
+.preview-compact .grid.history .history-order-symbol b{font-size:12px}
+.preview-compact .grid.history .history-order-symbol small{font-size:9px;color:#667085;direction:ltr}
+.preview-compact .grid.history .history-order-field{display:flex;flex-direction:column;gap:1px;min-width:0}
+.preview-compact .grid.history .history-order-field small{font-size:9px;color:#667085;line-height:1.2}
+.preview-compact .grid.history .history-order-field b{font-size:11px;line-height:1.35;overflow-wrap:anywhere}
+.preview-compact .grid.history .history-order-time b{white-space:normal;font-size:10px;overflow-wrap:anywhere}
+.preview-compact .grid.history .history-order-state{min-width:0}
+.preview-compact .grid.history .history-order-state .status{white-space:normal;line-height:1.3}
+.preview-compact .grid.history .history-order-actions{display:flex;align-items:center;justify-content:flex-start;gap:5px;min-width:0;white-space:nowrap}
+.preview-compact .grid.history .history-order-actions form{margin:0}
+.preview-compact .grid.history .history-order-actions button{padding:5px 7px;font-size:10px}
+.preview-compact .grid.history .history-order-actions .copy-order{margin:0;background:#eff8ff;color:#175cd3;border:1px solid #b2ddff}
+.preview-compact .grid.history .history-order-details{grid-column:1/-1;min-width:0;border-top:1px solid #f0f2f5;padding-top:4px;display:block}
+.preview-compact .grid.history .history-order-details-title{font-size:9px;font-weight:bold;color:#475467;margin-bottom:3px}
+.preview-compact .grid.history .history-order-details-body{display:flex;flex-wrap:wrap;align-items:center;gap:5px 14px;padding:2px 2px 1px;font-size:9px;color:#667085;line-height:1.4}
+.preview-compact .grid.history .history-order-details-body .reconcile-form{display:flex;flex-wrap:wrap;align-items:center;gap:5px;min-width:0;max-width:none;white-space:normal}
+.preview-compact .grid.history .history-order-details-body .reconcile-form select,
+.preview-compact .grid.history .history-order-details-body .reconcile-form input{width:auto;min-width:150px;min-height:28px;padding:4px 6px;font-size:10px}
+.preview-compact .grid.history .history-order-details-body .reconcile-form button{padding:5px 7px;font-size:10px}
+.preview-compact .grid.history .history-order-empty{width:100%;padding:18px;border:1px dashed #d0d5dd;border-radius:9px}
+@media(max-width:1050px){
+ .preview-compact .grid.history .history-order-row{grid-template-columns:minmax(0,1fr) minmax(0,.75fr) minmax(0,.55fr) minmax(0,1.35fr) minmax(0,.75fr) minmax(0,1.15fr) auto;gap:5px;padding:6px}
+}
+@media(max-width:780px){
+ .preview-compact .grid.history .history-order-row{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .preview-compact .grid.history .history-order-actions{grid-column:1/-1}
+ .preview-compact .grid.history .history-order-details{grid-column:1/-1}
+}
+</style></head><body class="{{if .PreviewMode}}preview-compact{{end}}" data-jyear="{{.JYear}}" data-jmonth="{{.JMonth}}" data-jday="{{.JDay}}"><main class="wrap">
+<div class="head"><div><h1>دستیار دایا</h1><div class="muted" style="margin-top:7px">مدیریت سفارش‌ها · ساعت تهران</div></div><div class="nav">{{if .PreviewMode}}<a href="/dashboard">داشبورد مرکزی</a>{{end}}<a class="{{if not .History}}active{{end}}" href="/">مدیریت سفارش‌ها</a><a class="{{if .History}}active{{end}}" href="/history">تاریخچه</a><a href="/settings">اتصال و نشست دایا</a>{{if .PreviewMode}}<a href="/daya-online-test">تست آنلاین خواندنی</a><a href="/daya-latency">کالیبراسیون تأخیر</a><a href="/daya-online-test/one">ارسال یک‌باره واقعی</a>{{end}}</div><span class="tag">{{if .APIAvailable}}ارسال واقعی API فعال است{{else}}ارسال واقعی API غیرفعال است{{end}}</span></div>
 <div class="note"><b>دو مسیر اجرا:</b> مسیر «بدون API» سفارش را برای ثبت دستی آماده می‌کند. مسیر «با API» تا زمان تأیید endpoint و ساختار درخواست سفارش دایا غیرفعال است؛ مدل سفارش و زمان‌بندی آماده‌اند.</div>
 {{if .Error}}<div class="msg err">{{.Error}}</div>{{end}}{{if .Notice}}<div class="msg">{{.Notice}}</div>{{end}}
+{{if and .PreviewMode (not .History)}}
+<section class="card" id="account-balances-panel" style="margin:4px 0 6px;padding:6px 8px">
+ <div class="account-balances-head">
+  <h2 style="margin:0;font-size:12px">موجودی حساب</h2>
+  <button type="button" id="refresh-account-balances" style="padding:4px 7px;font-size:10px">تازه‌سازی</button>
+ </div>
+ <div class="account-balances-grid">
+  <div class="account-balance-item"><span>موجودی حساب</span><strong id="account-account-balance">…</strong><small id="account-account-balance-unit"></small></div>
+  <div class="account-balance-item"><span>اعتبار</span><strong id="account-credit">…</strong><small id="account-credit-unit"></small></div>
+  <div class="account-balance-item"><span>برداشت در حال انجام</span><strong id="account-in-progress-cash-out">…</strong><small id="account-in-progress-cash-out-unit"></small></div>
+  <div class="account-balance-item"><span>قابل برداشت پس از یک روز کاری (T+1)</span><strong id="account-t-plus-1">…</strong><small id="account-t-plus-1-unit"></small></div>
+  <div class="account-balance-item"><span>قابل برداشت پس از دو روز کاری (T+2)</span><strong id="account-t-plus-2">…</strong><small id="account-t-plus-2-unit"></small></div>
+ </div>
+ <div id="account-balances-status" class="account-balances-status" aria-live="polite">در حال دریافت…</div>
+ <div id="account-balances-updated" class="account-balances-updated">آخرین دریافت: —</div>
+ <details class="account-balances-debug"><summary>جزئیات تشخیصی (مسیر و نوع داده؛ بدون مقدار)</summary><div id="account-balances-fields">—</div></details>
+</section>
+{{end}}
 <div class="grid{{if .History}} history{{end}}">{{if not .History}}<section class="card"><h2>تعریف سفارش</h2>
 <form id="order-form" method="post" action="/orders"><div class="form-grid">
 <div class="form-field wide"><label>مسیر ثبت سفارش</label><select id="execution-mode" name="execution_mode"><option value="manual" selected>بدون API — ثبت دستی در دایا</option><option value="api" {{if not .APIAvailable}}disabled{{end}}>با API — پس از تأیید قرارداد ارسال دایا فعال می‌شود</option></select></div>
 <div class="form-field"><label>انتخاب نماد از فهرست</label><select id="symbol-preset"><option value="">انتخاب نماد (اختیاری)</option>{{range .Symbols}}<option value="{{.Symbol}}" data-isin="{{.ISIN}}">{{.Symbol}}{{if .CompanyName}} — {{.CompanyName}}{{end}}{{if .MarketType}} ({{.MarketType}}){{end}}</option>{{end}}</select><div class="foot">{{.SymbolCatalogStatus}}</div></div>
 <div class="form-field"><label>نماد نمایشی</label><input id="order-symbol" name="symbol" maxlength="24" placeholder="نماد را حرف‌به‌حرف تایپ کن..." autocomplete="off" aria-autocomplete="list" aria-controls="market-symbol-suggestions" aria-expanded="false" required><div id="market-symbol-suggestions" class="symbol-suggestions" role="listbox" aria-label="پیشنهادهای نماد" hidden></div><div id="symbol-lookup-status" class="foot" aria-live="polite">با واردکردن هر حرف، پیشنهاد نمادها نمایش داده می‌شود.</div></div>
-<div class="form-field wide"><label>شناسه ISIN (فقط برای مسیر API)</label><input id="order-isin" name="isin" maxlength="12" minlength="12" pattern="[A-Za-z]{2}[A-Za-z0-9]{9}[0-9]" placeholder="مثلاً IR..." autocomplete="off"></div>
+<div class="form-field"><label>شناسه ISIN (فقط برای مسیر API)</label><input id="order-isin" name="isin" maxlength="12" minlength="12" pattern="[A-Za-z]{2}[A-Za-z0-9]{9}[0-9]" placeholder="مثلاً IR..." autocomplete="off"></div>
 <div class="form-field"><label>نوع سفارش</label><select name="side"><option value="buy">خرید</option><option value="sell">فروش</option></select></div>
-<div class="form-field"><label>قیمت (ریال)</label><input name="price" type="number" min="1" step="1" required></div>
+<div class="form-field"><label>قیمت (ریال)</label><input id="order-price" name="price" type="number" min="1" step="1" required></div><div class="form-field wide"><div id="order-symbol-price-range" class="price-range-panel" aria-live="polite">برای نمایش کف، سقف و درصد دامنه نوسان، ابتدا نماد را انتخاب کن.</div></div>
 <div class="form-field"><label>تعداد</label><input name="quantity" type="number" min="1" step="1" required></div>
 <div class="form-field"><label>تاریخ شمسی</label><div class="datebox"><div class="datebar"><input id="jalali-date-display" name="execute_at_date" type="text" value="" inputmode="numeric" dir="ltr" placeholder="مثلاً ۱۴۰۵/۰۸/۱۴" pattern="[0-9۰-۹٠-٩]{4}[/.-][0-9۰-۹٠-٩]{1,2}[/.-][0-9۰-۹٠-٩]{1,2}" autocomplete="off" required><button type="button" id="calendar-toggle">تقویم</button></div><div id="jalali-calendar" class="calendar" hidden><div class="cal-head"><button type="button" id="cal-prev" class="cal-nav">ماه قبل</button><strong id="cal-title">تقویم شمسی</strong><button type="button" id="cal-next" class="cal-nav">ماه بعد</button></div><div class="cal-grid" id="cal-weekdays"><span>ش</span><span>ی</span><span>د</span><span>س</span><span>چ</span><span>پ</span><span>ج</span></div><div class="cal-grid" id="cal-days"></div></div></div></div>
 <div class="form-field"><section class="server-clock" aria-live="off"><div><div class="server-clock-label">ساعت تهران</div><div class="server-clock-status" id="server-clock-status">در حال دریافت زمان سرور…</div></div><time class="server-clock-value" id="server-clock" dir="ltr">--:--:--.---</time></section></div>
@@ -552,14 +666,57 @@ th{font-size:10px;color:#667085}.tablewrap{overflow:auto}.tablewrap tbody td{fon
 </div></details>
 <button class="submit wide" type="submit">ذخیره سفارش زمان‌بندی‌شده</button><button class="dry-run wide" type="button" id="order-dry-run">اعتبارسنجی سفارش آزمایشی (بدون ارسال و ذخیره)</button><div class="dry-run-result wide" id="order-dry-run-result" role="status" aria-live="polite" hidden></div></div></form>
 <div class="foot">قیمت به ریال و تعداد به عدد سهم وارد شود. در مسیر API، ISIN دقیق نماد الزامی است.</div></section>{{end}}
-<section class="card"><div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap"><h2 style="margin:0">{{if .History}}تاریخچه سفارش‌ها{{else}}سفارش‌های فعال{{end}} ({{len .Orders}})</h2>{{if .History}}<form method="post" action="/history/clear" onsubmit="return confirm('تمام موارد نمایش‌داده‌شده در تاریخچه، حتی سفارش‌های آماده، درحال‌ارسال و با نتیجه نامشخص، برای همیشه حذف شوند؟ سفارش‌های زمان‌بندی‌شده فعال باقی می‌مانند. با حذف سوابق درحال‌ارسال یا نامشخص، امکان پیگیری آن‌ها در این پنل از بین می‌رود.')"><button type="submit" class="cancel">پاک کردن تاریخچه</button></form>{{else if .HasScheduledOrders}}<form method="post" action="/orders/cancel-all" onsubmit="return confirm('تمام سفارش‌های زمان‌بندی‌شده لغو شوند؟ سفارش‌های آماده ارسال، درحال ارسال و ثبت‌شده دست‌نخورده می‌مانند. این عملیات قابل بازگشت نیست.')"><button type="submit" class="cancel">لغو همه</button></form>{{end}}</div><div class="tablewrap"><table>
-<thead><tr><th>نماد</th><th>نوع</th><th>قیمت</th><th>تعداد</th><th>زمان تهران</th><th>مسیر</th><th>وضعیت</th><th>عملیات</th></tr></thead><tbody>
-{{range .Orders}}<tr><td><b>{{.Symbol}}</b>{{if .ISIN}}<div class="foot">{{.ISIN}}</div>{{end}}</td><td>{{if eq .Side "buy"}}<span class="buy">خرید</span>{{else}}<span class="sell">فروش</span>{{end}}</td>
+<section class="card"><div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap"><h2 style="margin:0">{{if .History}}تاریخچه سفارش‌ها{{else}}سفارش‌های فعال{{end}} (<span id="orders-visible-count">{{len .Orders}}</span>)</h2>{{if .History}}<form method="post" action="/history/clear" onsubmit="return confirm('تمام موارد نمایش‌داده‌شده در تاریخچه، حتی سفارش‌های آماده، درحال‌ارسال و با نتیجه نامشخص، برای همیشه حذف شوند؟ سفارش‌های زمان‌بندی‌شده فعال باقی می‌مانند. با حذف سوابق درحال‌ارسال یا نامشخص، امکان پیگیری آن‌ها در این پنل از بین می‌رود.')"><button type="submit" class="cancel">پاک کردن تاریخچه</button></form>{{else if .HasScheduledOrders}}<form id="cancel-all-scheduled-form" method="post" action="/orders/cancel-all" onsubmit="return confirm('تمام سفارش‌های زمان‌بندی‌شده لغو شوند؟ سفارش‌های آماده ارسال، درحال ارسال و ثبت‌شده دست‌نخورده می‌مانند. این عملیات قابل بازگشت نیست.')"><button type="submit" class="cancel">لغو همه</button></form>{{end}}</div>
+{{if and .History .PreviewMode}}
+<div class="history-order-list">
+{{range .Orders}}
+<article class="history-order-row" data-order-id="{{.ID}}">
+ <div class="history-order-symbol"><b>{{.Symbol}}</b>{{if .ISIN}}<small>{{.ISIN}}</small>{{end}}<span class="{{if eq .Side "buy"}}buy{{else}}sell{{end}}">{{if eq .Side "buy"}}خرید{{else}}فروش{{end}}</span></div>
+ <div class="history-order-field"><small>قیمت</small><b>{{.Price}}</b></div>
+ <div class="history-order-field"><small>تعداد</small><b>{{.Quantity}}</b></div>
+ <div class="history-order-field history-order-time"><small>زمان تهران</small><b>{{jalali .ExecuteAt}}</b></div>
+ <div class="history-order-field"><small>مسیر</small><b>{{executionMode .ExecutionMode}}</b></div>
+ <div class="history-order-state">
+  {{if eq .Status "scheduled"}}<span class="status scheduled">زمان‌بندی‌شده</span>{{else if eq .Status "ready"}}<span class="status ready">{{if eq .ExecutionMode "api"}}آماده ارسال{{else}}آماده بررسی{{end}}</span>{{else if eq .Status "manual_done"}}<span class="status ready">ثبت دستی تأیید شد</span>{{else if eq .Status "submitting"}}<span class="status ready">در حال ارسال</span>{{else if eq .Status "submission_pending"}}<span class="status scheduled">در انتظار تأیید دایا</span>{{else if eq .Status "submitted"}}<span class="status ready">در دایا ثبت شد</span>{{else if eq .Status "submission_failed"}}<span class="status cancelled">ارسال ناموفق</span>{{else if eq .Status "submission_unknown"}}<span class="status cancelled">نتیجه نامشخص</span>{{else}}<span class="status cancelled">لغوشده</span>{{end}}
+ </div>
+ <div class="history-order-actions">
+  {{if or (eq .Status "scheduled") (and (eq .Status "ready") (eq .ExecutionMode "api"))}}
+   <form method="post" action="/orders/cancel"><input type="hidden" name="id" value="{{.ID}}"><button class="cancel">لغو</button></form>
+  {{else if and (eq .Status "ready") (manualMode .ExecutionMode)}}
+   <form method="post" action="/orders/manual-confirm" onsubmit="return confirm('آیا سفارش را شخصاً در سامانه دایا ثبت کرده‌ای؟')"><input type="hidden" name="id" value="{{.ID}}"><button class="submit">ثبت دستی انجام شد</button></form>
+  {{end}}
+  <button type="button" class="copy-order" data-symbol="{{.Symbol}}" data-isin="{{.ISIN}}" data-side="{{.Side}}" data-price="{{.Price}}" data-quantity="{{.Quantity}}" data-mode="{{.ExecutionMode}}" data-execute="{{jalali .ExecuteAt}}">کپی</button>
+ </div>
+ <div class="history-order-details">
+  <div class="history-order-details-title">جزئیات و پیگیری</div>
+  <div class="history-order-details-body">
+   {{if .BrokerOrderID}}<span>شناسه سفارش دایا: {{.BrokerOrderID}}</span>{{end}}
+   {{if .BrokerHostOrderNumber}}<span>شماره میزبان دایا: {{.BrokerHostOrderNumber}}</span>{{end}}
+   {{if .BrokerHTTPStatus}}<span>HTTP: {{.BrokerHTTPStatus}}</span>{{end}}
+   {{if .BrokerRTTMillis}}<span>زمان پاسخ POST دایا: {{.BrokerRTTMillis}} ms</span>{{end}}
+   {{if .BrokerRequestID}}<span>شناسه درخواست: {{.BrokerRequestID}}</span>{{end}}
+   {{if not .BrokerResponseAt.IsZero}}<span>زمان پاسخ دایا: {{jalali .BrokerResponseAt}}</span>{{end}}
+   {{if not .ReconciledAt.IsZero}}<span>زمان تطبیق دستی: {{jalali .ReconciledAt}}</span>{{end}}
+   {{if .BrokerMessage}}<span>{{.BrokerMessage}}</span>{{end}}
+   {{if not (or .BrokerOrderID .BrokerHostOrderNumber .BrokerHTTPStatus .BrokerRTTMillis .BrokerRequestID (not .BrokerResponseAt.IsZero) (not .ReconciledAt.IsZero) .BrokerMessage (eq .Status "submission_unknown") (eq .Status "submission_pending"))}}<span>جزئیات فنی اضافه‌ای برای این سفارش ثبت نشده است.</span>{{end}}
+   {{if and (or (eq .Status "submission_unknown") (eq .Status "submission_pending")) (eq .ExecutionMode "api")}}
+   <form method="post" action="/orders/reconcile" class="reconcile-form"><input type="hidden" name="id" value="{{.ID}}"><select name="resolution" aria-label="نتیجه بررسی در دایا"><option value="registered">در دایا ثبت شده</option><option value="rejected">در دایا ثبت نشده</option></select><input name="broker_order_id" maxlength="128" placeholder="شناسه سفارش دایا (برای ثبت‌شده)"><input name="broker_message" maxlength="1000" placeholder="توضیح بررسی (اختیاری)"><button type="submit">ثبت نتیجه بررسی</button></form>
+   {{end}}
+  </div>
+ </div>
+</article>
+{{else}}<div class="empty history-order-empty">هنوز موردی در تاریخچه ثبت نشده است.</div>{{end}}
+</div>
+{{else}}
+<div class="tablewrap"><table>
+<thead><tr><th>نماد</th><th>نوع</th><th>قیمت</th><th>تعداد</th><th>زمان تهران</th><th>مسیر</th><th>وضعیت</th><th>عملیات</th></tr></thead><tbody id="orders-table-body">
+{{range .Orders}}<tr data-order-id="{{.ID}}"><td><b>{{.Symbol}}</b>{{if .ISIN}}<div class="foot">{{.ISIN}}</div>{{end}}</td><td>{{if eq .Side "buy"}}<span class="buy">خرید</span>{{else}}<span class="sell">فروش</span>{{end}}</td>
 <td>{{.Price}}</td><td>{{.Quantity}}</td><td>{{jalali .ExecuteAt}}</td><td>{{executionMode .ExecutionMode}}</td>
 <td>{{if eq .Status "scheduled"}}<span class="status scheduled">زمان‌بندی‌شده</span>{{else if eq .Status "ready"}}<span class="status ready">{{if eq .ExecutionMode "api"}}آماده ارسال{{else}}آماده بررسی{{end}}</span>{{else if eq .Status "manual_done"}}<span class="status ready">ثبت دستی تأیید شد</span>{{else if eq .Status "submitting"}}<span class="status ready">در حال ارسال</span>{{else if eq .Status "submission_pending"}}<span class="status scheduled">ارسال به موتور انجام شد؛ در انتظار تأیید</span>{{else if eq .Status "submitted"}}<span class="status ready">ثبت سفارش در دفتر سفارش‌های دایا تأیید شد</span>{{else if eq .Status "submission_failed"}}<span class="status cancelled">ارسال ناموفق</span>{{else if eq .Status "submission_unknown"}}<span class="status cancelled">نتیجه نامشخص — بررسی لازم</span>{{else}}<span class="status cancelled">لغوشده</span>{{end}}{{if .BrokerOrderID}}<div class="foot">شناسه سفارش دایا: {{.BrokerOrderID}}</div>{{end}}{{if .BrokerHostOrderNumber}}<div class="foot">شماره میزبان دایا: {{.BrokerHostOrderNumber}}</div>{{end}}{{if .BrokerHTTPStatus}}<div class="foot">HTTP: {{.BrokerHTTPStatus}}</div>{{end}}{{if .BrokerRTTMillis}}<div class="foot">زمان پاسخ POST دایا: {{.BrokerRTTMillis}} ms (اندازه‌گیری واقعی)</div>{{end}}{{if .BrokerRequestID}}<div class="foot">شناسه درخواست: {{.BrokerRequestID}}</div>{{end}}{{if not .BrokerResponseAt.IsZero}}<div class="foot">زمان پاسخ دایا: {{jalali .BrokerResponseAt}}</div>{{end}}{{if not .ReconciledAt.IsZero}}<div class="foot">زمان تطبیق دستی: {{jalali .ReconciledAt}}</div>{{end}}{{if .BrokerMessage}}<div class="foot">{{.BrokerMessage}}</div>{{end}}</td>
 <td>{{if or (eq .Status "scheduled") (and (eq .Status "ready") (eq .ExecutionMode "api"))}}<form method="post" action="/orders/cancel"><input type="hidden" name="id" value="{{.ID}}"><button class="cancel">لغو</button></form>{{else if and $.History (eq .Status "ready") (manualMode .ExecutionMode)}}<form method="post" action="/orders/manual-confirm" onsubmit="return confirm('آیا سفارش را شخصاً در سامانه دایا ثبت کرده‌ای؟')"><input type="hidden" name="id" value="{{.ID}}"><button class="submit">ثبت دستی انجام شد</button></form>{{else if and $.History (or (eq .Status "submission_unknown") (eq .Status "submission_pending")) (eq .ExecutionMode "api")}}<form method="post" action="/orders/reconcile" class="reconcile-form"><input type="hidden" name="id" value="{{.ID}}"><select name="resolution" aria-label="نتیجه بررسی در دایا"><option value="registered">در دایا ثبت شده</option><option value="rejected">در دایا ثبت نشده</option></select><input name="broker_order_id" maxlength="128" placeholder="شناسه سفارش دایا (برای ثبت‌شده)"><input name="broker_message" maxlength="1000" placeholder="توضیح بررسی (اختیاری)"><button type="submit">ثبت نتیجه بررسی</button></form>{{else}}—{{end}}<button type="button" class="copy-order" data-symbol="{{.Symbol}}" data-isin="{{.ISIN}}" data-side="{{.Side}}" data-price="{{.Price}}" data-quantity="{{.Quantity}}" data-mode="{{.ExecutionMode}}" data-execute="{{jalali .ExecuteAt}}" style="margin-right:6px;background:#eff8ff;color:#175cd3;border:1px solid #b2ddff;padding:6px 9px">کپی سفارش</button></td></tr>
-{{else}}<tr><td colspan="8" class="empty">{{if .History}}هنوز موردی در تاریخچه ثبت نشده است.{{else}}سفارش فعالی ثبت نشده است.{{end}}</td></tr>{{end}}
-</tbody></table></div><div class="foot">{{if .History}}این صفحه سفارش‌های سررسیدشده و لغوشده را نگه می‌دارد؛ هیچ سفارشی از داده‌ها حذف نشده است.{{else}}ساعت سرور: {{.Now}} · سفارش‌های سررسیدشده در صفحه تاریخچه نمایش داده می‌شوند.{{end}} وضعیت «آماده بررسی» به معنی ارسال به کارگزاری نیست.</div>
+{{else}}<tr data-empty-active-orders><td colspan="8" class="empty">{{if .History}}هنوز موردی در تاریخچه ثبت نشده است.{{else}}سفارش فعالی ثبت نشده است.{{end}}</td></tr>{{end}}
+</tbody></table></div>
+{{end}}<div class="foot">{{if .History}}این صفحه سفارش‌های سررسیدشده و لغوشده را نگه می‌دارد؛ هیچ سفارشی از داده‌ها حذف نشده است.{{else}}ساعت سرور: {{.Now}} · سفارش‌های سررسیدشده در صفحه تاریخچه نمایش داده می‌شوند.{{end}} وضعیت «آماده بررسی» به معنی ارسال به کارگزاری نیست.</div>
 </section></div></main>
 <script>
 (() => {
@@ -585,11 +742,98 @@ th{font-size:10px;color:#667085}.tablewrap{overflow:auto}.tablewrap tbody td{fon
   const symbolInput = $("order-symbol");
   const symbolLookupStatus = $("symbol-lookup-status");
   const symbolSuggestions = $("market-symbol-suggestions");
+  const orderPriceInput = $("order-price");
+  const orderPriceRangePanel = $("order-symbol-price-range");
   let symbolSuggestionTimer = null;
   let symbolSuggestionGeneration = 0;
+  let orderPriceRange = null;
+  let orderPriceRangeIsin = "";
+  let orderPriceRangeRequestNumber = 0;
 
   function showSymbolLookupStatus(message) {
     if (symbolLookupStatus) symbolLookupStatus.textContent = message;
+  }
+
+  function clearOrderPriceRange(message) {
+    orderPriceRangeRequestNumber++;
+    orderPriceRange = null;
+    orderPriceRangeIsin = "";
+    if (orderPriceRangePanel) {
+      orderPriceRangePanel.textContent = message || "برای نمایش کف، سقف و درصد دامنه نوسان، ابتدا نماد را انتخاب کن.";
+    }
+  }
+
+  function formatOrderPrice(value) {
+    return new Intl.NumberFormat("fa-IR", {maximumFractionDigits: 0}).format(value);
+  }
+
+  function formatOrderPercent(value) {
+    const sign = value >= 0 ? "+" : "";
+    return sign + new Intl.NumberFormat("fa-IR", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(value) + "٪";
+  }
+
+  async function loadOrderPriceRange(isin) {
+    const normalizedISIN = String(isin || "").trim().toUpperCase();
+    if (!orderPriceRangePanel) return;
+    if (!normalizedISIN) {
+      clearOrderPriceRange("برای نماد انتخاب‌شده ISIN معتبر موجود نیست؛ دامنه نوسان قابل دریافت نیست.");
+      return;
+    }
+    if (orderPriceRangeIsin === normalizedISIN && orderPriceRange) return;
+
+    const currentRequest = ++orderPriceRangeRequestNumber;
+    orderPriceRange = null;
+    orderPriceRangeIsin = normalizedISIN;
+    orderPriceRangePanel.textContent = "در حال دریافت کف و سقف مجاز قیمت از بازار...";
+    try {
+      const response = await fetch("/api/symbols/price-range?isin=" + encodeURIComponent(normalizedISIN), {
+        headers: {"Accept": "application/json"},
+        credentials: "same-origin",
+        cache: "no-store"
+      });
+      if (!response.ok) {
+        const reason = (await response.text()).trim();
+        throw new Error(reason || ("HTTP " + response.status));
+      }
+      const data = await response.json();
+      if (currentRequest !== orderPriceRangeRequestNumber ||
+          !isinInput || isinInput.value.trim().toUpperCase() !== normalizedISIN) return;
+      if (!Number.isSafeInteger(data.min_price) || !Number.isSafeInteger(data.max_price) ||
+          data.min_price <= 0 || data.max_price <= data.min_price) {
+        throw new Error("ساختار کف و سقف قیمت دریافتی معتبر نیست");
+      }
+
+      orderPriceRange = data;
+      const details = [
+        "کف مجاز: " + formatOrderPrice(data.min_price) + " ریال",
+        "سقف مجاز: " + formatOrderPrice(data.max_price) + " ریال"
+      ];
+      if (Number.isSafeInteger(data.reference_price) && data.reference_price > 0) {
+        details.push("قیمت مرجع: " + formatOrderPrice(data.reference_price) + " ریال");
+      }
+      if (Number.isFinite(data.min_percent) && Number.isFinite(data.max_percent)) {
+        details.push("درصد نسبت به مرجع: " + formatOrderPercent(data.min_percent) +
+          " تا " + formatOrderPercent(data.max_percent));
+      } else {
+        details.push("درصد نسبت به قیمت مرجع در پاسخ بازار موجود نیست");
+      }
+      const updatedAt = new Date(data.updated_at);
+      const updatedText = Number.isNaN(updatedAt.getTime()) ? "نامشخص" :
+        new Intl.DateTimeFormat("fa-IR", {
+          dateStyle: "short", timeStyle: "medium", timeZone: "Asia/Tehran"
+        }).format(updatedAt);
+      details.push("آخرین دریافت: " + updatedText);
+      orderPriceRangePanel.textContent = details.join(" · ");
+    } catch (error) {
+      if (currentRequest !== orderPriceRangeRequestNumber ||
+          !isinInput || isinInput.value.trim().toUpperCase() !== normalizedISIN) return;
+      orderPriceRange = null;
+      orderPriceRangePanel.textContent =
+        "دریافت دامنه نوسان از بازار ممکن نشد؛ " + String(error.message || error);
+    }
   }
 
   function normalizeSymbolText(value) {
@@ -615,6 +859,7 @@ th{font-size:10px;color:#667085}.tablewrap{overflow:auto}.tablewrap tbody td{fon
     if (symbolPreset) symbolPreset.value = "";
     hideSymbolSuggestions();
     showSymbolLookupStatus(item.isin ? "ISIN پیدا شد: " + item.isin : "برای این نماد ISIN ثبت نشده است.");
+    loadOrderPriceRange(item.isin || "");
   }
 
   function renderSymbolSuggestions(items, query) {
@@ -666,6 +911,7 @@ th{font-size:10px;color:#667085}.tablewrap{overflow:auto}.tablewrap tbody td{fon
     if (exactMatches.length === 1 && isinInput) {
       isinInput.value = exactMatches[0].isin || "";
       showSymbolLookupStatus("ISIN پیدا شد: " + (exactMatches[0].isin || ""));
+      loadOrderPriceRange(exactMatches[0].isin || "");
     } else if (exactMatches.length > 1) {
       if (isinInput) isinInput.value = "";
       showSymbolLookupStatus("برای این نماد چند ISIN وجود دارد؛ مورد درست را از پیشنهادها انتخاب کن.");
@@ -700,6 +946,7 @@ th{font-size:10px;color:#667085}.tablewrap{overflow:auto}.tablewrap tbody td{fon
     const query = symbolInput ? symbolInput.value.trim() : "";
     if (isinInput) isinInput.value = "";
     if (symbolPreset) symbolPreset.value = "";
+    clearOrderPriceRange();
 
     if (!query) {
       hideSymbolSuggestions();
@@ -730,6 +977,7 @@ th{font-size:10px;color:#667085}.tablewrap{overflow:auto}.tablewrap tbody td{fon
       if (isinInput) isinInput.value = option.dataset.isin || "";
       hideSymbolSuggestions();
       showSymbolLookupStatus(isinInput && isinInput.value ? "ISIN پیدا شد: " + isinInput.value : "");
+      loadOrderPriceRange(isinInput ? isinInput.value : "");
     });
   }
   function syncExecutionMode() {
@@ -763,6 +1011,7 @@ th{font-size:10px;color:#667085}.tablewrap{overflow:auto}.tablewrap tbody td{fon
       if (field && typeof value === "string") field.value = value;
     }
     syncExecutionMode();
+    if (isinInput && isinInput.value) loadOrderPriceRange(isinInput.value);
     if (symbolInput && symbolInput.value && isinInput && isinInput.value) {
       showSymbolLookupStatus("پیش‌نویس قبلی بازیابی شد · ISIN: " + isinInput.value);
     } else if (symbolInput && symbolInput.value) {
@@ -834,28 +1083,29 @@ th{font-size:10px;color:#667085}.tablewrap{overflow:auto}.tablewrap tbody td{fon
     }
     if (symbolPreset) symbolPreset.value = "";
     syncExecutionMode();
+    if (isinInput && isinInput.value) loadOrderPriceRange(isinInput.value);
     if (symbolInput && isinInput && isinInput.value) showSymbolLookupStatus("سفارش کپی شد؛ اطلاعات را ویرایش و سپس بررسی کن. ISIN: " + isinInput.value);
     orderForm.scrollIntoView({behavior:"smooth", block:"start"});
   }
 
-  document.querySelectorAll(".copy-order").forEach((button) => {
-    button.addEventListener("click", () => {
-      const draft = {
-        symbol: button.dataset.symbol || "",
-        isin: button.dataset.isin || "",
-        side: button.dataset.side || "buy",
-        price: button.dataset.price || "",
-        quantity: button.dataset.quantity || "",
-        execution_mode: button.dataset.mode || "manual",
-        execute_at: button.dataset.execute || ""
-      };
-      if (orderForm) {
-        applyCopiedOrder(draft);
-      } else {
-        sessionStorage.setItem("daya-assistant-copy-order-v1", JSON.stringify(draft));
-        window.location.href = "/";
-      }
-    });
+  document.addEventListener("click", (event) => {
+    const button = event.target.closest(".copy-order");
+    if (!button) return;
+    const draft = {
+      symbol: button.dataset.symbol || "",
+      isin: button.dataset.isin || "",
+      side: button.dataset.side || "buy",
+      price: button.dataset.price || "",
+      quantity: button.dataset.quantity || "",
+      execution_mode: button.dataset.mode || "manual",
+      execute_at: button.dataset.execute || ""
+    };
+    if (orderForm) {
+      applyCopiedOrder(draft);
+    } else {
+      sessionStorage.setItem("daya-assistant-copy-order-v1", JSON.stringify(draft));
+      window.location.href = "/";
+    }
   });
   if (orderForm) {
     try {
@@ -1149,7 +1399,155 @@ th{font-size:10px;color:#667085}.tablewrap{overflow:auto}.tablewrap tbody td{fon
       field.addEventListener("change", clearResult);
     }
   })();
-</script></body></html>`))
+</script>
+{{if and .PreviewMode (not .History)}}
+<script>
+(() => {
+  const button = document.getElementById("refresh-account-balances");
+  const status = document.getElementById("account-balances-status");
+  const updated = document.getElementById("account-balances-updated");
+  const numberFormat = new Intl.NumberFormat("fa-IR");
+
+  function formatAmount(raw) {
+    const value = String(raw || "").replace(/[٬,]/g, "").trim();
+    const match = value.match(/^(-?)(\d+)(?:\.(\d+))?$/);
+    if (!match) return value;
+    const whole = numberFormat.format(BigInt(match[2]));
+    return (match[1] ? "−" : "") + whole + (match[3] ? "٫" + match[3].replace(/\d/g, d => "۰۱۲۳۴۵۶۷۸۹"[Number(d)]) : "");
+  }
+
+  function showMetric(name, metric) {
+    const amount = document.getElementById("account-" + name);
+    const unit = document.getElementById("account-" + name + "-unit");
+    if (!amount || !unit) return;
+    if (metric && metric.status === "ok" && metric.value !== undefined) {
+      amount.textContent = formatAmount(metric.value);
+      unit.textContent = metric.unit || "";
+    } else {
+      amount.textContent = "نامشخص";
+      unit.textContent = metric && metric.status === "ambiguous" ? "چند مقدار ناسازگار" : "داده در پاسخ پیدا نشد";
+    }
+  }
+
+  async function refreshBalances() {
+    if (button) {
+      button.disabled = true;
+      button.textContent = "در حال دریافت…";
+    }
+    if (status) status.textContent = "در حال خواندن اطلاعات مالی از کارگزاری…";
+    try {
+      const response = await fetch("/api/daya/account-balances", {
+        cache: "no-store",
+        headers: {"Accept": "application/json"}
+      });
+      const report = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(report.error || "دریافت موجودی ناموفق بود (HTTP " + response.status + ")");
+      showMetric("account-balance", report.account_balance);
+      showMetric("credit", report.credit);
+      showMetric("in-progress-cash-out", report.in_progress_cash_out);
+      showMetric("t-plus-1", report.t_plus_1_amount);
+      showMetric("t-plus-2", report.t_plus_2_amount);
+      const diagnosticLines = (report.endpoints || []).map(item => {
+        const endpointFields = [...new Set(item.fields || [])].sort();
+        const schema = [...new Set(item.schema || [])].sort().slice(0, 60);
+        const details = [];
+        if (endpointFields.length) details.push("فیلدهای عددی: " + endpointFields.join(" · "));
+        if (schema.length) details.push("ساختار: " + schema.join(" · "));
+        return (item.path || "مسیر نامشخص") + ": " +
+          (details.length ? details.join(" | ") : "ساختار قابل تشخیصی پیدا نشد");
+      });
+      const fieldsBox = document.getElementById("account-balances-fields");
+      if (fieldsBox) fieldsBox.textContent = diagnosticLines.length
+        ? diagnosticLines.join("\n")
+        : "اطلاعات تشخیصی در دسترس نیست.";
+      const missingMetrics = [report.account_balance, report.credit, report.in_progress_cash_out, report.t_plus_1_amount, report.t_plus_2_amount]
+        .filter(metric => !metric || metric.status !== "ok").length;
+      if (report.needs_login) {
+        status.textContent = "نشست کارگزاری معتبر نیست؛ از بخش اتصال به دایا دوباره وارد شو.";
+      } else if (missingMetrics > 0) {
+        status.textContent = "اطلاعات از کارگزاری دریافت شد؛ " + missingMetrics +
+          " فیلد از ۵ فیلد مالی هنوز قابل شناسایی نیست.";
+      } else {
+        status.textContent = "هر پنج فیلد مالی مستقیماً از کارگزاری دریافت شد.";
+      }
+      const when = report.retrieved_at ? new Date(report.retrieved_at) : null;
+      updated.textContent = "آخرین دریافت: " + (when && !Number.isNaN(when.getTime())
+        ? new Intl.DateTimeFormat("fa-IR", {dateStyle:"short", timeStyle:"medium", timeZone:"Asia/Tehran"}).format(when)
+        : "نامشخص");
+    } catch (error) {
+      status.textContent = error.message || "خطا در دریافت اطلاعات مالی.";
+      for (const name of ["account-balance", "credit", "in-progress-cash-out", "t-plus-1", "t-plus-2"]) {
+        const amount = document.getElementById("account-" + name);
+        const unit = document.getElementById("account-" + name + "-unit");
+        if (amount) amount.textContent = "دریافت نشد";
+        if (unit) unit.textContent = "اتصال را بررسی کن";
+      }
+    } finally {
+      if (button) {
+        button.disabled = false;
+        button.textContent = "به‌روزرسانی موجودی";
+      }
+    }
+  }
+
+  if (button) button.addEventListener("click", refreshBalances);
+  refreshBalances();
+})();
+</script>
+<script>
+(() => {
+  const body = document.getElementById("orders-table-body");
+  const count = document.getElementById("orders-visible-count");
+  const cancelAll = document.getElementById("cancel-all-scheduled-form");
+  if (!body || !count) return;
+
+  async function refreshActiveOrders() {
+    try {
+      const response = await fetch("/api/orders/active-ids", {
+        cache: "no-store",
+        headers: {"Accept": "application/json"}
+      });
+      if (!response.ok) return;
+      const data = await response.json();
+      const activeIds = new Set((data.ids || []).map(String));
+      let removed = 0;
+      for (const row of Array.from(body.querySelectorAll("tr[data-order-id]"))) {
+        if (!activeIds.has(row.dataset.orderId)) {
+          row.remove();
+          removed++;
+        }
+      }
+      const rows = body.querySelectorAll("tr[data-order-id]");
+      const visibleCount = rows.length;
+      count.textContent = new Intl.NumberFormat("fa-IR").format(visibleCount);
+      if (cancelAll) cancelAll.hidden = visibleCount === 0;
+      let empty = body.querySelector("[data-empty-active-orders]");
+      if (visibleCount === 0 && !empty) {
+        empty = document.createElement("tr");
+        empty.dataset.emptyActiveOrders = "";
+        const cell = document.createElement("td");
+        cell.colSpan = 8;
+        cell.className = "empty";
+        cell.textContent = "سفارش فعالی ثبت نشده است؛ سفارش‌های سررسیدشده به تاریخچه منتقل شده‌اند.";
+        empty.appendChild(cell);
+        body.replaceChildren(empty);
+      } else if (visibleCount > 0 && empty) {
+        empty.remove();
+      }
+    } catch (_) {}
+  }
+
+  refreshActiveOrders();
+  window.setInterval(() => {
+    if (document.visibilityState === "visible") refreshActiveOrders();
+  }, 2500);
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") refreshActiveOrders();
+  });
+})();
+</script>
+{{end}}
+</body></html>`))
 
 func main() {
 	user, pass := os.Getenv("DAYA_ADMIN_USER"), os.Getenv("DAYA_ADMIN_PASS")
@@ -1203,12 +1601,32 @@ func main() {
 
 	mux := http.NewServeMux()
 	previewMode := strings.EqualFold(env("DAYA_PREVIEW_MODE", "false"), "true")
-	registerDayaLocalOrderTestRoutes(mux, previewMode)
 	registerDayaOnlineTestRoutes(mux, previewMode, credentials)
+	registerDayaAccountBalanceRoutes(mux, previewMode, credentials)
 	registerDayaLiveOrderTestRoutes(mux, previewMode, credentials, store, TSESymbolClient{})
 	registerDayaOrderReconciliationRoute(mux, store)
 	registerDayaDashboardRoutes(mux, previewMode, store, credentials, sessionMonitor)
 	registerDayaLatencyRoutes(mux, previewMode, credentials, sessionMonitor)
+	mux.HandleFunc("GET /api/orders/active-ids", func(w http.ResponseWriter, r *http.Request) {
+		if !previewMode {
+			http.NotFound(w, r)
+			return
+		}
+		if err := store.markDue(time.Now().In(tehran())); err != nil {
+			http.Error(w, "به‌روزرسانی وضعیت سفارش‌ها انجام نشد", http.StatusInternalServerError)
+			return
+		}
+		orders := store.activeSnapshot()
+		ids := make([]string, 0, len(orders))
+		for _, order := range orders {
+			ids = append(ids, order.ID)
+		}
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.Header().Set("Cache-Control", "no-store, no-cache, must-revalidate")
+		_ = json.NewEncoder(w).Encode(struct {
+			IDs []string `json:"ids"`
+		}{IDs: ids})
+	})
 	mux.HandleFunc("GET /api/server-time", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.Header().Set("Cache-Control", "no-store, no-cache, must-revalidate")
