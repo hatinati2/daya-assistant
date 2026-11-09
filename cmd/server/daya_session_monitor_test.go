@@ -414,7 +414,6 @@ func TestVerifyCurrentEndpointsDoesNotPersistWhenNoSetCookieIsReturned(t *testin
 	}
 }
 
-
 func TestDayaMonitorFirstCheckStartsAtLoginAndTracksConfirmedDisconnect(t *testing.T) {
 	requests := 0
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
