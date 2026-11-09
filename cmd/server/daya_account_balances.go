@@ -29,6 +29,7 @@ type DayaAccountBalanceEndpoint struct {
 	StatusCode int      `json:"status_code"`
 	Error      string   `json:"error,omitempty"`
 	Fields     []string `json:"fields,omitempty"`
+	Schema     []string `json:"schema,omitempty"`
 }
 
 type DayaAccountBalanceReport struct {
@@ -186,6 +187,92 @@ func dayaCollectFinancialFieldNames(value any, out map[string]struct{}, depth in
 	}
 }
 
+// dayaFinancialSchemaFieldAllowed omits identifiers and personal or session data.
+func dayaFinancialSchemaFieldAllowed(key string) bool {
+	if !dayaSafeFinancialFieldName(key) {
+		return false
+	}
+	normalized := dayaNormalizeFinancialKey(key)
+	for _, blocked := range []string{
+		"account", "customer", "userid", "username", "token", "cookie",
+		"password", "phone", "mobile", "email", "address", "national",
+		"identity", "birth", "firstname", "lastname", "fullname",
+		"isin", "symbol", "orderid", "brokerid", "clientid", "id",
+	} {
+		if strings.Contains(normalized, blocked) {
+			return false
+		}
+	}
+	return true
+}
+
+// dayaCollectFinancialSchema records safe property paths and JSON types only.
+// It never includes values, and samples at most two array elements per path.
+func dayaCollectFinancialSchema(value any, path string, out *[]string, depth int) {
+	if depth > 10 || len(*out) >= 100 {
+		return
+	}
+	appendEntry := func(entry string) {
+		if len(*out) < 100 {
+			*out = append(*out, entry)
+		}
+	}
+	switch node := value.(type) {
+	case map[string]any:
+		if path != "" {
+			appendEntry(path + ":object")
+		}
+		keys := make([]string, 0, len(node))
+		for key := range node {
+			keys = append(keys, key)
+		}
+		sort.Strings(keys)
+		for _, key := range keys {
+			if len(*out) >= 100 {
+				return
+			}
+			if !dayaFinancialSchemaFieldAllowed(key) {
+				continue
+			}
+			childPath := key
+			if path != "" {
+				childPath = path + "." + key
+			}
+			switch child := node[key].(type) {
+			case map[string]any:
+				dayaCollectFinancialSchema(child, childPath, out, depth+1)
+			case []any:
+				appendEntry(childPath + ":array")
+				limit := len(child)
+				if limit > 2 {
+					limit = 2
+				}
+				for i := 0; i < limit; i++ {
+					dayaCollectFinancialSchema(child[i], childPath+"[]", out, depth+1)
+				}
+			case json.Number:
+				appendEntry(childPath + ":number")
+			case string:
+				appendEntry(childPath + ":string")
+			case bool:
+				appendEntry(childPath + ":boolean")
+			case nil:
+				appendEntry(childPath + ":null")
+			default:
+				appendEntry(childPath + ":other")
+			}
+		}
+	case []any:
+		limit := len(node)
+		if limit > 2 {
+			limit = 2
+		}
+		for i := 0; i < limit; i++ {
+			dayaCollectFinancialSchema(node[i], path+"[]", out, depth+1)
+		}
+	}
+}
+
 func dayaCollectUnit(value any, depth int) string {
 	if depth > 12 {
 		return ""
@@ -291,6 +378,8 @@ func dayaBalanceEndpointReport(endpoint dayaBalanceEndpointData) DayaAccountBala
 			report.Fields = append(report.Fields, field)
 		}
 		sort.Strings(report.Fields)
+		dayaCollectFinancialSchema(endpoint.body, "", &report.Schema, 0)
+		sort.Strings(report.Schema)
 	}
 	return report
 }
