@@ -409,7 +409,7 @@ func ReadDayaAccountBalances(ctx context.Context, credentials *DayaCredentialSto
 	}
 
 	report.BuyingPower = dayaSelectBalanceMetric(&buying, &portfolio,
-		dayaMakeAliasSet("buyingPower", "availableBuyingPower", "cashBuyingPower", "buyingPowerAmount", "buyingPowerAvailable", "availableToPurchase", "buyingPowerValue"),
+		dayaMakeAliasSet("buyingPower", "availableBuyingPower", "cashBuyingPower", "buyingPowerAmount", "buyingPowerAvailable", "availableToPurchase", "buyingPowerValue", "credit"),
 		"قدرت خرید")
 	report.CashBalance = dayaSelectBalanceMetric(&portfolio, &buying,
 		dayaMakeAliasSet("cashBalance", "totalCashBalance", "accountCashBalance", "cashAmount", "cashBalanceAmount", "totalCash", "cash"),
