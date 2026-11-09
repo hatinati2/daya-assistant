@@ -32,9 +32,9 @@ const (
 )
 
 var (
-	ErrInvalidAnswer = errors.New("mock answer must contain exactly five ASCII digits")
-	ErrIncorrect     = errors.New("mock answer is incorrect")
-	ErrExpired       = errors.New("mock challenge has expired")
+	ErrInvalidAnswer  = errors.New("mock answer must contain exactly five ASCII digits")
+	ErrIncorrect      = errors.New("mock answer is incorrect")
+	ErrExpired        = errors.New("mock challenge has expired")
 	ErrInvalidFixture = errors.New("mock fixture is incomplete")
 )
 
