@@ -413,3 +413,43 @@ func TestVerifyCurrentEndpointsDoesNotPersistWhenNoSetCookieIsReturned(t *testin
 		t.Fatal("session updater must not be called when no cookie was rotated")
 	}
 }
+
+
+func TestDayaMonitorFirstCheckStartsAtLoginAndTracksConfirmedDisconnect(t *testing.T) {
+	requests := 0
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		requests++
+		if requests == 1 {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer server.Close()
+
+	m := NewDayaSessionMonitor(monitorTestClient(server))
+	m.interval = func() (time.Duration, error) { return time.Hour, nil }
+	if err := m.Start(context.Background(), monitorSession()); err != nil {
+		t.Fatal(err)
+	}
+	disconnected := waitForMonitor(t, m, func(s DayaMonitorSnapshot) bool {
+		return s.NeedsLogin && !s.DisconnectedAt.IsZero()
+	})
+	if disconnected.FirstCheckAt.IsZero() || disconnected.LastCheck.Before(disconnected.FirstCheckAt) {
+		t.Fatalf("first check was not initiated at login: %#v", disconnected)
+	}
+	if disconnected.DisconnectedFor < 0 {
+		t.Fatalf("negative disconnect duration: %v", disconnected.DisconnectedFor)
+	}
+
+	if err := m.Start(context.Background(), monitorSession()); err != nil {
+		t.Fatal(err)
+	}
+	reconnected := waitForMonitor(t, m, func(s DayaMonitorSnapshot) bool {
+		return s.Running && s.Checks > 0 && !s.LastReconnectAt.IsZero()
+	})
+	if reconnected.LastDisconnectedAt.IsZero() || reconnected.LastDisconnectDuration < 0 || !reconnected.DisconnectedAt.IsZero() {
+		t.Fatalf("disconnect history was not closed on reconnect: %#v", reconnected)
+	}
+	m.Stop(false, "test done")
+}
