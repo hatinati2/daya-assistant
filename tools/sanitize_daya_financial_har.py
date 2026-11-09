@@ -136,7 +136,7 @@ def collect_numeric_fingerprints(value, path: str, out: list[dict], reference, d
             if normalized in PAGINATION_KEYS:
                 continue
             child = value[key]
-            child_path = f"\${path}.\${key}" if path else str(key)
+            child_path = f"{path}.{key}" if path else str(key)
             numeric = parse_numeric(child)
             if numeric is not None:
                 entry = {
