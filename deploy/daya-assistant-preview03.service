@@ -1,0 +1,26 @@
+[Unit]
+Description=Daya Assistant Preview 03 order scheduler
+After=network.target
+
+[Service]
+Type=simple
+User=daya-assistant-preview03
+Group=daya-assistant-preview03
+WorkingDirectory=/opt/daya-assistant-preview03
+EnvironmentFile=/etc/daya-assistant-preview03.env
+ExecStart=/opt/daya-assistant-preview03/daya-assistant
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+ReadWritePaths=/var/lib/daya-assistant-preview03
+LockPersonality=true
+MemoryDenyWriteExecute=true
+
+[Install]
+WantedBy=multi-user.target
