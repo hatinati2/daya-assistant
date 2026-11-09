@@ -2,7 +2,7 @@ name: Go CI
 
 on:
   push:
-    branches: [main, "feature/**"]
+    branches: [main, "feature/**", "feat/**"]
   pull_request:
 
 permissions:
@@ -35,7 +35,7 @@ jobs:
       - name: Vet
         run: go vet ./...
       - name: Shell syntax
-        run: bash -n install-public.sh install-preview-public.sh deploy/install.sh deploy/install-preview.sh
+        run: bash -n install-public.sh install-preview-public.sh install-preview03-public.sh deploy/install.sh deploy/install-preview.sh
       - name: HAR sanitizer tests
         run: python3 -m unittest discover -s tools -p 'test_*.py'
       - name: Build
