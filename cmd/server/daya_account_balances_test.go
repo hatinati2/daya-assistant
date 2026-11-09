@@ -118,3 +118,34 @@ func TestDayaBuyingPowerRecognizesCreditField(t *testing.T) {
 		t.Fatalf("unverified fields must not be mapped: cash=%#v withdrawable=%#v", cash, withdrawable)
 	}
 }
+
+
+func TestDayaCollectFinancialSchemaShowsSafePathsAndTypesOnly(t *testing.T) {
+	payload := map[string]any{
+		"data": []any{
+			map[string]any{
+				"cashAvailable": "6000000",
+				"portfolio": map[string]any{"withdrawable": json.Number("4500000")},
+				"accountNumber": "123456789",
+				"customerName": "Sensitive Name",
+			},
+		},
+	}
+	var schema []string
+	dayaCollectFinancialSchema(payload, "", &schema, 0)
+	joined := strings.Join(schema, "\n")
+	for _, expected := range []string{
+		"data:array",
+		"data[].cashAvailable:string",
+		"data[].portfolio.withdrawable:number",
+	} {
+		if !strings.Contains(joined, expected) {
+			t.Fatalf("schema missing %q in %q", expected, joined)
+		}
+	}
+	for _, forbidden := range []string{"accountNumber", "customerName", "123456789", "Sensitive Name"} {
+		if strings.Contains(joined, forbidden) {
+			t.Fatalf("sensitive information leaked: %q in %q", forbidden, joined)
+		}
+	}
+}
