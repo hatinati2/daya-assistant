@@ -698,6 +698,7 @@ th{font-size:10px;color:#667085}.tablewrap{overflow:auto}.tablewrap tbody td{fon
    {{if not .BrokerResponseAt.IsZero}}<span>زمان پاسخ دایا: {{jalali .BrokerResponseAt}}</span>{{end}}
    {{if not .ReconciledAt.IsZero}}<span>زمان تطبیق دستی: {{jalali .ReconciledAt}}</span>{{end}}
    {{if .BrokerMessage}}<span>{{.BrokerMessage}}</span>{{end}}
+   {{if not (or .BrokerOrderID .BrokerHostOrderNumber .BrokerHTTPStatus .BrokerRTTMillis .BrokerRequestID (not .BrokerResponseAt.IsZero) (not .ReconciledAt.IsZero) .BrokerMessage (eq .Status "submission_unknown") (eq .Status "submission_pending"))}}<span>جزئیات فنی اضافه‌ای برای این سفارش ثبت نشده است.</span>{{end}}
    {{if and (or (eq .Status "submission_unknown") (eq .Status "submission_pending")) (eq .ExecutionMode "api")}}
    <form method="post" action="/orders/reconcile" class="reconcile-form"><input type="hidden" name="id" value="{{.ID}}"><select name="resolution" aria-label="نتیجه بررسی در دایا"><option value="registered">در دایا ثبت شده</option><option value="rejected">در دایا ثبت نشده</option></select><input name="broker_order_id" maxlength="128" placeholder="شناسه سفارش دایا (برای ثبت‌شده)"><input name="broker_message" maxlength="1000" placeholder="توضیح بررسی (اختیاری)"><button type="submit">ثبت نتیجه بررسی</button></form>
    {{end}}
