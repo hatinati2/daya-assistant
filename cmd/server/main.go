@@ -519,6 +519,7 @@ th{font-size:10px;color:#667085}.tablewrap{overflow:auto}.tablewrap tbody td{fon
 .symbol-suggestion{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;padding:10px 12px;border:0;border-radius:0;border-bottom:1px solid #eaecf0;background:#fff;color:#182230;text-align:right;cursor:pointer}
 .symbol-suggestion:last-child{border-bottom:0}.symbol-suggestion:hover,.symbol-suggestion:focus{background:#eff8ff;outline:none}
 .symbol-suggestion-main{display:flex;flex-direction:column;gap:4px;min-width:0}.symbol-suggestion-name{font-weight:bold}.symbol-suggestion-company{font-size:11px;color:#667085;white-space:normal}.symbol-suggestion-isin{direction:ltr;font-size:10px;color:#475467;white-space:nowrap}
+.price-range-panel{grid-column:1/-1;padding:8px 10px;border:1px solid #b2ddff;border-radius:9px;background:#f5faff;color:#1849a9;font-size:11px;line-height:1.9;overflow-wrap:anywhere}
 .datebox{position:relative}.datebar{display:flex;gap:8px}.datebar input{flex:1}.datebar button{white-space:nowrap}.calendar{margin-top:8px;padding:12px;border:1px solid #d0d5dd;border-radius:10px;background:#fff}.cal-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:12px}.cal-nav{background:#f2f4f7;color:#344054;padding:7px 10px}.cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;text-align:center}.cal-grid span{padding:7px 0;color:#667085;font-size:11px}.cal-day{background:#f8fafc;color:#182230;padding:9px 2px;border-radius:7px}.cal-day:hover,.cal-day.selected{background:#175cd3;color:#fff}.cal-day.today{outline:2px solid #84adff}.cal-empty{min-height:34px}
 .batch-planner{grid-column:1/-1;margin:4px 0;border:1px solid #d0d5dd;border-radius:9px;padding:7px 9px;background:#f8fafc}.batch-planner>summary{cursor:pointer;font-size:11px;font-weight:bold;color:#344054}.batch-planner-body{padding-top:7px}.batch-planner-note{font-size:10px;line-height:1.55;color:#667085;margin-bottom:6px}.batch-plan-controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 10px}.batch-plan-controls label{font-size:10px;margin:4px 0}.batch-plan-controls input{min-height:32px;padding:5px 8px;font-size:12px}.batch-plan-calc{margin-top:7px;font-size:11px;padding:7px 10px}.batch-plan-error{margin-top:6px;color:#b42318;font-size:10px}.batch-plan-result{margin-top:7px;padding:7px;background:#fff;border:1px solid #e4e7ec;border-radius:8px}.batch-plan-summary{display:flex;gap:10px;flex-wrap:wrap;font-size:10px}.batch-plan-table-wrap{max-height:140px;overflow:auto;margin-top:6px}.batch-plan-table{font-size:10px}.batch-plan-table th,.batch-plan-table td{padding:4px 6px}
 .dry-run{width:100%;margin-top:7px;background:#eff8ff;color:#175cd3;border:1px solid #b2ddff}.dry-run-result{margin-top:7px;padding:9px 11px;border:1px solid #b2ddff;border-radius:9px;background:#f5faff;color:#1849a9;line-height:1.7;white-space:pre-wrap}.dry-run-result.error{background:#fef3f2;border-color:#fecdca;color:#b42318}
@@ -537,7 +538,7 @@ th{font-size:10px;color:#667085}.tablewrap{overflow:auto}.tablewrap tbody td{fon
 <div class="form-field"><label>نماد نمایشی</label><input id="order-symbol" name="symbol" maxlength="24" placeholder="نماد را حرف‌به‌حرف تایپ کن..." autocomplete="off" aria-autocomplete="list" aria-controls="market-symbol-suggestions" aria-expanded="false" required><div id="market-symbol-suggestions" class="symbol-suggestions" role="listbox" aria-label="پیشنهادهای نماد" hidden></div><div id="symbol-lookup-status" class="foot" aria-live="polite">با واردکردن هر حرف، پیشنهاد نمادها نمایش داده می‌شود.</div></div>
 <div class="form-field wide"><label>شناسه ISIN (فقط برای مسیر API)</label><input id="order-isin" name="isin" maxlength="12" minlength="12" pattern="[A-Za-z]{2}[A-Za-z0-9]{9}[0-9]" placeholder="مثلاً IR..." autocomplete="off"></div>
 <div class="form-field"><label>نوع سفارش</label><select name="side"><option value="buy">خرید</option><option value="sell">فروش</option></select></div>
-<div class="form-field"><label>قیمت (ریال)</label><input name="price" type="number" min="1" step="1" required></div>
+<div class="form-field"><label>قیمت (ریال)</label><input id="order-price" name="price" type="number" min="1" step="1" required></div><div class="form-field wide"><div id="order-symbol-price-range" class="price-range-panel" aria-live="polite">برای نمایش کف، سقف و درصد دامنه نوسان، ابتدا نماد را انتخاب کن.</div></div>
 <div class="form-field"><label>تعداد</label><input name="quantity" type="number" min="1" step="1" required></div>
 <div class="form-field"><label>تاریخ شمسی</label><div class="datebox"><div class="datebar"><input id="jalali-date-display" name="execute_at_date" type="text" value="" inputmode="numeric" dir="ltr" placeholder="مثلاً ۱۴۰۵/۰۸/۱۴" pattern="[0-9۰-۹٠-٩]{4}[/.-][0-9۰-۹٠-٩]{1,2}[/.-][0-9۰-۹٠-٩]{1,2}" autocomplete="off" required><button type="button" id="calendar-toggle">تقویم</button></div><div id="jalali-calendar" class="calendar" hidden><div class="cal-head"><button type="button" id="cal-prev" class="cal-nav">ماه قبل</button><strong id="cal-title">تقویم شمسی</strong><button type="button" id="cal-next" class="cal-nav">ماه بعد</button></div><div class="cal-grid" id="cal-weekdays"><span>ش</span><span>ی</span><span>د</span><span>س</span><span>چ</span><span>پ</span><span>ج</span></div><div class="cal-grid" id="cal-days"></div></div></div></div>
 <div class="form-field"><section class="server-clock" aria-live="off"><div><div class="server-clock-label">ساعت تهران</div><div class="server-clock-status" id="server-clock-status">در حال دریافت زمان سرور…</div></div><time class="server-clock-value" id="server-clock" dir="ltr">--:--:--.---</time></section></div>
@@ -585,11 +586,98 @@ th{font-size:10px;color:#667085}.tablewrap{overflow:auto}.tablewrap tbody td{fon
   const symbolInput = $("order-symbol");
   const symbolLookupStatus = $("symbol-lookup-status");
   const symbolSuggestions = $("market-symbol-suggestions");
+  const orderPriceInput = $("order-price");
+  const orderPriceRangePanel = $("order-symbol-price-range");
   let symbolSuggestionTimer = null;
   let symbolSuggestionGeneration = 0;
+  let orderPriceRange = null;
+  let orderPriceRangeIsin = "";
+  let orderPriceRangeRequestNumber = 0;
 
   function showSymbolLookupStatus(message) {
     if (symbolLookupStatus) symbolLookupStatus.textContent = message;
+  }
+
+  function clearOrderPriceRange(message) {
+    orderPriceRangeRequestNumber++;
+    orderPriceRange = null;
+    orderPriceRangeIsin = "";
+    if (orderPriceRangePanel) {
+      orderPriceRangePanel.textContent = message || "برای نمایش کف، سقف و درصد دامنه نوسان، ابتدا نماد را انتخاب کن.";
+    }
+  }
+
+  function formatOrderPrice(value) {
+    return new Intl.NumberFormat("fa-IR", {maximumFractionDigits: 0}).format(value);
+  }
+
+  function formatOrderPercent(value) {
+    const sign = value >= 0 ? "+" : "";
+    return sign + new Intl.NumberFormat("fa-IR", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(value) + "٪";
+  }
+
+  async function loadOrderPriceRange(isin) {
+    const normalizedISIN = String(isin || "").trim().toUpperCase();
+    if (!orderPriceRangePanel) return;
+    if (!normalizedISIN) {
+      clearOrderPriceRange("برای نماد انتخاب‌شده ISIN معتبر موجود نیست؛ دامنه نوسان قابل دریافت نیست.");
+      return;
+    }
+    if (orderPriceRangeIsin === normalizedISIN && orderPriceRange) return;
+
+    const currentRequest = ++orderPriceRangeRequestNumber;
+    orderPriceRange = null;
+    orderPriceRangeIsin = normalizedISIN;
+    orderPriceRangePanel.textContent = "در حال دریافت کف و سقف مجاز قیمت از بازار...";
+    try {
+      const response = await fetch("/api/symbols/price-range?isin=" + encodeURIComponent(normalizedISIN), {
+        headers: {"Accept": "application/json"},
+        credentials: "same-origin",
+        cache: "no-store"
+      });
+      if (!response.ok) {
+        const reason = (await response.text()).trim();
+        throw new Error(reason || ("HTTP " + response.status));
+      }
+      const data = await response.json();
+      if (currentRequest !== orderPriceRangeRequestNumber ||
+          !isinInput || isinInput.value.trim().toUpperCase() !== normalizedISIN) return;
+      if (!Number.isSafeInteger(data.min_price) || !Number.isSafeInteger(data.max_price) ||
+          data.min_price <= 0 || data.max_price <= data.min_price) {
+        throw new Error("ساختار کف و سقف قیمت دریافتی معتبر نیست");
+      }
+
+      orderPriceRange = data;
+      const details = [
+        "کف مجاز: " + formatOrderPrice(data.min_price) + " ریال",
+        "سقف مجاز: " + formatOrderPrice(data.max_price) + " ریال"
+      ];
+      if (Number.isSafeInteger(data.reference_price) && data.reference_price > 0) {
+        details.push("قیمت مرجع: " + formatOrderPrice(data.reference_price) + " ریال");
+      }
+      if (Number.isFinite(data.min_percent) && Number.isFinite(data.max_percent)) {
+        details.push("درصد نسبت به مرجع: " + formatOrderPercent(data.min_percent) +
+          " تا " + formatOrderPercent(data.max_percent));
+      } else {
+        details.push("درصد نسبت به قیمت مرجع در پاسخ بازار موجود نیست");
+      }
+      const updatedAt = new Date(data.updated_at);
+      const updatedText = Number.isNaN(updatedAt.getTime()) ? "نامشخص" :
+        new Intl.DateTimeFormat("fa-IR", {
+          dateStyle: "short", timeStyle: "medium", timeZone: "Asia/Tehran"
+        }).format(updatedAt);
+      details.push("آخرین دریافت: " + updatedText);
+      orderPriceRangePanel.textContent = details.join(" · ");
+    } catch (error) {
+      if (currentRequest !== orderPriceRangeRequestNumber ||
+          !isinInput || isinInput.value.trim().toUpperCase() !== normalizedISIN) return;
+      orderPriceRange = null;
+      orderPriceRangePanel.textContent =
+        "دریافت دامنه نوسان از بازار ممکن نشد؛ " + String(error.message || error);
+    }
   }
 
   function normalizeSymbolText(value) {
@@ -615,6 +703,7 @@ th{font-size:10px;color:#667085}.tablewrap{overflow:auto}.tablewrap tbody td{fon
     if (symbolPreset) symbolPreset.value = "";
     hideSymbolSuggestions();
     showSymbolLookupStatus(item.isin ? "ISIN پیدا شد: " + item.isin : "برای این نماد ISIN ثبت نشده است.");
+    loadOrderPriceRange(item.isin || "");
   }
 
   function renderSymbolSuggestions(items, query) {
@@ -666,6 +755,7 @@ th{font-size:10px;color:#667085}.tablewrap{overflow:auto}.tablewrap tbody td{fon
     if (exactMatches.length === 1 && isinInput) {
       isinInput.value = exactMatches[0].isin || "";
       showSymbolLookupStatus("ISIN پیدا شد: " + (exactMatches[0].isin || ""));
+      loadOrderPriceRange(exactMatches[0].isin || "");
     } else if (exactMatches.length > 1) {
       if (isinInput) isinInput.value = "";
       showSymbolLookupStatus("برای این نماد چند ISIN وجود دارد؛ مورد درست را از پیشنهادها انتخاب کن.");
@@ -700,6 +790,7 @@ th{font-size:10px;color:#667085}.tablewrap{overflow:auto}.tablewrap tbody td{fon
     const query = symbolInput ? symbolInput.value.trim() : "";
     if (isinInput) isinInput.value = "";
     if (symbolPreset) symbolPreset.value = "";
+    clearOrderPriceRange();
 
     if (!query) {
       hideSymbolSuggestions();
@@ -730,6 +821,7 @@ th{font-size:10px;color:#667085}.tablewrap{overflow:auto}.tablewrap tbody td{fon
       if (isinInput) isinInput.value = option.dataset.isin || "";
       hideSymbolSuggestions();
       showSymbolLookupStatus(isinInput && isinInput.value ? "ISIN پیدا شد: " + isinInput.value : "");
+      loadOrderPriceRange(isinInput ? isinInput.value : "");
     });
   }
   function syncExecutionMode() {
@@ -763,6 +855,7 @@ th{font-size:10px;color:#667085}.tablewrap{overflow:auto}.tablewrap tbody td{fon
       if (field && typeof value === "string") field.value = value;
     }
     syncExecutionMode();
+    if (isinInput && isinInput.value) loadOrderPriceRange(isinInput.value);
     if (symbolInput && symbolInput.value && isinInput && isinInput.value) {
       showSymbolLookupStatus("پیش‌نویس قبلی بازیابی شد · ISIN: " + isinInput.value);
     } else if (symbolInput && symbolInput.value) {
@@ -834,6 +927,7 @@ th{font-size:10px;color:#667085}.tablewrap{overflow:auto}.tablewrap tbody td{fon
     }
     if (symbolPreset) symbolPreset.value = "";
     syncExecutionMode();
+    if (isinInput && isinInput.value) loadOrderPriceRange(isinInput.value);
     if (symbolInput && isinInput && isinInput.value) showSymbolLookupStatus("سفارش کپی شد؛ اطلاعات را ویرایش و سپس بررسی کن. ISIN: " + isinInput.value);
     orderForm.scrollIntoView({behavior:"smooth", block:"start"});
   }
