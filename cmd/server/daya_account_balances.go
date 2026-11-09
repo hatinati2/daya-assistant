@@ -33,14 +33,14 @@ type DayaAccountBalanceEndpoint struct {
 }
 
 type DayaAccountBalanceReport struct {
-	RetrievedAt        time.Time                    `json:"retrieved_at"`
-	NeedsLogin         bool                         `json:"needs_login"`
-	AccountBalance     DayaAccountBalanceMetric     `json:"account_balance"`
-	Credit             DayaAccountBalanceMetric     `json:"credit"`
-	InProgressCashOut  DayaAccountBalanceMetric     `json:"in_progress_cash_out"`
-	TPlus1Amount       DayaAccountBalanceMetric     `json:"t_plus_1_amount"`
-	TPlus2Amount       DayaAccountBalanceMetric     `json:"t_plus_2_amount"`
-	Endpoints          []DayaAccountBalanceEndpoint `json:"endpoints"`
+	RetrievedAt       time.Time                    `json:"retrieved_at"`
+	NeedsLogin        bool                         `json:"needs_login"`
+	AccountBalance    DayaAccountBalanceMetric     `json:"account_balance"`
+	Credit            DayaAccountBalanceMetric     `json:"credit"`
+	InProgressCashOut DayaAccountBalanceMetric     `json:"in_progress_cash_out"`
+	TPlus1Amount      DayaAccountBalanceMetric     `json:"t_plus_1_amount"`
+	TPlus2Amount      DayaAccountBalanceMetric     `json:"t_plus_2_amount"`
+	Endpoints         []DayaAccountBalanceEndpoint `json:"endpoints"`
 }
 
 type dayaBalanceEndpointData struct {
@@ -457,7 +457,7 @@ func fetchDayaFinancialEndpoint(ctx context.Context, client *http.Client, endpoi
 func ReadDayaAccountBalances(ctx context.Context, credentials *DayaCredentialStore) DayaAccountBalanceReport {
 	missing := DayaAccountBalanceMetric{Status: "not_found", Message: "مبلغ هنوز دریافت نشده است."}
 	report := DayaAccountBalanceReport{
-		RetrievedAt: time.Now().UTC(),
+		RetrievedAt:    time.Now().UTC(),
 		AccountBalance: missing, Credit: missing, InProgressCashOut: missing,
 		TPlus1Amount: missing, TPlus2Amount: missing,
 		Endpoints: make([]DayaAccountBalanceEndpoint, 0, 2),
