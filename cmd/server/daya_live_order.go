@@ -30,6 +30,12 @@ h1{font-size:20px}label{display:block;margin:12px 0 6px;font-weight:bold}input,s
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.warning{padding:13px;border:1px solid #fedf89;background:#fffaeb;border-radius:9px;color:#93370d;line-height:1.9}
 button{background:#b42318;color:#fff;border:0;border-radius:8px;padding:12px 18px;font:inherit;cursor:pointer;margin-top:12px}.error{padding:12px;background:#fef3f2;color:#b42318;border-radius:9px}.result{padding:12px;background:#ecfdf3;color:#05603a;border-radius:9px;line-height:1.9}
 a{color:#175cd3;text-decoration:none}.muted{color:#667085;line-height:1.9}input[type=checkbox]{width:auto;min-height:0}
+.symbol-results{display:grid;gap:6px;margin-top:8px}
+.symbol-results button{display:block;width:100%;text-align:right;background:#fff;color:#182230;border:1px solid #d0d5dd;border-radius:8px;padding:9px 11px;margin:0}
+.symbol-results button:hover,.symbol-results button:focus{background:#eff8ff;border-color:#84caff}
+.symbol-results small{display:block;color:#667085;margin-top:3px}
+.symbol-results:empty{display:none}
+.symbol-search{min-width:0}
 @media(max-width:600px){.grid{grid-template-columns:1fr}}
 
 /* Preview 03 shared page chrome */
@@ -96,7 +102,15 @@ main,.wrap{width:calc(100% - 32px);max-width:1400px}
 <form method="post" action="/daya-online-test/one/send" onsubmit="return confirm('تأیید نهایی: همین یک سفارش واقعی با مشخصات واردشده به دایا ارسال شود؟')">
 <input type="hidden" name="submission_nonce" value="{{.Nonce}}">
 <div class="grid">
-<div><label>ISIN</label><input name="isin" maxlength="12" minlength="12" pattern="[A-Za-z0-9]{12}" required></div>
+<div class="symbol-search">
+<label for="symbol-search-input">جست‌وجوی نماد یا نام شرکت</label>
+<input id="symbol-search-input" type="search" placeholder="مثلاً خودرو، فولاد، ایران‌خودرو..." autocomplete="off" aria-describedby="symbol-search-help" required>
+<div id="symbol-search-help" class="muted">نام یا بخشی از نماد را بنویس و یکی از نتایج را انتخاب کن؛ ISIN به‌صورت خودکار ثبت می‌شود.</div>
+<div id="symbol-search-results" class="symbol-results" role="listbox" aria-label="نتایج جست‌وجوی نماد"></div>
+<input type="hidden" id="selected-isin" name="isin" required>
+<input type="hidden" id="selected-symbol" name="symbol">
+<div id="symbol-selection" class="muted" aria-live="polite"></div>
+</div>
 <div><label>سمت</label><select name="side"><option value="buy">خرید BUY</option><option value="sell">فروش SELL</option></select></div>
 <div><label>قیمت به ریال</label><input name="price" type="number" min="1" step="1" required></div>
 <div><label>تعداد</label><input name="quantity" type="number" min="1" step="1" required></div>
@@ -118,7 +132,95 @@ ISIN: {{.Result.ISIN}} · سمت: {{.Result.Side}}<br>
 <div class="muted">این نتیجه ذخیره شده است. در وضعیت نامشخص، سفارش را دوباره نفرست.</div>
 </div>
 {{end}}
-</section></div></main></body></html>`))
+</section></div></main>
+<script>
+(() => {
+  const input = document.getElementById('symbol-search-input');
+  const isinField = document.getElementById('selected-isin');
+  const symbolField = document.getElementById('selected-symbol');
+  const results = document.getElementById('symbol-search-results');
+  const selection = document.getElementById('symbol-selection');
+  if (!input || !isinField || !symbolField || !results || !selection) return;
+  let timer = null;
+  let requestNumber = 0;
+  const clearSelection = () => {
+    isinField.value = '';
+    symbolField.value = '';
+    selection.textContent = 'هنوز نمادی انتخاب نشده است.';
+  };
+  const showMessage = (message) => {
+    results.replaceChildren();
+    const note = document.createElement('div');
+    note.className = 'muted';
+    note.textContent = message;
+    results.append(note);
+  };
+  input.addEventListener('input', () => {
+    clearSelection();
+    const query = input.value.trim();
+    const currentRequest = ++requestNumber;
+    clearTimeout(timer);
+    if (query.length < 2) {
+      results.replaceChildren();
+      return;
+    }
+    showMessage('در حال جست‌وجوی نمادها...');
+    timer = setTimeout(async () => {
+      try {
+        const response = await fetch('/api/symbols/suggest?q=' + encodeURIComponent(query), {
+          headers: {'Accept': 'application/json'},
+          credentials: 'same-origin'
+        });
+        if (!response.ok) throw new Error('search failed');
+        const items = await response.json();
+        if (currentRequest !== requestNumber) return;
+        results.replaceChildren();
+        if (!Array.isArray(items) || items.length === 0) {
+          showMessage('نمادی پیدا نشد؛ عبارت دیگری را امتحان کن.');
+          return;
+        }
+        for (const item of items) {
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.setAttribute('role', 'option');
+          const title = document.createElement('strong');
+          title.textContent = item.symbol || 'بدون نماد';
+          const detail = document.createElement('small');
+          detail.textContent = [item.company_name, item.market_type, item.isin].filter(Boolean).join(' · ');
+          button.append(title, detail);
+          button.addEventListener('click', () => {
+            input.value = item.symbol || '';
+            isinField.value = item.isin || '';
+            symbolField.value = item.symbol || '';
+            selection.textContent = 'نماد انتخاب‌شده: ' + (item.symbol || '') + ' — ISIN: ' + (item.isin || '');
+            results.replaceChildren();
+          });
+          results.append(button);
+        }
+      } catch (_) {
+        if (currentRequest === requestNumber) showMessage('جست‌وجوی نماد در دسترس نیست؛ کمی بعد دوباره تلاش کن.');
+      }
+    }, 250);
+  });
+  input.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter' && results.querySelector('button')) {
+      event.preventDefault();
+      results.querySelector('button').click();
+    }
+  });
+  const form = input.closest('form');
+  if (form) form.addEventListener('submit', (event) => {
+    if (!isinField.value || !symbolField.value) {
+      event.preventDefault();
+      input.setCustomValidity('ابتدا نماد را از نتایج جست‌وجو انتخاب کن.');
+      input.reportValidity();
+      input.addEventListener('input', () => input.setCustomValidity(''), {once:true});
+      input.focus();
+    }
+  });
+})();
+</script>
+</body></html>`))
 
 var dayaLiveOrderTestNonceStore = struct {
 	sync.Mutex
@@ -229,8 +331,12 @@ func parseDayaLiveOrderTestForm(r *http.Request) (Order, error) {
 	if priceErr != nil || quantityErr != nil {
 		return Order{}, errors.New("قیمت و تعداد باید عدد صحیح مثبت باشند.")
 	}
+	symbol := strings.TrimSpace(r.FormValue("symbol"))
+	if symbol == "" {
+		symbol = isin
+	}
 	order := Order{
-		ISIN: isin, Symbol: isin, Side: side, Price: price, Quantity: quantity,
+		ISIN: isin, Symbol: symbol, Side: side, Price: price, Quantity: quantity,
 		ExecutionMode: executionModeAPI,
 	}
 	if _, err := MarshalDayaOrderPayload(order); err != nil {
