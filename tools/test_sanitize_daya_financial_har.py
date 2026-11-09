@@ -62,10 +62,6 @@ class FinancialHarSanitizerTests(unittest.TestCase):
             self.assertNotIn(forbidden, schema)
 
 
-if __name__ == "__main__":
-    unittest.main()
-
-
     def test_financial_numeric_fingerprints_hide_values(self):
         from decimal import Decimal
         from sanitize_daya_financial_har import collect_numeric_fingerprints
@@ -88,3 +84,7 @@ if __name__ == "__main__":
         serialized = repr(fingerprints)
         for forbidden in ("6000000", "۶٬۰۰۰٬۰۰۰", "1200000"):
             self.assertNotIn(forbidden, serialized)
+
+
+if __name__ == "__main__":
+    unittest.main()
