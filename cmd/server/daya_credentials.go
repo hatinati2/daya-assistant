@@ -179,7 +179,11 @@ main,.wrap{width:calc(100% - 32px);max-width:1400px}
 <div class="row"><button class="danger" type="submit">حذف اطلاعات ذخیره‌شده</button></div>
 </form>
 {{end}}
-{{if .HasSession}}<div class="msg">آخرین ورود عادی دایا با موفقیت انجام شد: {{.LoginAt}}. کوکی‌های نشست به‌صورت رمزنگاری‌شده روی سرور ذخیره شده‌اند.</div>{{else}}<div class="note">اطلاعات ورود در سرور به‌صورت رمزنگاری‌شده نگهداری می‌شوند. هنوز ورود موفقی برای این حساب ثبت نشده است.</div>{{end}}
+{{if .HasSession}}<div class="msg">آخرین ورود عادی دایا با موفقیت انجام شد: {{.LoginAt}}. کوکی‌های نشست به‌صورت رمزنگاری‌شده روی سرور ذخیره شده‌اند.</div>
+<form method="post" action="/settings/daya-logout" onsubmit="return confirm('از نشست ذخیره‌شده دایا خارج شوی؟ اطلاعات نام کاربری و رمز عبور ذخیره‌شده باقی می‌مانند.')">
+<div class="row"><button class="danger" type="submit">خروج از نشست دایا</button></div>
+<p class="foot">این گزینه نشست و کوکی‌های ذخیره‌شده در این پنل را پاک می‌کند؛ اطلاعات ورود باقی می‌مانند. لغو نشست در سمت کارگزاری انجام نمی‌شود.</p>
+</form>{{else}}<div class="note">اطلاعات ورود در سرور به‌صورت رمزنگاری‌شده نگهداری می‌شوند. هنوز ورود موفقی برای این حساب ثبت نشده است.</div>{{end}}
 <section class="card" id="daya-monitor" style="margin:14px 0">
 <h2>پایش نشست دایا</h2>
 <p id="daya-monitor-state" class="muted">{{if .Monitor.Running}}پایش فعال است؛ درخواست فقط‌خواندنی GET /orders ارسال می‌شود.{{else if .Monitor.NeedsLogin}}ورود دستی با CAPTCHA لازم است.{{else}}پایش فعال نیست.{{end}}</p>
@@ -685,6 +689,15 @@ func (s *DayaCredentialStore) LoadAccessSession() (DayaSession, time.Time, error
 func (s *DayaCredentialStore) SessionStatus() (time.Time, bool, error) {
 	token, updatedAt, err := s.LoadAccessToken()
 	return updatedAt, token != "", err
+}
+
+// Logout clears only the locally stored broker session. Saved username/password remain intact.
+func (s *DayaCredentialStore) Logout() error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	err := os.Remove(s.sessionPath)
+	if errors.Is(err, os.ErrNotExist) { return nil }
+	return err
 }
 
 func (s *DayaCredentialStore) Delete() error {
