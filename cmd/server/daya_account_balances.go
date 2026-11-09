@@ -130,127 +130,23 @@ func dayaCollectBalanceCandidates(value any, path string, aliases map[string]str
 	}
 }
 
+// dayaSafeFinancialFieldName accepts simple JSON property names only.
+func dayaSafeFinancialFieldName(value string) bool {
+	if len(value) == 0 || len(value) > 64 {
+		return false
+	}
+	for i, r := range value {
+		if !((r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || (i > 0 && r >= '0' && r <= '9') || (i > 0 && r == '_')) {
+			return false
+		}
+	}
+	return true
+}
+
 // dayaCollectFinancialFieldNames returns field names only, never values or raw payloads.
 // Sensitive identifiers and session-related names are deliberately excluded.
 func dayaCollectFinancialFieldNames(value any, out map[string]struct{}, depth int) {
 	if depth > 12 || len(out) >= 40 {
-		return
-	}
-	switch node := value.(type) {
-	case map[string]any:
-		keys := make([]string, 0, len(node))
-		for key := range node { keys = append(keys, key) }
-		sort.Strings(keys)
-		for _, key := range keys {
-			if len(out) >= 40 { return }
-			child := node[key]
-			normalized := dayaNormalizeFinancialKey(key)
-			if normalized != "" && len(key) <= 64 && (strings.Contains(normalized, "account") || strings.Contains(normalized, "customer") || strings.Contains(normalized, "userid") || strings.Contains(normalized, "token") || strings.Contains(normalized, "cookie") || strings.Contains(normalized, "password") || strings.Contains(normalized, "phone") || strings.Contains(normalized, "mobile") || strings.Contains(normalized, "national") || strings.Contains(normalized, "identity") || strings.Contains(normalized, "isin") || strings.Contains(normalized, "symbol") || strings.Contains(normalized, "orderid") || normalized == "id") {
-				continue
-			}
-			if _, ok := dayaFinancialAmount(child); ok {
-				if keyPattern := regexp.MustCompile(`^[A-Za-z][A-Za-z0-9_]{0,63}package main
-
-import (
-	"bytes"
-	"context"
-	"encoding/json"
-	"fmt"
-	"io"
-	"net/http"
-	"sort"
-	"strconv"
-	"strings"
-	"time"
-)
-
-const dayaFinancialBodyLimit = 1 << 20
-
-type DayaAccountBalanceMetric struct {
-	Status  string `json:"status"`
-	Value   string `json:"value,omitempty"`
-	Unit    string `json:"unit,omitempty"`
-	Field   string `json:"field,omitempty"`
-	Source  string `json:"source,omitempty"`
-	Message string `json:"message,omitempty"`
-}
-
-type DayaAccountBalanceEndpoint struct {
-	Path       string   `json:"path"`
-	StatusCode int      `json:"status_code"`
-	Error      string   `json:"error,omitempty"`
-	Fields     []string `json:"fields,omitempty"`
-}
-
-type DayaAccountBalanceReport struct {
-	RetrievedAt  time.Time                    `json:"retrieved_at"`
-	NeedsLogin   bool                         `json:"needs_login"`
-	BuyingPower  DayaAccountBalanceMetric     `json:"buying_power"`
-	CashBalance  DayaAccountBalanceMetric     `json:"cash_balance"`
-	Withdrawable DayaAccountBalanceMetric     `json:"withdrawable"`
-	Endpoints    []DayaAccountBalanceEndpoint `json:"endpoints"`
-}
-
-type dayaBalanceEndpointData struct {
-	path   string
-	status int
-	body   any
-	err    string
-}
-
-type dayaBalanceCandidate struct {
-	value string
-	field string
-	path  string
-}
-
-func dayaNormalizeFinancialKey(value string) string {
-	var b strings.Builder
-	for _, r := range strings.ToLower(value) {
-		if (r >= 'a' && r <= 'z') || (r >= '0' && r <= '9') {
-			b.WriteRune(r)
-		}
-	}
-	return b.String()
-}
-
-func dayaFinancialAmount(value any) (string, bool) {
-	var raw string
-	switch v := value.(type) {
-	case json.Number:
-		raw = v.String()
-	case string:
-		raw = strings.TrimSpace(persianDigitReplacer.Replace(v))
-	case float64:
-		raw = strconv.FormatFloat(v, 'f', -1, 64)
-	case int64:
-		raw = strconv.FormatInt(v, 10)
-	case int:
-		raw = strconv.Itoa(v)
-	default:
-		return "", false
-	}
-	raw = strings.ReplaceAll(raw, ",", "")
-	raw = strings.ReplaceAll(raw, "٬", "")
-	if raw == "" {
-		return "", false
-	}
-	if _, err := strconv.ParseFloat(raw, 64); err != nil {
-		return "", false
-	}
-	return raw, true
-}
-
-func dayaMakeAliasSet(values ...string) map[string]struct{} {
-	result := make(map[string]struct{}, len(values))
-	for _, value := range values {
-		result[dayaNormalizeFinancialKey(value)] = struct{}{}
-	}
-	return result
-}
-
-func dayaCollectBalanceCandidates(value any, path string, aliases map[string]struct{}, out *[]dayaBalanceCandidate, depth int) {
-	if depth > 16 {
 		return
 	}
 	switch node := value.(type) {
@@ -261,33 +157,32 @@ func dayaCollectBalanceCandidates(value any, path string, aliases map[string]str
 		}
 		sort.Strings(keys)
 		for _, key := range keys {
+			if len(out) >= 40 {
+				return
+			}
 			child := node[key]
-			childPath := key
-			if path != "" {
-				childPath = path + "." + key
+			normalized := dayaNormalizeFinancialKey(key)
+			if strings.Contains(normalized, "account") || strings.Contains(normalized, "customer") ||
+				strings.Contains(normalized, "userid") || strings.Contains(normalized, "token") ||
+				strings.Contains(normalized, "cookie") || strings.Contains(normalized, "password") ||
+				strings.Contains(normalized, "phone") || strings.Contains(normalized, "mobile") ||
+				strings.Contains(normalized, "national") || strings.Contains(normalized, "identity") ||
+				strings.Contains(normalized, "isin") || strings.Contains(normalized, "symbol") ||
+				strings.Contains(normalized, "orderid") || normalized == "id" {
+				continue
 			}
-			if _, ok := aliases[dayaNormalizeFinancialKey(key)]; ok {
-				if amount, valid := dayaFinancialAmount(child); valid {
-					*out = append(*out, dayaBalanceCandidate{value: amount, field: key, path: childPath})
-					continue
+			if _, ok := dayaFinancialAmount(child); ok {
+				if dayaSafeFinancialFieldName(key) {
+					out[key] = struct{}{}
 				}
-			}
-			dayaCollectBalanceCandidates(child, childPath, aliases, out, depth+1)
-		}
-	case []any:
-		for i, child := range node {
-			dayaCollectBalanceCandidates(child, fmt.Sprintf("%s[%d]", path, i), aliases, out, depth+1)
-		}
-	}
-}
-
-); keyPattern.MatchString(key) { out[key] = struct{}{} }
 				continue
 			}
 			dayaCollectFinancialFieldNames(child, out, depth+1)
 		}
 	case []any:
-		for _, child := range node { dayaCollectFinancialFieldNames(child, out, depth+1) }
+		for _, child := range node {
+			dayaCollectFinancialFieldNames(child, out, depth+1)
+		}
 	}
 }
 
