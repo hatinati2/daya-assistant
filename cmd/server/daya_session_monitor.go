@@ -20,19 +20,19 @@ const (
 )
 
 type DayaMonitorSnapshot struct {
-	Running    bool      `json:"running"`
-	NeedsLogin bool      `json:"needs_login"`
-	LastCheck  time.Time `json:"last_check,omitempty"`
-	FirstCheckAt time.Time `json:"first_check_at,omitempty"`
-	DisconnectedAt time.Time `json:"disconnected_at,omitempty"`
-	LastDisconnectedAt time.Time `json:"last_disconnected_at,omitempty"`
-	LastDisconnectDuration time.Duration `json:"last_disconnect_duration,omitempty"`
-	DisconnectedFor time.Duration `json:"disconnected_for,omitempty"`
-	LastReconnectAt time.Time `json:"last_reconnect_at,omitempty"`
-	NextCheck  time.Time `json:"next_check,omitempty"`
-	LastStatus int       `json:"last_status,omitempty"`
-	Checks     uint64    `json:"checks"`
-	LastError  string    `json:"last_error,omitempty"`
+	Running                 bool          `json:"running"`
+	NeedsLogin              bool          `json:"needs_login"`
+	LastCheck               time.Time     `json:"last_check,omitempty"`
+	FirstCheckAt            time.Time     `json:"first_check_at,omitempty"`
+	DisconnectedAt          time.Time     `json:"disconnected_at,omitempty"`
+	LastDisconnectedAt      time.Time     `json:"last_disconnected_at,omitempty"`
+	LastDisconnectDuration  time.Duration `json:"last_disconnect_duration,omitempty"`
+	DisconnectedFor         time.Duration `json:"disconnected_for,omitempty"`
+	LastReconnectAt         time.Time     `json:"last_reconnect_at,omitempty"`
+	NextCheck               time.Time     `json:"next_check,omitempty"`
+	LastStatus              int           `json:"last_status,omitempty"`
+	Checks                  uint64        `json:"checks"`
+	LastError               string        `json:"last_error,omitempty"`
 }
 
 type DayaEndpointVerificationResult struct {
