@@ -23,6 +23,12 @@
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/hatinati2/daya-assistant/main/install-public.sh)"
 ```
 
+برای نصب نسخهٔ آزمایشی مستقل **Preview 03** روی پورت ۸۱۰۳ (بدون تغییر Preview روی ۸۱۰۲ یا Production):
+
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/hatinati2/daya-assistant/feat/preview03-isolated/install-preview03-public.sh)"
+```
+
 برای نصب Preview مستقل:
 
 ```bash
@@ -37,18 +43,20 @@ DAYA_INSTALL_REF=feat/daya-order-dispatch-foundation bash -c "$(curl -fsSL https
 
 این دستور فقط Preview مستقل را نصب می‌کند؛ پورت آن 8102 است. پس از ادغام PR می‌توان از نصب‌کنندهٔ `main` استفاده کرد.
 
-| مورد | Production | Preview |
-|---|---|---|
-| پورت | 8100 | 8102 |
-| سرویس | `daya-assistant.service` | `daya-assistant-preview.service` |
-| پوشه برنامه | `/opt/daya-assistant` | `/opt/daya-assistant-preview` |
-| داده‌ها | `/var/lib/daya-assistant` | `/var/lib/daya-assistant-preview` |
-| تنظیمات | `/etc/daya-assistant.env` | `/etc/daya-assistant-preview.env` |
-| کلید | `/etc/daya-assistant.key` | `/etc/daya-assistant-preview.key` |
+| مورد | Production | Preview | Preview 03 |
+|---|---|---|---|
+| پورت | 8100 | 8102 | 8103 |
+| سرویس | `daya-assistant.service` | `daya-assistant-preview.service` | `daya-assistant-preview03.service` |
+| کاربر سیستم | `daya-assistant` | `daya-assistant-preview` | `daya-assistant-preview03` |
+| پوشه برنامه | `/opt/daya-assistant` | `/opt/daya-assistant-preview` | `/opt/daya-assistant-preview03` |
+| داده‌ها | `/var/lib/daya-assistant` | `/var/lib/daya-assistant-preview` | `/var/lib/daya-assistant-preview03` |
+| تنظیمات | `/etc/daya-assistant.env` | `/etc/daya-assistant-preview.env` | `/etc/daya-assistant-preview03.env` |
+| کلید | `/etc/daya-assistant.key` | `/etc/daya-assistant-preview.key` | `/etc/daya-assistant-preview03.key` |
+| فایل ورود اولیه | `/root/daya-assistant-credentials.txt` | `/root/daya-assistant-preview-credentials.txt` | `/root/daya-assistant-preview03-credentials.txt` |
 
-پورت‌های Daya به‌صورت مستقل از رابین تنظیم شده‌اند: Production روی 8100 و Preview روی 8102. Preview مسیر داده، فایل تنظیمات، کلید رمزنگاری، کاربر سیستم و سرویس جداگانه دارد. نصب‌کننده Preview مقدار پیش‌فرض قدیمی 8101 را نیز به 8102 منتقل می‌کند، اما آدرس سفارشی موجود را تغییر نمی‌دهد.
+Production، Preview و Preview 03 فرایند، پورت، کاربر سیستم، مسیر داده، فایل تنظیمات، کلید رمزنگاری و فایل اطلاعات ورود مستقل دارند. نصب Preview 03 فقط سرویس `daya-assistant-preview03` را ایجاد یا به‌روزرسانی می‌کند و سرویس‌های موجود روی پورت‌های 8100 و 8102 را تغییر نمی‌دهد. هر سه نسخه منطقه زمانی داخلی `Asia/Tehran` را استفاده می‌کنند و منطقه زمانی سیستم‌عامل را تغییر نمی‌دهند.
 
-اطلاعات ورود اولیه در فایل root-only ذخیره می‌شود: `/root/daya-assistant-credentials.txt` یا `/root/daya-assistant-preview-credentials.txt`. تنظیمات قبلی در به‌روزرسانی حفظ می‌شوند.
+اطلاعات ورود اولیه هر نسخه در فایل مخصوص خودش و فقط قابل خواندن برای root ذخیره می‌شود. تنظیمات قبلی همان نسخه در به‌روزرسانی حفظ می‌شوند.
 
 ## احراز هویت دایا
 
@@ -65,7 +73,7 @@ DAYA_INSTALL_REF=feat/daya-order-dispatch-foundation bash -c "$(curl -fsSL https
 
 تمام مدل سفارش، زمان‌بندی، برنامه‌ریز چندنوبتی، مدیریت وضعیت، تاریخچه، لغوها و مسیر دستی پیاده‌سازی شده‌اند. برای تکمیل ارسال خودکار، باید درخواست واقعی ثبت سفارش از Network مرورگر دایا (با حذف token، cookie، رمز، شماره حساب و شناسه‌های شخصی) دریافت شود. هیچ درخواست سفارش زنده‌ای در CI یا تست‌ها ارسال نمی‌شود.
 
-## بررسی دستی endpointهای نشست در Preview
+## بررسی دستی endpointهای نشست در Preview 03
 
 در صفحه «اتصال به دایا»، دکمه «بررسی دستی مسیرهای نشست» فقط با کلیک کاربر اجرا می‌شود و دقیقاً یک درخواست GET به هر یک از مسیرهای تأییدشدهٔ زیر می‌فرستد:
 
@@ -74,12 +82,12 @@ DAYA_INSTALL_REF=feat/daya-order-dispatch-foundation bash -c "$(curl -fsSL https
 
 برای هر پاسخ، کد HTTP، زمان دریافت هدرهای پاسخ، و وجود/تعداد هدرهای `Set-Cookie` نمایش داده می‌شود. مقادیر کوکی یا توکن نه در گزارش و نه در لاگ نوشته نمی‌شوند. فقط کوکی‌های مجاز `token` و `cookiesession1` از پاسخ، با همان اعتبارسنجی موجود پردازش و در صورت چرخش، در ذخیره‌ساز رمزنگاری‌شده ثبت می‌شوند. redirect دنبال نمی‌شود و درخواست ناموفق باعث retry نمی‌شود.
 
-این بررسی فقط در Preview در دسترس است، پس‌زمینه‌ای اجرا نمی‌شود و به‌تنهایی تضمین‌کننده تمدید نشست نیست؛ تمدید فقط در صورت صدور کوکی تازه از سمت دایا رخ می‌دهد.
+این بررسی در نسخهٔ Preview 03 با کلیک کاربر اجرا می‌شود، در پس‌زمینه اجرا نمی‌شود و به‌تنهایی تضمین‌کننده تمدید نشست نیست؛ تمدید فقط در صورت صدور کوکی تازه از سمت دایا رخ می‌دهد.
 
-## تست آنلاین در Preview
+## تست آنلاین در Preview 03
 
 - مسیر `/daya-online-test` با کلیک کاربر فقط `GET /orders` واقعی را برای بررسی نشست و پاسخ JSON اجرا می‌کند.
-- مسیر `/daya-online-test/one` فقط در Preview یک فرم ارسال دستی یک‌باره دارد. با تأیید صریح کاربر، همان یک درخواست واقعی `POST /orders` ارسال و نتیجه در تاریخچه Preview ذخیره می‌شود.
+- مسیر `/daya-online-test/one` فقط در Preview 03 یک فرم ارسال دستی یک‌باره دارد. با تأیید صریح کاربر، همان یک درخواست واقعی `POST /orders` ارسال و نتیجه در تاریخچه Preview ذخیره می‌شود.
 - سفارش آزمایشی وارد زمان‌بندی نمی‌شود. در timeout یا نتیجه مبهم، ارسال مجدد خودکار انجام نمی‌شود. در پاسخ ENTRY، فقط تأیید خواندنی BOOKED بررسی می‌شود و بعد از BOOKED پایش متوقف می‌ماند.
 - هیچ درخواست POST واقعی در CI یا تست‌های خودکار اجرا نمی‌شود. ارسال زمان‌بندی‌شده از API همچنان به‌صورت مستقل غیرفعال است.
 
