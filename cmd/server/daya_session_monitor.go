@@ -42,7 +42,7 @@ type DayaEndpointVerificationResult struct {
 }
 
 type DayaEndpointVerificationReport struct {
-	CheckedAt time.Time                         `json:"checked_at"`
+	CheckedAt time.Time                        `json:"checked_at"`
 	Results   []DayaEndpointVerificationResult `json:"results"`
 }
 
