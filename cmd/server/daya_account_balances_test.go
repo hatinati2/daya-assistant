@@ -8,8 +8,8 @@ import (
 
 func TestDayaNormalizeFinancialKey(t *testing.T) {
 	for input, want := range map[string]string{
-		"buyingPower": "buyingpower",
-		"cash_balance": "cashbalance",
+		"buyingPower":       "buyingpower",
+		"cash_balance":      "cashbalance",
 		"withdrawable-cash": "withdrawablecash",
 	} {
 		if got := dayaNormalizeFinancialKey(input); got != want {
@@ -26,9 +26,9 @@ func TestDayaSelectBalanceMetricFindsNestedKnownFields(t *testing.T) {
 	portfolio := &dayaBalanceEndpointData{
 		path: "/financials/portfolio/instant", status: 200,
 		body: map[string]any{"data": map[string]any{
-			"cashBalance": json.Number("200000000"),
+			"cashBalance":      json.Number("200000000"),
 			"withdrawableCash": "150000000",
-			"accountNumber": "must-not-be-returned",
+			"accountNumber":    "must-not-be-returned",
 		}},
 	}
 	gotBuying := dayaSelectBalanceMetric(buying, portfolio, dayaMakeAliasSet("buyingPower"), "قدرت خرید")
@@ -52,7 +52,7 @@ func TestDayaSelectBalanceMetricHidesConflictingValues(t *testing.T) {
 	endpoint := &dayaBalanceEndpointData{
 		path: "/financials/portfolio/instant", status: 200,
 		body: map[string]any{"data": map[string]any{
-			"cashBalance": json.Number("100"),
+			"cashBalance":      json.Number("100"),
 			"totalCashBalance": json.Number("200"),
 		}},
 	}

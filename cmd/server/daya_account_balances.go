@@ -320,7 +320,7 @@ func ReadDayaAccountBalances(ctx context.Context, credentials *DayaCredentialSto
 	}
 
 	client := &http.Client{
-		Timeout: 8 * time.Second,
+		Timeout:       8 * time.Second,
 		CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse },
 	}
 	client.Jar = nil
