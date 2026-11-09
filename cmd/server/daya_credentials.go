@@ -67,10 +67,10 @@ type DayaCredentialStore struct {
 }
 
 type DayaSettingsPageData struct {
-	Username   string
-	Saved      bool
-	HasSession bool
-	LoginAt    string
+	Username    string
+	Saved       bool
+	HasSession  bool
+	LoginAt     string
 	Monitor     DayaMonitorSnapshot
 	PreviewMode bool
 	Error       string
@@ -657,14 +657,14 @@ func (s *DayaCredentialStore) RenderWithMonitorMode(w http.ResponseWriter, error
 		loginAtText = formatJalaliDateTime(loginAt.In(tehran()))
 	}
 	data := DayaSettingsPageData{
-		Username:   username,
-		Saved:      saved,
-		HasSession: hasSession,
-		LoginAt:    loginAtText,
+		Username:    username,
+		Saved:       saved,
+		HasSession:  hasSession,
+		LoginAt:     loginAtText,
 		Monitor:     monitor,
 		PreviewMode: previewMode,
 		Error:       errorMessage,
-		Notice:     notice,
+		Notice:      notice,
 	}
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.Header().Set("Cache-Control", "no-store")
