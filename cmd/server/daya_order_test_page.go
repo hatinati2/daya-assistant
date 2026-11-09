@@ -120,7 +120,7 @@ pre{border-radius:10px}
 <div class="foot">این نتیجه فقط صحت ساخت JSON، مسیر POST /orders و دریافت پاسخ HTTP از mock محلی را می‌سنجد. نتیجه هیچ ارتباطی با پذیرش سفارش توسط دایا ندارد.</div>
 </section>
 {{end}}
-</main></body></html>`))
+</div></main></body></html>`))
 
 // registerDayaLocalOrderTestRoutes exposes the local mock workflow only when
 // DAYA_PREVIEW_MODE=true. The handlers never access broker credentials.
