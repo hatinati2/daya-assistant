@@ -82,40 +82,42 @@ func TestDayaCollectUnit(t *testing.T) {
 	}
 }
 
-func TestDayaBuyingPowerRecognizesCreditField(t *testing.T) {
+func TestDayaBuyingPowerDoesNotTreatCreditAsBuyingPower(t *testing.T) {
 	buying := &dayaBalanceEndpointData{
 		path:   "/financials/buying-power",
 		status: 200,
 		body: map[string]any{
-			"credit":            json.Number("125000000"),
-			"inProgressCashOut": json.Number("5000000"),
-			"tPlus1Amount":      json.Number("7000000"),
-			"tPlus2Amount":      json.Number("9000000"),
+			"accountBalance":    json.Number("6000000"),
+			"credit":            json.Number("0"),
+			"inProgressCashOut": json.Number("0"),
+			"tPlus1Amount":      json.Number("6000000"),
+			"tPlus2Amount":      json.Number("6000000"),
 		},
 	}
-	got := dayaSelectBalanceMetric(
+
+	buyingPower := dayaSelectBalanceMetric(
 		buying, nil,
-		dayaMakeAliasSet("buyingPower", "credit"),
+		dayaMakeAliasSet("buyingPower", "availableBuyingPower", "cashBuyingPower", "buyingPowerAmount", "buyingPowerAvailable", "availableToPurchase", "buyingPowerValue"),
 		"قدرت خرید",
 	)
-	if got.Status != "ok" || got.Value != "125000000" || got.Field != "credit" {
-		t.Fatalf("credit should be recognized as buying power: %#v", got)
+	if buyingPower.Status != "not_found" || buyingPower.Value != "" {
+		t.Fatalf("credit/account balance must not be guessed as buying power: %#v", buyingPower)
 	}
 
-	// Do not reinterpret in-progress cash-out or settlement fields as
-	// cash balance or withdrawable funds without verified semantics.
-	cash := dayaSelectBalanceMetric(
-		buying, nil,
-		dayaMakeAliasSet("cashBalance", "totalCashBalance"),
-		"موجودی نقدی",
-	)
-	withdrawable := dayaSelectBalanceMetric(
-		buying, nil,
-		dayaMakeAliasSet("withdrawableCash", "cashAvailableToWithdraw", "availableToWithdraw"),
-		"موجودی قابل برداشت",
-	)
-	if cash.Status != "not_found" || withdrawable.Status != "not_found" {
-		t.Fatalf("unverified fields must not be mapped: cash=%#v withdrawable=%#v", cash, withdrawable)
+	accountBalance := dayaSelectBalanceMetric(buying, nil, dayaMakeAliasSet("accountBalance"), "موجودی حساب")
+	tPlus1 := dayaSelectBalanceMetric(buying, nil, dayaMakeAliasSet("tPlus1Amount"), "T+1")
+	tPlus2 := dayaSelectBalanceMetric(buying, nil, dayaMakeAliasSet("tPlus2Amount"), "T+2")
+	if accountBalance.Status != "ok" || accountBalance.Value != "6000000" || accountBalance.Field != "accountBalance" {
+		t.Fatalf("accountBalance should be shown as account balance: %#v", accountBalance)
+	}
+	if tPlus1.Status != "ok" || tPlus1.Value != "6000000" || tPlus1.Field != "tPlus1Amount" {
+		t.Fatalf("T+1 should be shown independently: %#v", tPlus1)
+	}
+	if tPlus2.Status != "ok" || tPlus2.Value != "6000000" || tPlus2.Field != "tPlus2Amount" {
+		t.Fatalf("T+2 should be shown independently: %#v", tPlus2)
+	}
+	if tPlus1.Value == "" || tPlus2.Value == "" {
+		t.Fatal("settlement amounts must not be combined or discarded")
 	}
 }
 
@@ -123,6 +125,7 @@ func TestDayaCollectFinancialSchemaShowsSafePathsAndTypesOnly(t *testing.T) {
 	payload := map[string]any{
 		"data": []any{
 			map[string]any{
+				"accountBalance": json.Number("6000000"),
 				"cashAvailable": "6000000",
 				"portfolio":     map[string]any{"withdrawable": json.Number("4500000")},
 				"accountNumber": "123456789",
@@ -135,6 +138,7 @@ func TestDayaCollectFinancialSchemaShowsSafePathsAndTypesOnly(t *testing.T) {
 	joined := strings.Join(schema, "\n")
 	for _, expected := range []string{
 		"data:array",
+		"data[].accountBalance:number",
 		"data[].cashAvailable:string",
 		"data[].portfolio.withdrawable:number",
 	} {
