@@ -20,6 +20,7 @@ case "$MODE" in
     SERVICE=daya-assistant
     SERVICE_USER=daya-assistant
     ADDR=0.0.0.0:8100
+    PANEL_PORT=8100
     PREVIEW=false
     CREDENTIALS_FILE=/root/daya-assistant-credentials.txt
     UNIT_SOURCE=daya-assistant.service
@@ -32,12 +33,26 @@ case "$MODE" in
     SERVICE=daya-assistant-preview
     SERVICE_USER=daya-assistant-preview
     ADDR=0.0.0.0:8102
+    PANEL_PORT=8102
     PREVIEW=true
     CREDENTIALS_FILE=/root/daya-assistant-preview-credentials.txt
     UNIT_SOURCE=daya-assistant-preview.service
     ;;
+  preview03)
+    APP=/opt/daya-assistant-preview03
+    DATA=/var/lib/daya-assistant-preview03
+    CONF=/etc/daya-assistant-preview03.env
+    KEY=/etc/daya-assistant-preview03.key
+    SERVICE=daya-assistant-preview03
+    SERVICE_USER=daya-assistant-preview03
+    ADDR=0.0.0.0:8103
+    PANEL_PORT=8103
+    PREVIEW=true
+    CREDENTIALS_FILE=/root/daya-assistant-preview03-credentials.txt
+    UNIT_SOURCE=daya-assistant-preview03.service
+    ;;
   *)
-    echo "DAYA_INSTALL_MODE باید production یا preview باشد؛ مقدار فعلی: $MODE" >&2
+    echo "DAYA_INSTALL_MODE باید production، preview یا preview03 باشد؛ مقدار فعلی: $MODE" >&2
     exit 1
     ;;
 esac
@@ -107,7 +122,7 @@ fi
 set_default DAYA_DATA_DIR "$DATA"
 set_default DAYA_CREDENTIALS_KEY_FILE "$KEY"
 
-# Preview and production use independent processes, ports, keys and data.
+# Production, Preview 02, and Preview 03 use independent processes, ports, keys, and data.
 sed -i '/^DAYA_PREVIEW_MODE=/d' "$CONF"
 printf 'DAYA_PREVIEW_MODE=%s\n' "$PREVIEW" >> "$CONF"
 
@@ -142,4 +157,4 @@ echo "تنظیمات: $CONF"
 echo "داده‌ها: $DATA"
 echo "کلید مستقل: $KEY"
 echo "منطقه زمانی داخلی برنامه: Asia/Tehran (منطقه زمانی سیستم تغییر نکرد)"
-echo "پنل: http://SERVER_IP:$([[ "$MODE" == "preview" ]] && echo 8102 || echo 8100)"
+echo "پنل: http://SERVER_IP:$PANEL_PORT"
