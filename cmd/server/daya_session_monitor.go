@@ -25,6 +25,7 @@ type DayaMonitorSnapshot struct {
 	LastCheck  time.Time `json:"last_check,omitempty"`
 	FirstCheckAt time.Time `json:"first_check_at,omitempty"`
 	DisconnectedAt time.Time `json:"disconnected_at,omitempty"`
+	LastDisconnectedAt time.Time `json:"last_disconnected_at,omitempty"`
 	LastDisconnectDuration time.Duration `json:"last_disconnect_duration,omitempty"`
 	DisconnectedFor time.Duration `json:"disconnected_for,omitempty"`
 	LastReconnectAt time.Time `json:"last_reconnect_at,omitempty"`
@@ -207,8 +208,9 @@ func (m *DayaSessionMonitor) Start(parent context.Context, session DayaSession) 
 	m.cancel = cancel
 	now := time.Now().UTC()
 	previous := m.state
-	m.state = DayaMonitorSnapshot{Running: true, FirstCheckAt: now, DisconnectedAt: previous.DisconnectedAt, LastDisconnectDuration: previous.LastDisconnectDuration}
+	m.state = DayaMonitorSnapshot{Running: true, FirstCheckAt: now, LastDisconnectedAt: previous.LastDisconnectedAt, LastDisconnectDuration: previous.LastDisconnectDuration}
 	if !previous.DisconnectedAt.IsZero() {
+		m.state.LastDisconnectedAt = previous.DisconnectedAt
 		m.state.LastDisconnectDuration = now.Sub(previous.DisconnectedAt)
 		m.state.LastReconnectAt = now
 	}
@@ -235,11 +237,9 @@ func (m *DayaSessionMonitor) Snapshot() DayaMonitorSnapshot {
 	defer m.mu.Unlock()
 	snapshot := m.state
 	if !snapshot.DisconnectedAt.IsZero() {
-		if snapshot.LastReconnectAt.After(snapshot.DisconnectedAt) {
-			snapshot.DisconnectedFor = snapshot.LastDisconnectDuration
-		} else {
-			snapshot.DisconnectedFor = time.Since(snapshot.DisconnectedAt)
-		}
+		snapshot.DisconnectedFor = time.Since(snapshot.DisconnectedAt)
+	} else if !snapshot.LastDisconnectedAt.IsZero() {
+		snapshot.DisconnectedFor = snapshot.LastDisconnectDuration
 	}
 	return snapshot
 }
