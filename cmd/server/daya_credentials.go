@@ -67,10 +67,10 @@ type DayaCredentialStore struct {
 }
 
 type DayaSettingsPageData struct {
-	Username   string
-	Saved      bool
-	HasSession bool
-	LoginAt    string
+	Username    string
+	Saved       bool
+	HasSession  bool
+	LoginAt     string
 	Monitor     DayaMonitorSnapshot
 	PreviewMode bool
 	Error       string
@@ -99,7 +99,7 @@ button{border:0;border-radius:8px;background:#175cd3;color:#fff;padding:10px 14p
 </style></head>
 <body><main class="wrap">
 <div class="head"><div><h1>اتصال به سامانه دایا</h1><div class="muted" style="margin-top:7px">مدیریت اطلاعات ورود برای آزمایش اتصال</div></div>
-<nav class="nav"><a href="/">سفارش‌های فعال</a><a href="/history">تاریخچه</a><a class="active" href="/settings">اتصال به دایا</a></nav></div>
+<nav class="nav"><a href="/dashboard">داشبورد مرکزی</a><a href="/">سفارش‌های فعال</a><a href="/history">تاریخچه</a><a class="active" href="/settings">اتصال به دایا</a></nav></div>
 {{if .Error}}<div class="msg err">{{.Error}}</div>{{end}}{{if .Notice}}<div class="msg">{{.Notice}}</div>{{end}}
 <section class="card">
 <h2>اطلاعات حساب دایا</h2>
@@ -657,14 +657,14 @@ func (s *DayaCredentialStore) RenderWithMonitorMode(w http.ResponseWriter, error
 		loginAtText = formatJalaliDateTime(loginAt.In(tehran()))
 	}
 	data := DayaSettingsPageData{
-		Username:   username,
-		Saved:      saved,
-		HasSession: hasSession,
-		LoginAt:    loginAtText,
+		Username:    username,
+		Saved:       saved,
+		HasSession:  hasSession,
+		LoginAt:     loginAtText,
 		Monitor:     monitor,
 		PreviewMode: previewMode,
 		Error:       errorMessage,
-		Notice:     notice,
+		Notice:      notice,
 	}
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.Header().Set("Cache-Control", "no-store")
