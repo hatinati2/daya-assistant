@@ -519,7 +519,7 @@ th{font-size:10px;color:#667085}.tablewrap{overflow:auto}.tablewrap tbody td{fon
 .symbol-suggestion{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;padding:10px 12px;border:0;border-radius:0;border-bottom:1px solid #eaecf0;background:#fff;color:#182230;text-align:right;cursor:pointer}
 .symbol-suggestion:last-child{border-bottom:0}.symbol-suggestion:hover,.symbol-suggestion:focus{background:#eff8ff;outline:none}
 .symbol-suggestion-main{display:flex;flex-direction:column;gap:4px;min-width:0}.symbol-suggestion-name{font-weight:bold}.symbol-suggestion-company{font-size:11px;color:#667085;white-space:normal}.symbol-suggestion-isin{direction:ltr;font-size:10px;color:#475467;white-space:nowrap}
-#account-balances-panel{min-width:0}#account-balances-panel .account-balances-head{display:flex;align-items:center;justify-content:space-between;gap:8px}#account-balances-panel .account-balances-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:8px}#account-balances-panel .account-balance-item{min-width:0;padding:7px 8px;border:1px solid #e4e7ec;border-radius:8px;background:#f8fafc;display:flex;flex-direction:column;gap:3px}#account-balances-panel .account-balance-item span{font-size:10px;color:#475467}#account-balances-panel .account-balance-item strong{font-size:16px;line-height:1.4;overflow-wrap:anywhere}#account-balances-panel .account-balance-item small{font-size:9px;color:#667085;min-height:12px}#account-balances-panel .account-balances-status,#account-balances-panel .account-balances-updated{font-size:9px;color:#667085;margin-top:4px}#account-balances-panel .account-balances-debug{margin-top:5px;font-size:9px;color:#667085}#account-balances-panel .account-balances-debug summary{cursor:pointer}#account-balances-fields{direction:ltr;text-align:left;white-space:pre-line;overflow-wrap:anywhere;padding-top:4px}@media(max-width:560px){#account-balances-panel .account-balances-grid{gap:5px}#account-balances-panel .account-balance-item{padding:6px 5px}#account-balances-panel .account-balance-item strong{font-size:13px}}
+#account-balances-panel{min-width:0}#account-balances-panel .account-balances-head{display:flex;align-items:center;justify-content:space-between;gap:8px}#account-balances-panel .account-balances-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin-top:8px}#account-balances-panel .account-balance-item{min-width:0;padding:7px 8px;border:1px solid #e4e7ec;border-radius:8px;background:#f8fafc;display:flex;flex-direction:column;gap:3px}#account-balances-panel .account-balance-item span{font-size:10px;color:#475467}#account-balances-panel .account-balance-item strong{font-size:16px;line-height:1.4;overflow-wrap:anywhere}#account-balances-panel .account-balance-item small{font-size:9px;color:#667085;min-height:12px}#account-balances-panel .account-balances-status,#account-balances-panel .account-balances-updated{font-size:9px;color:#667085;margin-top:4px}#account-balances-panel .account-balances-debug{margin-top:5px;font-size:9px;color:#667085}#account-balances-panel .account-balances-debug summary{cursor:pointer}#account-balances-fields{direction:ltr;text-align:left;white-space:pre-line;overflow-wrap:anywhere;padding-top:4px}@media(max-width:900px){#account-balances-panel .account-balances-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:560px){#account-balances-panel .account-balances-grid{gap:5px}#account-balances-panel .account-balance-item{padding:6px 5px}#account-balances-panel .account-balance-item strong{font-size:13px}}
 .price-range-panel{grid-column:1/-1;padding:8px 10px;border:1px solid #b2ddff;border-radius:9px;background:#f5faff;color:#1849a9;font-size:11px;line-height:1.9;overflow-wrap:anywhere}
 .datebox{position:relative}.datebar{display:flex;gap:8px}.datebar input{flex:1}.datebar button{white-space:nowrap}.calendar{margin-top:8px;padding:12px;border:1px solid #d0d5dd;border-radius:10px;background:#fff}.cal-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:12px}.cal-nav{background:#f2f4f7;color:#344054;padding:7px 10px}.cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;text-align:center}.cal-grid span{padding:7px 0;color:#667085;font-size:11px}.cal-day{background:#f8fafc;color:#182230;padding:9px 2px;border-radius:7px}.cal-day:hover,.cal-day.selected{background:#175cd3;color:#fff}.cal-day.today{outline:2px solid #84adff}.cal-empty{min-height:34px}
 .batch-planner{grid-column:1/-1;margin:4px 0;border:1px solid #d0d5dd;border-radius:9px;padding:7px 9px;background:#f8fafc}.batch-planner>summary{cursor:pointer;font-size:11px;font-weight:bold;color:#344054}.batch-planner-body{padding-top:7px}.batch-planner-note{font-size:10px;line-height:1.55;color:#667085;margin-bottom:6px}.batch-plan-controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 10px}.batch-plan-controls label{font-size:10px;margin:4px 0}.batch-plan-controls input{min-height:32px;padding:5px 8px;font-size:12px}.batch-plan-calc{margin-top:7px;font-size:11px;padding:7px 10px}.batch-plan-error{margin-top:6px;color:#b42318;font-size:10px}.batch-plan-result{margin-top:7px;padding:7px;background:#fff;border:1px solid #e4e7ec;border-radius:8px}.batch-plan-summary{display:flex;gap:10px;flex-wrap:wrap;font-size:10px}.batch-plan-table-wrap{max-height:140px;overflow:auto;margin-top:6px}.batch-plan-table{font-size:10px}.batch-plan-table th,.batch-plan-table td{padding:4px 6px}
@@ -540,8 +540,9 @@ th{font-size:10px;color:#667085}.tablewrap{overflow:auto}.tablewrap tbody td{fon
  </div>
  <div class="account-balances-grid">
   <div class="account-balance-item"><span>قدرت خرید</span><strong id="account-buying-power">…</strong><small id="account-buying-power-unit"></small></div>
-  <div class="account-balance-item"><span>موجودی نقدی</span><strong id="account-cash-balance">…</strong><small id="account-cash-balance-unit"></small></div>
-  <div class="account-balance-item"><span>قابل برداشت</span><strong id="account-withdrawable">…</strong><small id="account-withdrawable-unit"></small></div>
+  <div class="account-balance-item"><span>موجودی حساب</span><strong id="account-account-balance">…</strong><small id="account-account-balance-unit"></small></div>
+  <div class="account-balance-item"><span>قابل برداشت پس از یک روز کاری (T+1)</span><strong id="account-t-plus-1">…</strong><small id="account-t-plus-1-unit"></small></div>
+  <div class="account-balance-item"><span>قابل برداشت پس از دو روز کاری (T+2)</span><strong id="account-t-plus-2">…</strong><small id="account-t-plus-2-unit"></small></div>
  </div>
  <div id="account-balances-status" class="account-balances-status" aria-live="polite">در حال دریافت…</div>
  <div id="account-balances-updated" class="account-balances-updated">آخرین دریافت: —</div>
@@ -1304,8 +1305,9 @@ th{font-size:10px;color:#667085}.tablewrap{overflow:auto}.tablewrap tbody td{fon
       const report = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(report.error || "دریافت موجودی ناموفق بود (HTTP " + response.status + ")");
       showMetric("buying-power", report.buying_power);
-      showMetric("cash-balance", report.cash_balance);
-      showMetric("withdrawable", report.withdrawable);
+      showMetric("account-balance", report.account_balance);
+      showMetric("t-plus-1", report.t_plus_1_amount);
+      showMetric("t-plus-2", report.t_plus_2_amount);
       const diagnosticLines = (report.endpoints || []).map(item => {
         const endpointFields = [...new Set(item.fields || [])].sort();
         const schema = [...new Set(item.schema || [])].sort().slice(0, 60);
@@ -1319,15 +1321,15 @@ th{font-size:10px;color:#667085}.tablewrap{overflow:auto}.tablewrap tbody td{fon
       if (fieldsBox) fieldsBox.textContent = diagnosticLines.length
         ? diagnosticLines.join("\n")
         : "اطلاعات تشخیصی در دسترس نیست.";
-      const missingMetrics = [report.buying_power, report.cash_balance, report.withdrawable]
+      const missingMetrics = [report.buying_power, report.account_balance, report.t_plus_1_amount, report.t_plus_2_amount]
         .filter(metric => !metric || metric.status !== "ok").length;
       if (report.needs_login) {
         status.textContent = "نشست کارگزاری معتبر نیست؛ از بخش اتصال به دایا دوباره وارد شو.";
       } else if (missingMetrics > 0) {
-        status.textContent = "داده از کارگزاری دریافت شد؛ " + missingMetrics +
-          " مقدار مالی هنوز قابل شناسایی نیست.";
+        status.textContent = "اطلاعات از کارگزاری دریافت شد؛ " + missingMetrics +
+          " شاخص از ۴ شاخص مالی هنوز قابل شناسایی نیست.";
       } else {
-        status.textContent = "هر سه مقدار مالی از کارگزاری دریافت شد.";
+        status.textContent = "هر چهار شاخص مالی از کارگزاری دریافت شد.";
       }
       const when = report.retrieved_at ? new Date(report.retrieved_at) : null;
       updated.textContent = "آخرین دریافت: " + (when && !Number.isNaN(when.getTime())
@@ -1335,7 +1337,7 @@ th{font-size:10px;color:#667085}.tablewrap{overflow:auto}.tablewrap tbody td{fon
         : "نامشخص");
     } catch (error) {
       status.textContent = error.message || "خطا در دریافت اطلاعات مالی.";
-      for (const name of ["buying-power", "cash-balance", "withdrawable"]) {
+      for (const name of ["buying-power", "account-balance", "t-plus-1", "t-plus-2"]) {
         const amount = document.getElementById("account-" + name);
         const unit = document.getElementById("account-" + name + "-unit");
         if (amount) amount.textContent = "دریافت نشد";
