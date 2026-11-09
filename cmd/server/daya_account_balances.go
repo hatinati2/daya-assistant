@@ -33,15 +33,14 @@ type DayaAccountBalanceEndpoint struct {
 }
 
 type DayaAccountBalanceReport struct {
-	RetrievedAt    time.Time                    `json:"retrieved_at"`
-	NeedsLogin     bool                         `json:"needs_login"`
-	BuyingPower    DayaAccountBalanceMetric     `json:"buying_power"`
-	AccountBalance DayaAccountBalanceMetric     `json:"account_balance"`
-	CashBalance    DayaAccountBalanceMetric     `json:"cash_balance"`
-	TPlus1Amount   DayaAccountBalanceMetric     `json:"t_plus_1_amount"`
-	TPlus2Amount   DayaAccountBalanceMetric     `json:"t_plus_2_amount"`
-	Withdrawable   DayaAccountBalanceMetric     `json:"withdrawable"`
-	Endpoints      []DayaAccountBalanceEndpoint `json:"endpoints"`
+	RetrievedAt        time.Time                    `json:"retrieved_at"`
+	NeedsLogin         bool                         `json:"needs_login"`
+	AccountBalance     DayaAccountBalanceMetric     `json:"account_balance"`
+	Credit             DayaAccountBalanceMetric     `json:"credit"`
+	InProgressCashOut  DayaAccountBalanceMetric     `json:"in_progress_cash_out"`
+	TPlus1Amount       DayaAccountBalanceMetric     `json:"t_plus_1_amount"`
+	TPlus2Amount       DayaAccountBalanceMetric     `json:"t_plus_2_amount"`
+	Endpoints          []DayaAccountBalanceEndpoint `json:"endpoints"`
 }
 
 type dayaBalanceEndpointData struct {
@@ -458,9 +457,9 @@ func fetchDayaFinancialEndpoint(ctx context.Context, client *http.Client, endpoi
 func ReadDayaAccountBalances(ctx context.Context, credentials *DayaCredentialStore) DayaAccountBalanceReport {
 	missing := DayaAccountBalanceMetric{Status: "not_found", Message: "مبلغ هنوز دریافت نشده است."}
 	report := DayaAccountBalanceReport{
-		RetrievedAt: time.Now().UTC(), BuyingPower: missing,
-		AccountBalance: missing, CashBalance: missing,
-		TPlus1Amount: missing, TPlus2Amount: missing, Withdrawable: missing,
+		RetrievedAt: time.Now().UTC(),
+		AccountBalance: missing, Credit: missing, InProgressCashOut: missing,
+		TPlus1Amount: missing, TPlus2Amount: missing,
 		Endpoints: make([]DayaAccountBalanceEndpoint, 0, 2),
 	}
 	if credentials == nil {
@@ -504,24 +503,21 @@ func ReadDayaAccountBalances(ctx context.Context, credentials *DayaCredentialSto
 		report.NeedsLogin = true
 	}
 
-	report.BuyingPower = dayaSelectBalanceMetric(&buying, &portfolio,
-		dayaMakeAliasSet("buyingPower", "availableBuyingPower", "cashBuyingPower", "buyingPowerAmount", "buyingPowerAvailable", "availableToPurchase", "buyingPowerValue"),
-		"قدرت خرید")
 	report.AccountBalance = dayaSelectBalanceMetric(&buying, &portfolio,
 		dayaMakeAliasSet("accountBalance"),
 		"موجودی حساب")
-	report.CashBalance = dayaSelectBalanceMetric(&portfolio, &buying,
-		dayaMakeAliasSet("cashBalance", "totalCashBalance", "accountCashBalance", "cashAmount", "cashBalanceAmount", "totalCash", "cash"),
-		"موجودی نقدی")
+	report.Credit = dayaSelectBalanceMetric(&buying, &portfolio,
+		dayaMakeAliasSet("credit"),
+		"اعتبار")
+	report.InProgressCashOut = dayaSelectBalanceMetric(&buying, &portfolio,
+		dayaMakeAliasSet("inProgressCashOut"),
+		"برداشت در حال انجام")
 	report.TPlus1Amount = dayaSelectBalanceMetric(&buying, &portfolio,
 		dayaMakeAliasSet("tPlus1Amount"),
 		"قابل برداشت پس از یک روز کاری (T+1)")
 	report.TPlus2Amount = dayaSelectBalanceMetric(&buying, &portfolio,
 		dayaMakeAliasSet("tPlus2Amount"),
 		"قابل برداشت پس از دو روز کاری (T+2)")
-	report.Withdrawable = dayaSelectBalanceMetric(&portfolio, &buying,
-		dayaMakeAliasSet("withdrawableCash", "cashWithdrawable", "withdrawableBalance", "cashAvailableToWithdraw", "availableToWithdraw", "withdrawableAmount", "availableWithdrawalAmount", "withdrawalAvailableAmount"),
-		"موجودی قابل برداشت")
 	return report
 }
 
