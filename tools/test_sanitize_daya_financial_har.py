@@ -64,3 +64,27 @@ class FinancialHarSanitizerTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+    def test_financial_numeric_fingerprints_hide_values(self):
+        from decimal import Decimal
+        from sanitize_daya_financial_har import collect_numeric_fingerprints
+
+        payload = {
+            "credit": 0,
+            "inProgressCashOut": "۶٬۰۰۰٬۰۰۰",
+            "tPlus1Amount": 1200000,
+            "number": 1,
+            "accountNumber": "6000000",
+        }
+        fingerprints = []
+        collect_numeric_fingerprints(payload, "", fingerprints, Decimal("6000000"))
+        by_path = {item["path"]: item for item in fingerprints}
+        self.assertEqual(by_path["credit"]["sign"], "zero")
+        self.assertEqual(by_path["credit"]["matches_reference"], False)
+        self.assertEqual(by_path["inProgressCashOut"]["matches_reference"], True)
+        self.assertNotIn("number", by_path)
+        self.assertNotIn("accountNumber", by_path)
+        serialized = repr(fingerprints)
+        for forbidden in ("6000000", "۶٬۰۰۰٬۰۰۰", "1200000"):
+            self.assertNotIn(forbidden, serialized)
