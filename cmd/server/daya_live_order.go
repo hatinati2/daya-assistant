@@ -288,11 +288,17 @@ var dayaLiveOrderTestNonceStore = struct {
 
 func registerDayaLiveOrderTestRoutes(mux *http.ServeMux, previewMode bool, credentials *DayaCredentialStore, store *Store, symbolClient TSESymbolClient) {
 	mux.HandleFunc("GET /api/symbols/price-range", func(w http.ResponseWriter, r *http.Request) {
-		if !previewMode { http.NotFound(w, r); return }
+		if !previewMode {
+			http.NotFound(w, r)
+			return
+		}
 		ctx, cancel := context.WithTimeout(r.Context(), 4*time.Second)
 		defer cancel()
 		priceRange, err := symbolClient.FetchPriceRange(ctx, r.URL.Query().Get("isin"))
-		if err != nil { http.Error(w, err.Error(), http.StatusBadGateway); return }
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadGateway)
+			return
+		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.Header().Set("Cache-Control", "no-store")
 		_ = json.NewEncoder(w).Encode(priceRange)
