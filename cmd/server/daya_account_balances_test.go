@@ -81,3 +81,41 @@ func TestDayaCollectUnit(t *testing.T) {
 		t.Fatalf("unit = %q, want ریال", got)
 	}
 }
+
+
+func TestDayaBuyingPowerRecognizesCreditField(t *testing.T) {
+	buying := &dayaBalanceEndpointData{
+		path: "/financials/buying-power",
+		status: 200,
+		body: map[string]any{
+			"credit": json.Number("125000000"),
+			"inProgressCashOut": json.Number("5000000"),
+			"tPlus1Amount": json.Number("7000000"),
+			"tPlus2Amount": json.Number("9000000"),
+		},
+	}
+	got := dayaSelectBalanceMetric(
+		buying, nil,
+		dayaMakeAliasSet("buyingPower", "credit"),
+		"قدرت خرید",
+	)
+	if got.Status != "ok" || got.Value != "125000000" || got.Field != "credit" {
+		t.Fatalf("credit should be recognized as buying power: %#v", got)
+	}
+
+	// Do not reinterpret in-progress cash-out or settlement fields as
+	// cash balance or withdrawable funds without verified semantics.
+	cash := dayaSelectBalanceMetric(
+		buying, nil,
+		dayaMakeAliasSet("cashBalance", "totalCashBalance"),
+		"موجودی نقدی",
+	)
+	withdrawable := dayaSelectBalanceMetric(
+		buying, nil,
+		dayaMakeAliasSet("withdrawableCash", "cashAvailableToWithdraw", "availableToWithdraw"),
+		"موجودی قابل برداشت",
+	)
+	if cash.Status != "not_found" || withdrawable.Status != "not_found" {
+		t.Fatalf("unverified fields must not be mapped: cash=%#v withdrawable=%#v", cash, withdrawable)
+	}
+}
