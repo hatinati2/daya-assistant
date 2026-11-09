@@ -287,7 +287,9 @@ func dayaBalanceEndpointReport(endpoint dayaBalanceEndpointData) DayaAccountBala
 	if endpoint.body != nil {
 		fields := make(map[string]struct{})
 		dayaCollectFinancialFieldNames(endpoint.body, fields, 0)
-		for field := range fields { report.Fields = append(report.Fields, field) }
+		for field := range fields {
+			report.Fields = append(report.Fields, field)
+		}
 		sort.Strings(report.Fields)
 	}
 	return report
