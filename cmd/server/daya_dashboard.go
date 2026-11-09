@@ -106,7 +106,6 @@ main,.wrap{width:calc(100% - 32px);max-width:1400px}
  <a href="/">مدیریت سفارش‌ها</a>
  <a href="/history">تاریخچه</a>
  <a href="/settings">اتصال و نشست دایا</a>
- <a href="/daya-api-test">تست محلی API</a>
  <a href="/daya-online-test">تست آنلاین خواندنی</a>
  <a href="/daya-latency">کالیبراسیون تأخیر</a>
  <a class="danger-link" href="/daya-online-test/one">ارسال یک‌باره واقعی</a>
@@ -149,11 +148,6 @@ main,.wrap{width:calc(100% - 32px);max-width:1400px}
   <h2>کالیبراسیون ارتباط</h2>
   <p>مقایسه RTT درخواست بدون نشست با RTT درخواست احراز هویت‌شده با نشست ذخیره‌شده؛ تفکیک پاسخ HTTP از پاسخ معتبر ۲۰۰.</p>
   <a href="/daya-latency">باز کردن کالیبراتور دوحالته ←</a>
- </section>
- <section class="card">
-  <h2>آزمایش محلی API</h2>
-  <p>ساخت و بررسی Payload در برابر سرور ساختگی روی همین ماشین؛ بدون اتصال به کارگزاری و بدون استفاده از نشست.</p>
-  <a href="/daya-api-test">اجرای تست ساختگی محلی ←</a>
  </section>
  <section class="card danger">
   <h2>ارسال دستی یک سفارش واقعی</h2>
