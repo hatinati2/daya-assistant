@@ -107,7 +107,7 @@ main,.wrap{width:calc(100% - 32px);max-width:1400px}
 <input id="symbol-search-input" type="search" placeholder="مثلاً خودرو، فولاد، ایران‌خودرو..." autocomplete="off" aria-describedby="symbol-search-help" required>
 <div id="symbol-search-help" class="muted">نام یا بخشی از نماد را بنویس و یکی از نتایج را انتخاب کن؛ ISIN به‌صورت خودکار ثبت می‌شود.</div>
 <div id="symbol-search-results" class="symbol-results" role="listbox" aria-label="نتایج جست‌وجوی نماد"></div>
-<input type="hidden" id="selected-isin" name="isin" required>
+<input type="hidden" id="selected-isin" name="isin">
 <input type="hidden" id="selected-symbol" name="symbol">
 <div id="symbol-selection" class="muted" aria-live="polite"></div>
 </div>
