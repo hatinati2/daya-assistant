@@ -92,7 +92,9 @@ func TestDayaCredentialStoreLogoutKeepsSavedCredentials(t *testing.T) {
 		t.Fatal("session still present after logout")
 	}
 	username, saved, err := store.Status()
-	if err != nil { t.Fatal(err) }
+	if err != nil {
+		t.Fatal(err)
+	}
 	if !saved || username != "test-user" {
 		t.Fatalf("saved credentials were not preserved: username=%q saved=%v", username, saved)
 	}
