@@ -124,6 +124,9 @@ main,.wrap{width:calc(100% - 32px);max-width:1400px}
   <div class="stat"><div class="stat-label">تعداد بررسی‌ها</div><div class="stat-value" id="monitor-checks">{{.Summary.Monitor.Checks}}</div></div>
   <div class="stat"><div class="stat-label">آخرین بررسی</div><div class="stat-value" id="monitor-last-check" style="font-size:14px">—</div></div>
   <div class="stat"><div class="stat-label">بررسی بعدی</div><div class="stat-value" id="monitor-next-check" style="font-size:14px">—</div></div>
+  <div class="stat"><div class="stat-label">زمان ورود / اولین تست</div><div class="stat-value" id="monitor-first-check" style="font-size:14px">—</div></div>
+  <div class="stat"><div class="stat-label">آخرین زمان قطع تأییدشده</div><div class="stat-value" id="monitor-disconnected-at" style="font-size:14px">—</div></div>
+  <div class="stat"><div class="stat-label">مدت قطعی</div><div class="stat-value" id="monitor-disconnected-for" style="font-size:14px">—</div></div>
  </div>
  <div class="foot" id="monitor-last-error">جزئیات خطا: —</div>
  <div class="foot" id="session-expiry">انقضای ثبت‌شده نشست: {{if .Summary.SessionExpiresAt}}{{.Summary.SessionExpiresAt}}{{else}}نامشخص / نشست موجود نیست{{end}}</div>
@@ -169,8 +172,9 @@ main,.wrap{width:calc(100% - 32px);max-width:1400px}
 </div>
 <script>
 (async()=>{
- const ids={scheduled:document.getElementById("scheduled-orders"),ready:document.getElementById("ready-orders"),total:document.getElementById("total-orders"),session:document.getElementById("session-state"),monitor:document.getElementById("session-monitor-state"),http:document.getElementById("monitor-http"),checks:document.getElementById("monitor-checks"),lastCheck:document.getElementById("monitor-last-check"),nextCheck:document.getElementById("monitor-next-check"),lastError:document.getElementById("monitor-last-error"),expiry:document.getElementById("session-expiry"),clock:document.getElementById("current-time")};
+ const ids={scheduled:document.getElementById("scheduled-orders"),ready:document.getElementById("ready-orders"),total:document.getElementById("total-orders"),session:document.getElementById("session-state"),monitor:document.getElementById("session-monitor-state"),http:document.getElementById("monitor-http"),checks:document.getElementById("monitor-checks"),lastCheck:document.getElementById("monitor-last-check"),nextCheck:document.getElementById("monitor-next-check"),firstCheck:document.getElementById("monitor-first-check"),disconnectedAt:document.getElementById("monitor-disconnected-at"),disconnectedFor:document.getElementById("monitor-disconnected-for"),lastError:document.getElementById("monitor-last-error"),expiry:document.getElementById("session-expiry"),clock:document.getElementById("current-time")};
  function localTime(value){if(!value)return "—";const d=new Date(value);return Number.isNaN(d.getTime())?"—":new Intl.DateTimeFormat("fa-IR",{dateStyle:"short",timeStyle:"medium",timeZone:"Asia/Tehran"}).format(d)}
+ function duration(value){const seconds=Math.max(0,Math.floor(Number(value||0)/1e9));if(!seconds)return "۰ ثانیه";const h=Math.floor(seconds/3600),m=Math.floor((seconds%3600)/60),s=seconds%60;return [h? h+" ساعت":"",m?m+" دقیقه":"",s?s+" ثانیه":""].filter(Boolean).join(" و ")}
  async function refreshSessionMonitor(){
   try{
    const r=await fetch("/api/daya/session-monitor",{cache:"no-store",headers:{"Accept":"application/json"}});
