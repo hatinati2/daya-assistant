@@ -1205,7 +1205,7 @@ func main() {
 	previewMode := strings.EqualFold(env("DAYA_PREVIEW_MODE", "false"), "true")
 	registerDayaLocalOrderTestRoutes(mux, previewMode)
 	registerDayaOnlineTestRoutes(mux, previewMode, credentials)
-	registerDayaLiveOrderTestRoutes(mux, previewMode, credentials, store)
+	registerDayaLiveOrderTestRoutes(mux, previewMode, credentials, store, TSESymbolClient{})
 	registerDayaOrderReconciliationRoute(mux, store)
 	registerDayaDashboardRoutes(mux, previewMode, store, credentials, sessionMonitor)
 	registerDayaLatencyRoutes(mux, previewMode, credentials, sessionMonitor)
