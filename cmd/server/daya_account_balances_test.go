@@ -82,16 +82,15 @@ func TestDayaCollectUnit(t *testing.T) {
 	}
 }
 
-
 func TestDayaBuyingPowerRecognizesCreditField(t *testing.T) {
 	buying := &dayaBalanceEndpointData{
-		path: "/financials/buying-power",
+		path:   "/financials/buying-power",
 		status: 200,
 		body: map[string]any{
-			"credit": json.Number("125000000"),
+			"credit":            json.Number("125000000"),
 			"inProgressCashOut": json.Number("5000000"),
-			"tPlus1Amount": json.Number("7000000"),
-			"tPlus2Amount": json.Number("9000000"),
+			"tPlus1Amount":      json.Number("7000000"),
+			"tPlus2Amount":      json.Number("9000000"),
 		},
 	}
 	got := dayaSelectBalanceMetric(
