@@ -96,12 +96,52 @@ button{border:0;border-radius:8px;background:#175cd3;color:#fff;padding:10px 14p
 .err{background:#fef3f2;color:#b42318}.note{padding:12px;border-radius:9px;margin:12px 0;line-height:1.9;background:#fffaeb;border:1px solid #fedf89;color:#93370d}
 .tag{display:inline-block;padding:6px 10px;border-radius:16px;background:#ecfdf3;color:#067647;font-size:12px}
 .foot{font-size:12px;line-height:1.9;margin-top:14px}
+
+/* Keep all Preview 03 pages on the same visual system as the main workspace */
+body{background:#f4f6fa;color:#182230;font:12.5px Tahoma,Arial}
+main,.wrap{max-width:1400px;margin:18px auto;padding:0 16px}
+.page-header,.head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.page-header h1,.head h1{font-size:19px;margin:0}
+.page-subtitle{color:#667085;font-size:12px;line-height:1.8;margin-top:6px}
+.page-tag{display:inline-block;border-radius:18px;padding:7px 10px;background:#eef4ff;color:#1849a9;font-size:11px}
+.page-content{max-width:1080px;margin:0 auto}
+.nav{display:flex;gap:7px;flex-wrap:wrap;margin:0 0 12px}
+.nav a{display:inline-block;padding:7px 10px;border:1px solid #d0d5dd;border-radius:9px;color:#344054;text-decoration:none;background:#fff;font-size:12px}
+.nav a.active{background:#175cd3;color:#fff;border-color:#175cd3}
+.nav a.danger-link{color:#b42318;border-color:#fecdca}
+.card,.page-card{background:#fff;border:1px solid #e4e7ec;border-radius:13px;padding:18px;margin:12px 0;min-width:0}
+.page-card{max-width:1080px;margin-left:auto;margin-right:auto}
+h1{font-size:19px;margin:0 0 8px}h2{font-size:14px;margin:0 0 10px}
+.muted,.foot{color:#667085;line-height:1.8}
+label{display:block;margin:10px 0 5px;font-weight:bold}
+input,select,textarea{width:100%;padding:8px 10px;border:1px solid #d0d5dd;border-radius:8px;background:#fff;color:#182230;font:inherit;min-height:36px}
+input:focus,select:focus,textarea:focus{outline:2px solid #b2ddff;outline-offset:1px;border-color:#84caff}
+button{border:0;border-radius:8px;background:#175cd3;color:#fff;padding:8px 12px;font:inherit;cursor:pointer}
+button:disabled{opacity:.5;cursor:not-allowed}
+.warning,.note{padding:11px 13px;border:1px solid #fedf89;border-radius:9px;background:#fffaeb;color:#93370d;line-height:1.8;margin:10px 0}
+.error,.err{padding:11px 13px;border-radius:9px;background:#fef3f2;color:#b42318;line-height:1.8;margin:10px 0}
+.success,.result,.msg{padding:11px 13px;border-radius:9px;background:#ecfdf3;color:#05603a;line-height:1.8;margin:10px 0}
+table{border-collapse:collapse;width:100%;margin-top:12px}
+th,td{padding:8px 9px;border-bottom:1px solid #eaecf0;text-align:right}
+th{font-size:11px;color:#667085}
+pre{border-radius:10px}
+@media(max-width:640px){main,.wrap{padding-left:12px;padding-right:12px}.page-card{padding:14px}.nav{gap:6px}.nav a{padding:7px 8px;font-size:11px}}
+
 </style></head>
 <body><main class="wrap">
 <div class="head"><div><h1>اتصال به سامانه دایا</h1><div class="muted" style="margin-top:7px">مدیریت اطلاعات ورود برای آزمایش اتصال</div></div>
-<nav class="nav"><a href="/dashboard">داشبورد مرکزی</a><a href="/">سفارش‌های فعال</a><a href="/history">تاریخچه</a><a class="active" href="/settings">اتصال به دایا</a></nav></div>
+<nav class="nav page-nav">
+<a href="/dashboard">داشبورد مرکزی</a>
+<a href="/">سفارش‌ها</a>
+<a href="/history">تاریخچه</a>
+<a href="/settings" class="active">اتصال و نشست</a>
+<a href="/daya-api-test">تست محلی API</a>
+<a href="/daya-online-test">تست آنلاین</a>
+<a href="/daya-latency">کالیبراسیون تأخیر</a>
+<a class="danger-link" href="/daya-online-test/one">ارسال یک‌باره واقعی</a>
+</nav></div>
 {{if .Error}}<div class="msg err">{{.Error}}</div>{{end}}{{if .Notice}}<div class="msg">{{.Notice}}</div>{{end}}
-<section class="card">
+<section class="card page-card">
 <h2>اطلاعات حساب دایا</h2>
 {{if .Saved}}<p><span class="tag">اطلاعات ورود ذخیره شده</span></p>{{else}}<p class="muted">هنوز اطلاعات ورود دایا ثبت نشده است.</p>{{end}}
 <form method="post" action="/settings/daya-credentials" autocomplete="off">
