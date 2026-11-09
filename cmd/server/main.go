@@ -559,9 +559,19 @@ th{font-size:10px;color:#667085}.tablewrap{overflow:auto}.tablewrap tbody td{fon
 .preview-compact .batch-plan-result{margin-top:5px;padding:5px}
 .preview-compact th,.preview-compact td{padding:6px 5px}
 .preview-compact .tablewrap tbody td{font-size:10.5px}
-.preview-compact #account-balances-panel .account-balances-grid{gap:5px;margin-top:6px}
-.preview-compact #account-balances-panel .account-balance-item{padding:5px 6px;gap:2px}
-.preview-compact #account-balances-panel .account-balance-item strong{font-size:14px}
+.preview-compact #account-balances-panel{padding:6px 8px!important;margin:4px 0 6px!important;border-radius:8px}
+.preview-compact #account-balances-panel .account-balances-head{gap:5px}
+.preview-compact #account-balances-panel .account-balances-head h2{font-size:12px!important;margin:0}
+.preview-compact #account-balances-panel #refresh-account-balances{padding:4px 7px!important;font-size:10px!important}
+.preview-compact #account-balances-panel .account-balances-grid{gap:4px;margin-top:4px}
+.preview-compact #account-balances-panel .account-balance-item{padding:3px 5px;gap:1px;border-radius:7px}
+.preview-compact #account-balances-panel .account-balance-item span{font-size:9px;line-height:1.25}
+.preview-compact #account-balances-panel .account-balance-item strong{font-size:12px;line-height:1.25}
+.preview-compact #account-balances-panel .account-balance-item small{font-size:8px;line-height:1.1;min-height:9px}
+.preview-compact #account-balances-panel .account-balances-status,.preview-compact #account-balances-panel .account-balances-updated{font-size:8px;line-height:1.25;margin-top:2px}
+.preview-compact #account-balances-panel .account-balances-debug{margin-top:2px;font-size:8px}
+.preview-compact #account-balances-panel .account-balances-debug summary{font-size:8px}
+.preview-compact #account-balances-panel #account-balances-fields{font-size:8px;padding-top:2px}
 @media(min-width:901px){.preview-compact .grid{grid-template-columns:minmax(430px,470px) minmax(0,1fr)}}
 @media(max-height:900px) and (min-width:901px){
  .preview-compact .wrap{margin:6px auto}
@@ -581,10 +591,10 @@ th{font-size:10px;color:#667085}.tablewrap{overflow:auto}.tablewrap tbody td{fon
 <div class="note"><b>دو مسیر اجرا:</b> مسیر «بدون API» سفارش را برای ثبت دستی آماده می‌کند. مسیر «با API» تا زمان تأیید endpoint و ساختار درخواست سفارش دایا غیرفعال است؛ مدل سفارش و زمان‌بندی آماده‌اند.</div>
 {{if .Error}}<div class="msg err">{{.Error}}</div>{{end}}{{if .Notice}}<div class="msg">{{.Notice}}</div>{{end}}
 {{if and .PreviewMode (not .History)}}
-<section class="card" id="account-balances-panel" style="margin:6px 0 10px;padding:9px 11px">
+<section class="card" id="account-balances-panel" style="margin:4px 0 6px;padding:6px 8px">
  <div class="account-balances-head">
-  <h2 style="margin:0;font-size:14px">موجودی حساب</h2>
-  <button type="button" id="refresh-account-balances" style="padding:6px 9px;font-size:11px">تازه‌سازی</button>
+  <h2 style="margin:0;font-size:12px">موجودی حساب</h2>
+  <button type="button" id="refresh-account-balances" style="padding:4px 7px;font-size:10px">تازه‌سازی</button>
  </div>
  <div class="account-balances-grid">
   <div class="account-balance-item"><span>موجودی حساب</span><strong id="account-account-balance">…</strong><small id="account-account-balance-unit"></small></div>
