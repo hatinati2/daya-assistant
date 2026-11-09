@@ -129,6 +129,11 @@ pre{border-radius:10px}
 
 
 /* Wider content like the main order workspace; denser forms on desktop */
+.credentials-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 16px}
+.credentials-grid>div{min-width:0}
+.credentials-grid label{margin-top:4px}
+@media(max-width:600px){.credentials-grid{grid-template-columns:1fr}}
+
 main,.wrap{width:calc(100% - 32px);max-width:1400px}
 .page-content{width:100%;max-width:1360px;margin:0 auto}
 .page-card{width:100%;max-width:1360px;margin:12px auto;padding:20px}
@@ -161,10 +166,12 @@ main,.wrap{width:calc(100% - 32px);max-width:1400px}
 <h2>اطلاعات حساب دایا</h2>
 {{if .Saved}}<p><span class="tag">اطلاعات ورود ذخیره شده</span></p>{{else}}<p class="muted">هنوز اطلاعات ورود دایا ثبت نشده است.</p>{{end}}
 <form method="post" action="/settings/daya-credentials" autocomplete="off">
-<label for="daya-username">نام کاربری</label>
-<input id="daya-username" name="username" type="text" maxlength="200" value="{{.Username}}" autocomplete="username" required>
-<label for="daya-password">رمز عبور</label>
-<input id="daya-password" name="password" type="password" maxlength="1024" autocomplete="new-password" placeholder="{{if .Saved}}برای حفظ رمز قبلی خالی بگذارید؛ برای تغییر، رمز جدید را وارد کنید{{else}}رمز عبور حساب دایا{{end}}" {{if not .Saved}}required{{end}}>
+<div class="credentials-grid">
+<div><label for="daya-username">نام کاربری</label>
+<input id="daya-username" name="username" type="text" maxlength="200" value="{{.Username}}" autocomplete="username" required></div>
+<div><label for="daya-password">رمز عبور</label>
+<input id="daya-password" name="password" type="password" maxlength="1024" autocomplete="new-password" placeholder="{{if .Saved}}برای حفظ رمز قبلی خالی بگذارید؛ برای تغییر، رمز جدید را وارد کنید{{else}}رمز عبور حساب دایا{{end}}" {{if not .Saved}}required{{end}}></div>
+</div>
 <div class="row"><button type="submit">ذخیره اطلاعات ورود</button></div>
 </form>
 {{if .Saved}}
