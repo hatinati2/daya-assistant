@@ -131,6 +131,9 @@ func registerDayaLatencyRoutes(mux *http.ServeMux, previewMode bool, credentials
 		if credentials != nil {
 			session, _, err := credentials.LoadAccessSession()
 			hasSession = err == nil && session.Token != "" && (session.ExpiresAt.IsZero() || session.ExpiresAt.After(time.Now()))
+			if monitor != nil && monitor.Snapshot().NeedsLogin {
+				hasSession = false
+			}
 		}
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		w.Header().Set("Cache-Control", "no-store")
@@ -171,6 +174,10 @@ func registerDayaLatencyRoutes(mux *http.ServeMux, previewMode bool, credentials
 		}
 		if credentials == nil {
 			writeDayaLatencyError(w, http.StatusServiceUnavailable, "مخزن نشست دایا در دسترس نیست")
+			return
+		}
+		if monitor != nil && monitor.Snapshot().NeedsLogin {
+			writeDayaLatencyError(w, http.StatusConflict, "پایش دایا نیاز به ورود مجدد را ثبت کرده است؛ ابتدا با CAPTCHA دوباره وارد شو")
 			return
 		}
 		count, err := parseDayaLatencyCount(r.URL.Query().Get("count"))
@@ -294,7 +301,19 @@ func probeDayaLatency(parent context.Context) dayaLatencySample {
 		return sample
 	}
 	sample.HTTPStatus = resp.StatusCode
+	body, readErr := io.ReadAll(io.LimitReader(resp.Body, (1<<20)+1))
 	_ = resp.Body.Close()
+	if readErr != nil || len(body) > 1<<20 {
+		sample.Error = "خواندن پاسخ خواندنی کامل نشد یا پاسخ بیش از حد مجاز بود"
+		return sample
+	}
+	if resp.StatusCode == http.StatusOK {
+		if _, validationErr := summarizeDayaOrderListResponse(resp.StatusCode, body); validationErr == nil {
+			sample.ResponseValid = true
+		} else {
+			sample.Error = "پاسخ HTTP 200 دریافت شد اما ساختار JSON سفارش‌ها معتبر نبود"
+		}
+	}
 	return sample
 }
 
