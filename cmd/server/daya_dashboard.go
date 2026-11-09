@@ -118,17 +118,17 @@ main,.wrap{width:calc(100% - 32px);max-width:1400px}
 </div>
 <section class="card" id="session-monitor-panel">
  <div class="head"><div><h2>پایش نشست دایا</h2><div class="muted">وضعیت زنده مانیتور نشست؛ فقط خواندن اطلاعات داخلی و بدون ارسال درخواست معاملاتی</div></div><button type="button" id="refresh-session-monitor">به‌روزرسانی وضعیت</button></div>
- <div class="status" id="session-monitor-state">{{if .Summary.Monitor.Running}}پایش نشست فعال است.{{else if .Summary.Monitor.NeedsLogin}}نشست معتبر نیست؛ ورود دستی با CAPTCHA لازم است.{{else}}پایش نشست در حال حاضر فعال نیست.{{end}}</div>
+ <div class="status" id="session-monitor-state">{{if .Summary.Monitor.Running}}پایش روشن است؛ هنوز نتیجه‌ای ثبت نشده.{{else if .Summary.Monitor.NeedsLogin}}ورود مجدد به دایا لازم است.{{else}}پایش خاموش است.{{end}}</div><div class="muted">این بخش فقط وضعیت ورود را می‌سنجد و هیچ سفارشی ثبت یا ویرایش نمی‌کند.</div>
  <div class="grid">
-  <div class="stat"><div class="stat-label">آخرین کد HTTP</div><div class="stat-value" id="monitor-http">{{if .Summary.Monitor.LastStatus}}{{.Summary.Monitor.LastStatus}}{{else}}—{{end}}</div></div>
-  <div class="stat"><div class="stat-label">تعداد بررسی‌ها</div><div class="stat-value" id="monitor-checks">{{.Summary.Monitor.Checks}}</div></div>
+  <div class="stat"><div class="stat-label">نتیجه آخرین بررسی</div><div class="stat-value" id="monitor-http">{{if .Summary.Monitor.LastStatus}}{{.Summary.Monitor.LastStatus}}{{else}}—{{end}}</div></div>
+  <div class="stat"><div class="stat-label">تعداد دفعات بررسی</div><div class="stat-value" id="monitor-checks">{{.Summary.Monitor.Checks}}</div></div>
   <div class="stat"><div class="stat-label">آخرین بررسی</div><div class="stat-value" id="monitor-last-check" style="font-size:14px">—</div></div>
   <div class="stat"><div class="stat-label">بررسی بعدی</div><div class="stat-value" id="monitor-next-check" style="font-size:14px">—</div></div>
-  <div class="stat"><div class="stat-label">زمان ورود / اولین تست</div><div class="stat-value" id="monitor-first-check" style="font-size:14px">—</div></div>
-  <div class="stat"><div class="stat-label">آخرین زمان قطع تأییدشده</div><div class="stat-value" id="monitor-disconnected-at" style="font-size:14px">—</div></div>
-  <div class="stat"><div class="stat-label">مدت قطعی</div><div class="stat-value" id="monitor-disconnected-for" style="font-size:14px">—</div></div>
+  <div class="stat"><div class="stat-label">شروع پایش</div><div class="stat-value" id="monitor-first-check" style="font-size:14px">—</div></div>
+  <div class="stat"><div class="stat-label">آخرین قطعی تأییدشده</div><div class="stat-value" id="monitor-disconnected-at" style="font-size:14px">—</div></div>
+  <div class="stat"><div class="stat-label">مدت قطعی فعلی</div><div class="stat-value" id="monitor-disconnected-for" style="font-size:14px">—</div></div>
  </div>
- <div class="foot" id="monitor-last-error">جزئیات خطا: —</div>
+ <div class="foot" id="monitor-disconnect-history">سابقه قطعی: هنوز قطعی ثبت نشده است.</div><div class="foot" id="monitor-last-error">پیام خطا: موردی گزارش نشده است.</div>
  <div class="foot" id="session-expiry">انقضای ثبت‌شده نشست: {{if .Summary.SessionExpiresAt}}{{.Summary.SessionExpiresAt}}{{else}}نامشخص / نشست موجود نیست{{end}}</div>
  <div class="foot">این نمایش، داده‌های endpoint پایش نشست را می‌خواند؛ هیچ ورود، تمدید دستی یا عملیات سفارش انجام نمی‌دهد.</div>
 </section>
@@ -172,24 +172,33 @@ main,.wrap{width:calc(100% - 32px);max-width:1400px}
 </div>
 <script>
 (async()=>{
- const ids={scheduled:document.getElementById("scheduled-orders"),ready:document.getElementById("ready-orders"),total:document.getElementById("total-orders"),session:document.getElementById("session-state"),monitor:document.getElementById("session-monitor-state"),http:document.getElementById("monitor-http"),checks:document.getElementById("monitor-checks"),lastCheck:document.getElementById("monitor-last-check"),nextCheck:document.getElementById("monitor-next-check"),firstCheck:document.getElementById("monitor-first-check"),disconnectedAt:document.getElementById("monitor-disconnected-at"),disconnectedFor:document.getElementById("monitor-disconnected-for"),lastError:document.getElementById("monitor-last-error"),expiry:document.getElementById("session-expiry"),clock:document.getElementById("current-time")};
- function localTime(value){if(!value)return "—";const d=new Date(value);return Number.isNaN(d.getTime())?"—":new Intl.DateTimeFormat("fa-IR",{dateStyle:"short",timeStyle:"medium",timeZone:"Asia/Tehran"}).format(d)}
- function duration(value){const seconds=Math.max(0,Math.floor(Number(value||0)/1e9));if(!seconds)return "۰ ثانیه";const h=Math.floor(seconds/3600),m=Math.floor((seconds%3600)/60),s=seconds%60;return [h? h+" ساعت":"",m?m+" دقیقه":"",s?s+" ثانیه":""].filter(Boolean).join(" و ")}
+ const ids={scheduled:document.getElementById("scheduled-orders"),ready:document.getElementById("ready-orders"),total:document.getElementById("total-orders"),session:document.getElementById("session-state"),monitor:document.getElementById("session-monitor-state"),http:document.getElementById("monitor-http"),checks:document.getElementById("monitor-checks"),lastCheck:document.getElementById("monitor-last-check"),nextCheck:document.getElementById("monitor-next-check"),firstCheck:document.getElementById("monitor-first-check"),disconnectedAt:document.getElementById("monitor-disconnected-at"),disconnectedFor:document.getElementById("monitor-disconnected-for"),disconnectHistory:document.getElementById("monitor-disconnect-history"),lastError:document.getElementById("monitor-last-error"),expiry:document.getElementById("session-expiry"),clock:document.getElementById("current-time")};
+ function hasRealTime(value){if(!value)return false;const t=new Date(value).getTime();return Number.isFinite(t)&&t>86400000}
+ function localTime(value){if(!hasRealTime(value))return "—";const d=new Date(value);return new Intl.DateTimeFormat("fa-IR",{dateStyle:"short",timeStyle:"medium",timeZone:"Asia/Tehran"}).format(d)}
+ function duration(value){const seconds=Math.max(0,Math.floor(Number(value||0)/1e9));if(!seconds)return "کمتر از یک ثانیه";const h=Math.floor(seconds/3600),m=Math.floor((seconds%3600)/60),s=seconds%60;return [h?h+" ساعت":"",m?m+" دقیقه":"",s?s+" ثانیه":""].filter(Boolean).join(" و ")}
+ function refreshStatus(d){
+  if(d.needs_login){ids.monitor.textContent="ورود مجدد به دایا لازم است.";return}
+  if(!d.running){ids.monitor.textContent="پایش خاموش است.";return}
+  if(!d.checks){ids.monitor.textContent="پایش روشن است؛ هنوز اولین بررسی انجام نشده.";return}
+  ids.monitor.textContent=d.last_status===200?"اتصال در آخرین بررسی موفق بوده است (HTTP 200).":"آخرین پاسخ سامانه: HTTP "+(d.last_status||"نامشخص")+"؛ جزئیات را در پیام خطا ببین.";
+ }
  async function refreshSessionMonitor(){
   try{
    const r=await fetch("/api/daya/session-monitor",{cache:"no-store",headers:{"Accept":"application/json"}});
    if(!r.ok)throw new Error("HTTP "+r.status);
    const d=await r.json();
-   ids.monitor.textContent=d.running?"پایش نشست فعال است.":(d.needs_login?"نشست معتبر نیست؛ ورود دستی با CAPTCHA لازم است.":"پایش نشست فعال نیست.");
-   ids.http.textContent=d.last_status?String(d.last_status):"—";
+   refreshStatus(d);
+   ids.http.textContent=d.last_status===200?"موفق · ۲۰۰":(d.last_status?"HTTP "+String(d.last_status):"هنوز بررسی نشده");
    ids.checks.textContent=String(d.checks||0);
-   ids.lastCheck.textContent=localTime(d.last_check);
-   ids.nextCheck.textContent=localTime(d.next_check);
-   ids.firstCheck.textContent=localTime(d.first_check_at);
-   ids.disconnectedAt.textContent=localTime(d.disconnected_at||d.last_disconnected_at);
+   ids.lastCheck.textContent=hasRealTime(d.last_check)?localTime(d.last_check):"هنوز انجام نشده";
+   ids.nextCheck.textContent=hasRealTime(d.next_check)?localTime(d.next_check):"هنوز زمان‌بندی نشده";
+   ids.firstCheck.textContent=hasRealTime(d.first_check_at)?localTime(d.first_check_at):"ثبت نشده";
+   const disconnected=hasRealTime(d.disconnected_at), lastDisconnected=hasRealTime(d.last_disconnected_at);
+   ids.disconnectedAt.textContent=disconnected?localTime(d.disconnected_at):(lastDisconnected?localTime(d.last_disconnected_at):"هنوز قطعی ثبت نشده");
    const disconnectDuration=Number(d.disconnected_for||d.last_disconnect_duration||0);
-   ids.disconnectedFor.textContent=(d.disconnected_at||d.last_disconnected_at)?duration(disconnectDuration):"—";
-   ids.lastError.textContent="جزئیات خطا: "+(d.last_error||"موردی گزارش نشده است");
+   ids.disconnectedFor.textContent=disconnected?duration(disconnectDuration):"اکنون قطعی فعال نیست";
+   ids.disconnectHistory.textContent=lastDisconnected?"آخرین قطعی ثبت‌شده: "+localTime(d.last_disconnected_at)+(hasRealTime(d.last_reconnect_at)?" · اتصال مجدد: "+localTime(d.last_reconnect_at):" · زمان اتصال مجدد ثبت نشده"):"سابقه قطعی: هنوز قطعی ثبت نشده است.";
+   ids.lastError.textContent="پیام خطا: "+(d.last_error||"موردی گزارش نشده است");
   }catch(e){ids.lastError.textContent="دریافت وضعیت پایش ناموفق بود؛ "+String(e.message||e)}
  }
  async function refresh(){
@@ -201,13 +210,7 @@ main,.wrap{width:calc(100% - 32px);max-width:1400px}
    ids.ready.textContent=String(d.ready_orders);
    ids.total.textContent=String(d.total_orders);
    ids.session.textContent=d.session_available?"موجود":"نیازمند ورود";
-   ids.http.textContent=d.monitor.last_status?String(d.monitor.last_status):"—";
-   ids.checks.textContent=String(d.monitor.checks||0);
-   ids.monitor.textContent=(d.monitor.running?"پایش نشست فعال است.":(d.monitor.needs_login?"نشست معتبر نیست؛ ورود دستی با CAPTCHA لازم است.":"پایش نشست فعال نیست."))+" آخرین HTTP: ";
-   ids.http.textContent=d.monitor.last_status?String(d.monitor.last_status):"—";
-   ids.monitor.append(ids.http);
-   ids.monitor.append(document.createTextNode(" · تعداد بررسی‌ها: "));
-   ids.monitor.append(ids.checks);
+   refreshStatus(d.monitor);
    ids.expiry.textContent="انقضای ثبت‌شده نشست: "+(d.session_expires_at||"نامشخص / نشست موجود نیست");
    ids.clock.textContent=d.current_time;
   }catch(_){}
