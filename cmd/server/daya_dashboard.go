@@ -8,16 +8,16 @@ import (
 )
 
 type dayaDashboardSummary struct {
-	CurrentTime       string            `json:"current_time"`
-	ScheduledOrders   int               `json:"scheduled_orders"`
-	ReadyOrders       int               `json:"ready_orders"`
-	HistoryOrders     int               `json:"history_orders"`
-	TotalOrders       int               `json:"total_orders"`
-	CredentialsSaved  bool              `json:"credentials_saved"`
-	SessionAvailable  bool              `json:"session_available"`
-	SessionExpiresAt  string            `json:"session_expires_at,omitempty"`
+	CurrentTime       string              `json:"current_time"`
+	ScheduledOrders   int                 `json:"scheduled_orders"`
+	ReadyOrders       int                 `json:"ready_orders"`
+	HistoryOrders     int                 `json:"history_orders"`
+	TotalOrders       int                 `json:"total_orders"`
+	CredentialsSaved  bool                `json:"credentials_saved"`
+	SessionAvailable  bool                `json:"session_available"`
+	SessionExpiresAt  string              `json:"session_expires_at,omitempty"`
 	Monitor           DayaMonitorSnapshot `json:"monitor"`
-	APIDispatchActive bool              `json:"api_dispatch_active"`
+	APIDispatchActive bool                `json:"api_dispatch_active"`
 }
 
 type dayaDashboardPageData struct {
@@ -148,7 +148,7 @@ h1{font-size:22px;margin:0}.muted,.foot{color:#667085;line-height:1.8}.nav{displ
 
 func buildDayaDashboardSummary(store *Store, credentials *DayaCredentialStore, monitor *DayaSessionMonitor, now time.Time) dayaDashboardSummary {
 	summary := dayaDashboardSummary{
-		CurrentTime: formatJalaliDateTime(now.In(tehran())),
+		CurrentTime:       formatJalaliDateTime(now.In(tehran())),
 		APIDispatchActive: dayaOrderAPICapable(),
 	}
 	if store != nil {
