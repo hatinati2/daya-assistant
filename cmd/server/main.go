@@ -1309,6 +1309,8 @@ func main() {
 		notice := ""
 		if r.URL.Query().Get("notice") == "daya_saved" {
 			notice = "اطلاعات ورود دایا به‌صورت رمزنگاری‌شده ذخیره شد."
+		} else if r.URL.Query().Get("notice") == "daya_logged_out" {
+			notice = "از نشست ذخیره‌شده دایا خارج شدی؛ اطلاعات ورود حفظ شدند."
 		} else if r.URL.Query().Get("notice") == "daya_deleted" {
 			notice = "اطلاعات ورود دایا حذف شد."
 		} else if r.URL.Query().Get("notice") == "daya_login_ok" {
@@ -1333,6 +1335,19 @@ func main() {
 		sessionMonitor.Stop(false, "اطلاعات ورود تغییر کرد؛ ورود مجدد لازم است")
 		http.Redirect(w, r, "/settings?notice=daya_saved", http.StatusSeeOther)
 	})
+	mux.HandleFunc("POST /settings/daya-logout", func(w http.ResponseWriter, r *http.Request) {
+		if !sameOrigin(r) {
+			http.Error(w, "درخواست نامعتبر", http.StatusForbidden)
+			return
+		}
+		if err := credentials.Logout(); err != nil {
+			credentials.RenderWithMonitor(w, "خروج از نشست دایا انجام نشد.", "", sessionMonitor.Snapshot())
+			return
+		}
+		sessionMonitor.Stop(false, "از نشست دایا خارج شدی؛ برای اتصال دوباره ورود لازم است")
+		http.Redirect(w, r, "/settings?notice=daya_logged_out", http.StatusSeeOther)
+	})
+
 	mux.HandleFunc("POST /settings/daya-credentials/delete", func(w http.ResponseWriter, r *http.Request) {
 		if !sameOrigin(r) {
 			http.Error(w, "درخواست نامعتبر", http.StatusForbidden)

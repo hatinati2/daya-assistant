@@ -73,6 +73,33 @@ func TestDayaCredentialStoreKeepsPasswordWhenBlank(t *testing.T) {
 	}
 }
 
+func TestDayaCredentialStoreLogoutKeepsSavedCredentials(t *testing.T) {
+	store := newTestCredentialStore(t)
+	if err := store.Save("test-user", "saved-password"); err != nil {
+		t.Fatal(err)
+	}
+	if err := store.SaveAccessTokenUntil("active-session-token", time.Now().Add(time.Hour)); err != nil {
+		t.Fatal(err)
+	}
+	if err := store.Logout(); err != nil {
+		t.Fatal(err)
+	}
+	token, _, err := store.LoadAccessToken()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if token != "" {
+		t.Fatal("session still present after logout")
+	}
+	username, saved, err := store.Status()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !saved || username != "test-user" {
+		t.Fatalf("saved credentials were not preserved: username=%q saved=%v", username, saved)
+	}
+}
+
 func TestDayaCredentialStoreDelete(t *testing.T) {
 	store := newTestCredentialStore(t)
 	if err := store.Save("test-user", "saved-password"); err != nil {
