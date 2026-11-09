@@ -84,6 +84,7 @@ table{width:100%;border-collapse:collapse}td,th{padding:8px;border-bottom:1px so
 const anonymousButton=document.getElementById("run-anonymous");
 const authenticatedButton=document.getElementById("run-authenticated");
 const state=document.getElementById("state");
+const initialAuthDisabled=authenticatedButton.disabled;
 function escapeHTML(value){return String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 async function runCalibration(mode,button){
  const authenticated=mode==="authenticated";
@@ -113,7 +114,7 @@ async function runCalibration(mode,button){
   document.getElementById("rows").innerHTML=(data.samples||[]).map((x,i)=>'<tr><td>'+(i+1)+'</td><td>'+escapeHTML(x.http_status||"—")+'</td><td>'+escapeHTML(x.rtt_ms)+'</td><td>'+(x.response_valid?"بله":"خیر")+'</td><td>'+(x.session_rotated?(x.session_persisted?"ذخیره شد":"ذخیره نشد"):"—")+'</td><td>'+escapeHTML(x.ended_at||"—")+'</td><td>'+escapeHTML(x.error||"—")+'</td></tr>').join("");
   state.textContent=authenticated?"اندازه‌گیری با نشست ذخیره‌شده تمام شد":"اندازه‌گیری بدون نشست تمام شد";
  }catch(error){state.textContent=error.message||"اندازه‌گیری ناموفق بود"}
- finally{button.disabled=false;other.disabled=authenticatedButton.disabled&&!authenticated?true:false;}
+ finally{button.disabled=false;anonymousButton.disabled=false;authenticatedButton.disabled=initialAuthDisabled;}
 }
 anonymousButton.addEventListener("click",()=>runCalibration("anonymous",anonymousButton));
 authenticatedButton.addEventListener("click",()=>runCalibration("authenticated",authenticatedButton));
