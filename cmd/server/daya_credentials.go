@@ -156,7 +156,7 @@ main,.wrap{width:calc(100% - 32px);max-width:1400px}
 <a href="/">سفارش‌ها</a>
 <a href="/history">تاریخچه</a>
 <a href="/settings" class="active">اتصال و نشست</a>
-<a href="/daya-api-test">تست محلی API</a>
+
 <a href="/daya-online-test">تست آنلاین</a>
 <a href="/daya-latency">کالیبراسیون تأخیر</a>
 <a class="danger-link" href="/daya-online-test/one">ارسال یک‌باره واقعی</a>
