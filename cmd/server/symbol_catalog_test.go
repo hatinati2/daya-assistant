@@ -323,7 +323,6 @@ func TestTSESymbolClientSearchSymbolsMapsShortcutFields(t *testing.T) {
 	}
 }
 
-
 func TestTSESymbolClientFetchPriceRange(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet || r.URL.Path != "/InstrumentProvider/api/v1/Instrument/LiveInstrumentByIdQuery/fa" {
