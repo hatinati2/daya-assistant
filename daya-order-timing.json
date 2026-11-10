@@ -1,0 +1,4997 @@
+{
+  "entries": [
+    {
+      "startedDateTime": "2026-11-10T09:29:31.841Z",
+      "duration_ms": 296.38100000011036,
+      "method": "GET",
+      "url": "https://mg.dayatrader.ir/market-data/instruments/[REDACTED]",
+      "request_headers": [
+        {
+          "name": "Accept"
+        },
+        {
+          "name": "Accept-Encoding"
+        },
+        {
+          "name": "Accept-Language"
+        },
+        {
+          "name": "Cache-Control"
+        },
+        {
+          "name": "Connection"
+        },
+        {
+          "name": "Content-Type"
+        },
+        {
+          "name": "Host"
+        },
+        {
+          "name": "Origin"
+        },
+        {
+          "name": "Pragma"
+        },
+        {
+          "name": "Referer"
+        },
+        {
+          "name": "Sec-Fetch-Dest"
+        },
+        {
+          "name": "Sec-Fetch-Mode"
+        },
+        {
+          "name": "Sec-Fetch-Site"
+        },
+        {
+          "name": "User-Agent"
+        },
+        {
+          "name": "X-CLIENT-TYPE"
+        },
+        {
+          "name": "sec-ch-ua"
+        },
+        {
+          "name": "sec-ch-ua-mobile"
+        },
+        {
+          "name": "sec-ch-ua-platform"
+        }
+      ],
+      "request_body_field_names": [],
+      "status": 200,
+      "response_headers": [
+        {
+          "name": "Content-Encoding"
+        },
+        {
+          "name": "Transfer-Encoding"
+        },
+        {
+          "name": "access-control-allow-credentials"
+        },
+        {
+          "name": "access-control-allow-origin"
+        },
+        {
+          "name": "cache-control"
+        },
+        {
+          "name": "content-security-policy"
+        },
+        {
+          "name": "content-type"
+        },
+        {
+          "name": "expires"
+        },
+        {
+          "name": "pragma"
+        },
+        {
+          "name": "referrer-policy"
+        },
+        {
+          "name": "strict-transport-security"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "x-content-type-options"
+        },
+        {
+          "name": "x-frame-options"
+        },
+        {
+          "name": "x-xss-protection"
+        }
+      ],
+      "response_time_fields": {}
+    },
+    {
+      "startedDateTime": "2026-11-10T09:29:31.843Z",
+      "duration_ms": 64.0630000000092,
+      "method": "OPTIONS",
+      "url": "https://mg.dayatrader.ir/market-data/instruments/[REDACTED]",
+      "request_headers": [
+        {
+          "name": "Accept"
+        },
+        {
+          "name": "Accept-Encoding"
+        },
+        {
+          "name": "Accept-Language"
+        },
+        {
+          "name": "Access-Control-Request-Headers"
+        },
+        {
+          "name": "Access-Control-Request-Method"
+        },
+        {
+          "name": "Cache-Control"
+        },
+        {
+          "name": "Connection"
+        },
+        {
+          "name": "Host"
+        },
+        {
+          "name": "Origin"
+        },
+        {
+          "name": "Pragma"
+        },
+        {
+          "name": "Referer"
+        },
+        {
+          "name": "Sec-Fetch-Dest"
+        },
+        {
+          "name": "Sec-Fetch-Mode"
+        },
+        {
+          "name": "Sec-Fetch-Site"
+        },
+        {
+          "name": "User-Agent"
+        }
+      ],
+      "request_body_field_names": [],
+      "status": 200,
+      "response_headers": [
+        {
+          "name": "access-control-allow-credentials"
+        },
+        {
+          "name": "access-control-allow-headers"
+        },
+        {
+          "name": "access-control-allow-methods"
+        },
+        {
+          "name": "access-control-allow-origin"
+        },
+        {
+          "name": "cache-control"
+        },
+        {
+          "name": "content-length"
+        },
+        {
+          "name": "content-security-policy"
+        },
+        {
+          "name": "expires"
+        },
+        {
+          "name": "pragma"
+        },
+        {
+          "name": "referrer-policy"
+        },
+        {
+          "name": "strict-transport-security"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "x-content-type-options"
+        },
+        {
+          "name": "x-frame-options"
+        },
+        {
+          "name": "x-xss-protection"
+        }
+      ],
+      "response_time_fields": {}
+    },
+    {
+      "startedDateTime": "2026-11-10T09:29:31.971Z",
+      "duration_ms": 283.63400000125694,
+      "method": "GET",
+      "url": "https://mg.dayatrader.ir/market-data/instruments/[REDACTED]",
+      "request_headers": [
+        {
+          "name": "Accept"
+        },
+        {
+          "name": "Accept-Encoding"
+        },
+        {
+          "name": "Accept-Language"
+        },
+        {
+          "name": "Cache-Control"
+        },
+        {
+          "name": "Connection"
+        },
+        {
+          "name": "Content-Type"
+        },
+        {
+          "name": "Host"
+        },
+        {
+          "name": "Origin"
+        },
+        {
+          "name": "Pragma"
+        },
+        {
+          "name": "Referer"
+        },
+        {
+          "name": "Sec-Fetch-Dest"
+        },
+        {
+          "name": "Sec-Fetch-Mode"
+        },
+        {
+          "name": "Sec-Fetch-Site"
+        },
+        {
+          "name": "User-Agent"
+        },
+        {
+          "name": "X-CLIENT-TYPE"
+        },
+        {
+          "name": "sec-ch-ua"
+        },
+        {
+          "name": "sec-ch-ua-mobile"
+        },
+        {
+          "name": "sec-ch-ua-platform"
+        }
+      ],
+      "request_body_field_names": [],
+      "status": 200,
+      "response_headers": [
+        {
+          "name": "Content-Encoding"
+        },
+        {
+          "name": "Transfer-Encoding"
+        },
+        {
+          "name": "access-control-allow-credentials"
+        },
+        {
+          "name": "access-control-allow-origin"
+        },
+        {
+          "name": "cache-control"
+        },
+        {
+          "name": "content-security-policy"
+        },
+        {
+          "name": "content-type"
+        },
+        {
+          "name": "expires"
+        },
+        {
+          "name": "pragma"
+        },
+        {
+          "name": "referrer-policy"
+        },
+        {
+          "name": "strict-transport-security"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "x-content-type-options"
+        },
+        {
+          "name": "x-frame-options"
+        },
+        {
+          "name": "x-xss-protection"
+        }
+      ],
+      "response_time_fields": {}
+    },
+    {
+      "startedDateTime": "2026-11-10T09:29:31.973Z",
+      "duration_ms": 48.21999999896798,
+      "method": "OPTIONS",
+      "url": "https://mg.dayatrader.ir/market-data/instruments/[REDACTED]",
+      "request_headers": [
+        {
+          "name": "Accept"
+        },
+        {
+          "name": "Accept-Encoding"
+        },
+        {
+          "name": "Accept-Language"
+        },
+        {
+          "name": "Access-Control-Request-Headers"
+        },
+        {
+          "name": "Access-Control-Request-Method"
+        },
+        {
+          "name": "Cache-Control"
+        },
+        {
+          "name": "Connection"
+        },
+        {
+          "name": "Host"
+        },
+        {
+          "name": "Origin"
+        },
+        {
+          "name": "Pragma"
+        },
+        {
+          "name": "Referer"
+        },
+        {
+          "name": "Sec-Fetch-Dest"
+        },
+        {
+          "name": "Sec-Fetch-Mode"
+        },
+        {
+          "name": "Sec-Fetch-Site"
+        },
+        {
+          "name": "User-Agent"
+        }
+      ],
+      "request_body_field_names": [],
+      "status": 200,
+      "response_headers": [
+        {
+          "name": "access-control-allow-credentials"
+        },
+        {
+          "name": "access-control-allow-headers"
+        },
+        {
+          "name": "access-control-allow-methods"
+        },
+        {
+          "name": "access-control-allow-origin"
+        },
+        {
+          "name": "cache-control"
+        },
+        {
+          "name": "content-length"
+        },
+        {
+          "name": "content-security-policy"
+        },
+        {
+          "name": "expires"
+        },
+        {
+          "name": "pragma"
+        },
+        {
+          "name": "referrer-policy"
+        },
+        {
+          "name": "strict-transport-security"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "x-content-type-options"
+        },
+        {
+          "name": "x-frame-options"
+        },
+        {
+          "name": "x-xss-protection"
+        }
+      ],
+      "response_time_fields": {}
+    },
+    {
+      "startedDateTime": "2026-11-10T09:29:32.130Z",
+      "duration_ms": 215.83100000134436,
+      "method": "GET",
+      "url": "https://mg.dayatrader.ir/market-data/instruments/[REDACTED]",
+      "request_headers": [
+        {
+          "name": "Accept"
+        },
+        {
+          "name": "Accept-Encoding"
+        },
+        {
+          "name": "Accept-Language"
+        },
+        {
+          "name": "Cache-Control"
+        },
+        {
+          "name": "Connection"
+        },
+        {
+          "name": "Content-Type"
+        },
+        {
+          "name": "Host"
+        },
+        {
+          "name": "Origin"
+        },
+        {
+          "name": "Pragma"
+        },
+        {
+          "name": "Referer"
+        },
+        {
+          "name": "Sec-Fetch-Dest"
+        },
+        {
+          "name": "Sec-Fetch-Mode"
+        },
+        {
+          "name": "Sec-Fetch-Site"
+        },
+        {
+          "name": "User-Agent"
+        },
+        {
+          "name": "X-CLIENT-TYPE"
+        },
+        {
+          "name": "sec-ch-ua"
+        },
+        {
+          "name": "sec-ch-ua-mobile"
+        },
+        {
+          "name": "sec-ch-ua-platform"
+        }
+      ],
+      "request_body_field_names": [],
+      "status": 200,
+      "response_headers": [
+        {
+          "name": "Content-Encoding"
+        },
+        {
+          "name": "Content-Length"
+        },
+        {
+          "name": "access-control-allow-credentials"
+        },
+        {
+          "name": "access-control-allow-origin"
+        },
+        {
+          "name": "cache-control"
+        },
+        {
+          "name": "content-security-policy"
+        },
+        {
+          "name": "content-type"
+        },
+        {
+          "name": "expires"
+        },
+        {
+          "name": "pragma"
+        },
+        {
+          "name": "referrer-policy"
+        },
+        {
+          "name": "strict-transport-security"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "x-content-type-options"
+        },
+        {
+          "name": "x-frame-options"
+        },
+        {
+          "name": "x-xss-protection"
+        }
+      ],
+      "response_time_fields": {}
+    },
+    {
+      "startedDateTime": "2026-11-10T09:29:32.131Z",
+      "duration_ms": 49.962000000309665,
+      "method": "OPTIONS",
+      "url": "https://mg.dayatrader.ir/market-data/instruments/[REDACTED]",
+      "request_headers": [
+        {
+          "name": "Accept"
+        },
+        {
+          "name": "Accept-Encoding"
+        },
+        {
+          "name": "Accept-Language"
+        },
+        {
+          "name": "Access-Control-Request-Headers"
+        },
+        {
+          "name": "Access-Control-Request-Method"
+        },
+        {
+          "name": "Cache-Control"
+        },
+        {
+          "name": "Connection"
+        },
+        {
+          "name": "Host"
+        },
+        {
+          "name": "Origin"
+        },
+        {
+          "name": "Pragma"
+        },
+        {
+          "name": "Referer"
+        },
+        {
+          "name": "Sec-Fetch-Dest"
+        },
+        {
+          "name": "Sec-Fetch-Mode"
+        },
+        {
+          "name": "Sec-Fetch-Site"
+        },
+        {
+          "name": "User-Agent"
+        }
+      ],
+      "request_body_field_names": [],
+      "status": 200,
+      "response_headers": [
+        {
+          "name": "access-control-allow-credentials"
+        },
+        {
+          "name": "access-control-allow-headers"
+        },
+        {
+          "name": "access-control-allow-methods"
+        },
+        {
+          "name": "access-control-allow-origin"
+        },
+        {
+          "name": "cache-control"
+        },
+        {
+          "name": "content-length"
+        },
+        {
+          "name": "content-security-policy"
+        },
+        {
+          "name": "expires"
+        },
+        {
+          "name": "pragma"
+        },
+        {
+          "name": "referrer-policy"
+        },
+        {
+          "name": "strict-transport-security"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "x-content-type-options"
+        },
+        {
+          "name": "x-frame-options"
+        },
+        {
+          "name": "x-xss-protection"
+        }
+      ],
+      "response_time_fields": {}
+    },
+    {
+      "startedDateTime": "2026-11-10T09:29:32.426Z",
+      "duration_ms": 192.01199999952223,
+      "method": "GET",
+      "url": "https://mg.dayatrader.ir/market-data/instruments/[REDACTED]",
+      "request_headers": [
+        {
+          "name": "Accept"
+        },
+        {
+          "name": "Accept-Encoding"
+        },
+        {
+          "name": "Accept-Language"
+        },
+        {
+          "name": "Cache-Control"
+        },
+        {
+          "name": "Connection"
+        },
+        {
+          "name": "Content-Type"
+        },
+        {
+          "name": "Host"
+        },
+        {
+          "name": "Origin"
+        },
+        {
+          "name": "Pragma"
+        },
+        {
+          "name": "Referer"
+        },
+        {
+          "name": "Sec-Fetch-Dest"
+        },
+        {
+          "name": "Sec-Fetch-Mode"
+        },
+        {
+          "name": "Sec-Fetch-Site"
+        },
+        {
+          "name": "User-Agent"
+        },
+        {
+          "name": "X-CLIENT-TYPE"
+        },
+        {
+          "name": "sec-ch-ua"
+        },
+        {
+          "name": "sec-ch-ua-mobile"
+        },
+        {
+          "name": "sec-ch-ua-platform"
+        }
+      ],
+      "request_body_field_names": [],
+      "status": 200,
+      "response_headers": [
+        {
+          "name": "Content-Encoding"
+        },
+        {
+          "name": "Content-Length"
+        },
+        {
+          "name": "access-control-allow-credentials"
+        },
+        {
+          "name": "access-control-allow-origin"
+        },
+        {
+          "name": "cache-control"
+        },
+        {
+          "name": "content-security-policy"
+        },
+        {
+          "name": "content-type"
+        },
+        {
+          "name": "expires"
+        },
+        {
+          "name": "pragma"
+        },
+        {
+          "name": "referrer-policy"
+        },
+        {
+          "name": "strict-transport-security"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "x-content-type-options"
+        },
+        {
+          "name": "x-frame-options"
+        },
+        {
+          "name": "x-xss-protection"
+        }
+      ],
+      "response_time_fields": {}
+    },
+    {
+      "startedDateTime": "2026-11-10T09:29:32.427Z",
+      "duration_ms": 46.76699999928824,
+      "method": "OPTIONS",
+      "url": "https://mg.dayatrader.ir/market-data/instruments/[REDACTED]",
+      "request_headers": [
+        {
+          "name": "Accept"
+        },
+        {
+          "name": "Accept-Encoding"
+        },
+        {
+          "name": "Accept-Language"
+        },
+        {
+          "name": "Access-Control-Request-Headers"
+        },
+        {
+          "name": "Access-Control-Request-Method"
+        },
+        {
+          "name": "Cache-Control"
+        },
+        {
+          "name": "Connection"
+        },
+        {
+          "name": "Host"
+        },
+        {
+          "name": "Origin"
+        },
+        {
+          "name": "Pragma"
+        },
+        {
+          "name": "Referer"
+        },
+        {
+          "name": "Sec-Fetch-Dest"
+        },
+        {
+          "name": "Sec-Fetch-Mode"
+        },
+        {
+          "name": "Sec-Fetch-Site"
+        },
+        {
+          "name": "User-Agent"
+        }
+      ],
+      "request_body_field_names": [],
+      "status": 200,
+      "response_headers": [
+        {
+          "name": "access-control-allow-credentials"
+        },
+        {
+          "name": "access-control-allow-headers"
+        },
+        {
+          "name": "access-control-allow-methods"
+        },
+        {
+          "name": "access-control-allow-origin"
+        },
+        {
+          "name": "cache-control"
+        },
+        {
+          "name": "content-length"
+        },
+        {
+          "name": "content-security-policy"
+        },
+        {
+          "name": "expires"
+        },
+        {
+          "name": "pragma"
+        },
+        {
+          "name": "referrer-policy"
+        },
+        {
+          "name": "strict-transport-security"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "x-content-type-options"
+        },
+        {
+          "name": "x-frame-options"
+        },
+        {
+          "name": "x-xss-protection"
+        }
+      ],
+      "response_time_fields": {}
+    },
+    {
+      "startedDateTime": "2026-11-10T09:29:32.759Z",
+      "duration_ms": 198.18000000122993,
+      "method": "GET",
+      "url": "https://mg.dayatrader.ir/market-data/instruments/[REDACTED]",
+      "request_headers": [
+        {
+          "name": "Accept"
+        },
+        {
+          "name": "Accept-Encoding"
+        },
+        {
+          "name": "Accept-Language"
+        },
+        {
+          "name": "Cache-Control"
+        },
+        {
+          "name": "Connection"
+        },
+        {
+          "name": "Content-Type"
+        },
+        {
+          "name": "Host"
+        },
+        {
+          "name": "Origin"
+        },
+        {
+          "name": "Pragma"
+        },
+        {
+          "name": "Referer"
+        },
+        {
+          "name": "Sec-Fetch-Dest"
+        },
+        {
+          "name": "Sec-Fetch-Mode"
+        },
+        {
+          "name": "Sec-Fetch-Site"
+        },
+        {
+          "name": "User-Agent"
+        },
+        {
+          "name": "X-CLIENT-TYPE"
+        },
+        {
+          "name": "sec-ch-ua"
+        },
+        {
+          "name": "sec-ch-ua-mobile"
+        },
+        {
+          "name": "sec-ch-ua-platform"
+        }
+      ],
+      "request_body_field_names": [],
+      "status": 200,
+      "response_headers": [
+        {
+          "name": "Content-Encoding"
+        },
+        {
+          "name": "Content-Length"
+        },
+        {
+          "name": "access-control-allow-credentials"
+        },
+        {
+          "name": "access-control-allow-origin"
+        },
+        {
+          "name": "cache-control"
+        },
+        {
+          "name": "content-security-policy"
+        },
+        {
+          "name": "content-type"
+        },
+        {
+          "name": "expires"
+        },
+        {
+          "name": "pragma"
+        },
+        {
+          "name": "referrer-policy"
+        },
+        {
+          "name": "strict-transport-security"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "x-content-type-options"
+        },
+        {
+          "name": "x-frame-options"
+        },
+        {
+          "name": "x-xss-protection"
+        }
+      ],
+      "response_time_fields": {}
+    },
+    {
+      "startedDateTime": "2026-11-10T09:29:32.760Z",
+      "duration_ms": 46.51999999981851,
+      "method": "OPTIONS",
+      "url": "https://mg.dayatrader.ir/market-data/instruments/[REDACTED]",
+      "request_headers": [
+        {
+          "name": "Accept"
+        },
+        {
+          "name": "Accept-Encoding"
+        },
+        {
+          "name": "Accept-Language"
+        },
+        {
+          "name": "Access-Control-Request-Headers"
+        },
+        {
+          "name": "Access-Control-Request-Method"
+        },
+        {
+          "name": "Cache-Control"
+        },
+        {
+          "name": "Connection"
+        },
+        {
+          "name": "Host"
+        },
+        {
+          "name": "Origin"
+        },
+        {
+          "name": "Pragma"
+        },
+        {
+          "name": "Referer"
+        },
+        {
+          "name": "Sec-Fetch-Dest"
+        },
+        {
+          "name": "Sec-Fetch-Mode"
+        },
+        {
+          "name": "Sec-Fetch-Site"
+        },
+        {
+          "name": "User-Agent"
+        }
+      ],
+      "request_body_field_names": [],
+      "status": 200,
+      "response_headers": [
+        {
+          "name": "access-control-allow-credentials"
+        },
+        {
+          "name": "access-control-allow-headers"
+        },
+        {
+          "name": "access-control-allow-methods"
+        },
+        {
+          "name": "access-control-allow-origin"
+        },
+        {
+          "name": "cache-control"
+        },
+        {
+          "name": "content-length"
+        },
+        {
+          "name": "content-security-policy"
+        },
+        {
+          "name": "expires"
+        },
+        {
+          "name": "pragma"
+        },
+        {
+          "name": "referrer-policy"
+        },
+        {
+          "name": "strict-transport-security"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "x-content-type-options"
+        },
+        {
+          "name": "x-frame-options"
+        },
+        {
+          "name": "x-xss-protection"
+        }
+      ],
+      "response_time_fields": {}
+    },
+    {
+      "startedDateTime": "2026-11-10T09:29:32.942Z",
+      "duration_ms": 248.94099999983155,
+      "method": "GET",
+      "url": "https://mg.dayatrader.ir/market-data/instruments/[REDACTED]",
+      "request_headers": [
+        {
+          "name": "Accept"
+        },
+        {
+          "name": "Accept-Encoding"
+        },
+        {
+          "name": "Accept-Language"
+        },
+        {
+          "name": "Cache-Control"
+        },
+        {
+          "name": "Connection"
+        },
+        {
+          "name": "Content-Type"
+        },
+        {
+          "name": "Host"
+        },
+        {
+          "name": "Origin"
+        },
+        {
+          "name": "Pragma"
+        },
+        {
+          "name": "Referer"
+        },
+        {
+          "name": "Sec-Fetch-Dest"
+        },
+        {
+          "name": "Sec-Fetch-Mode"
+        },
+        {
+          "name": "Sec-Fetch-Site"
+        },
+        {
+          "name": "User-Agent"
+        },
+        {
+          "name": "X-CLIENT-TYPE"
+        },
+        {
+          "name": "sec-ch-ua"
+        },
+        {
+          "name": "sec-ch-ua-mobile"
+        },
+        {
+          "name": "sec-ch-ua-platform"
+        }
+      ],
+      "request_body_field_names": [],
+      "status": 200,
+      "response_headers": [
+        {
+          "name": "Content-Encoding"
+        },
+        {
+          "name": "Transfer-Encoding"
+        },
+        {
+          "name": "access-control-allow-credentials"
+        },
+        {
+          "name": "access-control-allow-origin"
+        },
+        {
+          "name": "cache-control"
+        },
+        {
+          "name": "content-security-policy"
+        },
+        {
+          "name": "content-type"
+        },
+        {
+          "name": "expires"
+        },
+        {
+          "name": "pragma"
+        },
+        {
+          "name": "referrer-policy"
+        },
+        {
+          "name": "strict-transport-security"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "x-content-type-options"
+        },
+        {
+          "name": "x-frame-options"
+        },
+        {
+          "name": "x-xss-protection"
+        }
+      ],
+      "response_time_fields": {}
+    },
+    {
+      "startedDateTime": "2026-11-10T09:29:32.943Z",
+      "duration_ms": 46.329999998838176,
+      "method": "OPTIONS",
+      "url": "https://mg.dayatrader.ir/market-data/instruments/[REDACTED]",
+      "request_headers": [
+        {
+          "name": "Accept"
+        },
+        {
+          "name": "Accept-Encoding"
+        },
+        {
+          "name": "Accept-Language"
+        },
+        {
+          "name": "Access-Control-Request-Headers"
+        },
+        {
+          "name": "Access-Control-Request-Method"
+        },
+        {
+          "name": "Cache-Control"
+        },
+        {
+          "name": "Connection"
+        },
+        {
+          "name": "Host"
+        },
+        {
+          "name": "Origin"
+        },
+        {
+          "name": "Pragma"
+        },
+        {
+          "name": "Referer"
+        },
+        {
+          "name": "Sec-Fetch-Dest"
+        },
+        {
+          "name": "Sec-Fetch-Mode"
+        },
+        {
+          "name": "Sec-Fetch-Site"
+        },
+        {
+          "name": "User-Agent"
+        }
+      ],
+      "request_body_field_names": [],
+      "status": 200,
+      "response_headers": [
+        {
+          "name": "access-control-allow-credentials"
+        },
+        {
+          "name": "access-control-allow-headers"
+        },
+        {
+          "name": "access-control-allow-methods"
+        },
+        {
+          "name": "access-control-allow-origin"
+        },
+        {
+          "name": "cache-control"
+        },
+        {
+          "name": "content-length"
+        },
+        {
+          "name": "content-security-policy"
+        },
+        {
+          "name": "expires"
+        },
+        {
+          "name": "pragma"
+        },
+        {
+          "name": "referrer-policy"
+        },
+        {
+          "name": "strict-transport-security"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "x-content-type-options"
+        },
+        {
+          "name": "x-frame-options"
+        },
+        {
+          "name": "x-xss-protection"
+        }
+      ],
+      "response_time_fields": {}
+    },
+    {
+      "startedDateTime": "2026-11-10T09:29:33.156Z",
+      "duration_ms": 203.56100000026345,
+      "method": "GET",
+      "url": "https://mg.dayatrader.ir/market-data/instruments/[REDACTED]",
+      "request_headers": [
+        {
+          "name": "Accept"
+        },
+        {
+          "name": "Accept-Encoding"
+        },
+        {
+          "name": "Accept-Language"
+        },
+        {
+          "name": "Cache-Control"
+        },
+        {
+          "name": "Connection"
+        },
+        {
+          "name": "Content-Type"
+        },
+        {
+          "name": "Host"
+        },
+        {
+          "name": "Origin"
+        },
+        {
+          "name": "Pragma"
+        },
+        {
+          "name": "Referer"
+        },
+        {
+          "name": "Sec-Fetch-Dest"
+        },
+        {
+          "name": "Sec-Fetch-Mode"
+        },
+        {
+          "name": "Sec-Fetch-Site"
+        },
+        {
+          "name": "User-Agent"
+        },
+        {
+          "name": "X-CLIENT-TYPE"
+        },
+        {
+          "name": "sec-ch-ua"
+        },
+        {
+          "name": "sec-ch-ua-mobile"
+        },
+        {
+          "name": "sec-ch-ua-platform"
+        }
+      ],
+      "request_body_field_names": [],
+      "status": 200,
+      "response_headers": [
+        {
+          "name": "Content-Encoding"
+        },
+        {
+          "name": "Content-Length"
+        },
+        {
+          "name": "access-control-allow-credentials"
+        },
+        {
+          "name": "access-control-allow-origin"
+        },
+        {
+          "name": "cache-control"
+        },
+        {
+          "name": "content-security-policy"
+        },
+        {
+          "name": "content-type"
+        },
+        {
+          "name": "expires"
+        },
+        {
+          "name": "pragma"
+        },
+        {
+          "name": "referrer-policy"
+        },
+        {
+          "name": "strict-transport-security"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "x-content-type-options"
+        },
+        {
+          "name": "x-frame-options"
+        },
+        {
+          "name": "x-xss-protection"
+        }
+      ],
+      "response_time_fields": {}
+    },
+    {
+      "startedDateTime": "2026-11-10T09:29:33.157Z",
+      "duration_ms": 47.48200000012805,
+      "method": "OPTIONS",
+      "url": "https://mg.dayatrader.ir/market-data/instruments/[REDACTED]",
+      "request_headers": [
+        {
+          "name": "Accept"
+        },
+        {
+          "name": "Accept-Encoding"
+        },
+        {
+          "name": "Accept-Language"
+        },
+        {
+          "name": "Access-Control-Request-Headers"
+        },
+        {
+          "name": "Access-Control-Request-Method"
+        },
+        {
+          "name": "Cache-Control"
+        },
+        {
+          "name": "Connection"
+        },
+        {
+          "name": "Host"
+        },
+        {
+          "name": "Origin"
+        },
+        {
+          "name": "Pragma"
+        },
+        {
+          "name": "Referer"
+        },
+        {
+          "name": "Sec-Fetch-Dest"
+        },
+        {
+          "name": "Sec-Fetch-Mode"
+        },
+        {
+          "name": "Sec-Fetch-Site"
+        },
+        {
+          "name": "User-Agent"
+        }
+      ],
+      "request_body_field_names": [],
+      "status": 200,
+      "response_headers": [
+        {
+          "name": "access-control-allow-credentials"
+        },
+        {
+          "name": "access-control-allow-headers"
+        },
+        {
+          "name": "access-control-allow-methods"
+        },
+        {
+          "name": "access-control-allow-origin"
+        },
+        {
+          "name": "cache-control"
+        },
+        {
+          "name": "content-length"
+        },
+        {
+          "name": "content-security-policy"
+        },
+        {
+          "name": "expires"
+        },
+        {
+          "name": "pragma"
+        },
+        {
+          "name": "referrer-policy"
+        },
+        {
+          "name": "strict-transport-security"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "x-content-type-options"
+        },
+        {
+          "name": "x-frame-options"
+        },
+        {
+          "name": "x-xss-protection"
+        }
+      ],
+      "response_time_fields": {}
+    },
+    {
+      "startedDateTime": "2026-11-10T09:29:33.529Z",
+      "duration_ms": 229.8060000011901,
+      "method": "GET",
+      "url": "https://mg.dayatrader.ir/market-data/instruments/[REDACTED]",
+      "request_headers": [
+        {
+          "name": "Accept"
+        },
+        {
+          "name": "Accept-Encoding"
+        },
+        {
+          "name": "Accept-Language"
+        },
+        {
+          "name": "Cache-Control"
+        },
+        {
+          "name": "Connection"
+        },
+        {
+          "name": "Content-Type"
+        },
+        {
+          "name": "Host"
+        },
+        {
+          "name": "Origin"
+        },
+        {
+          "name": "Pragma"
+        },
+        {
+          "name": "Referer"
+        },
+        {
+          "name": "Sec-Fetch-Dest"
+        },
+        {
+          "name": "Sec-Fetch-Mode"
+        },
+        {
+          "name": "Sec-Fetch-Site"
+        },
+        {
+          "name": "User-Agent"
+        },
+        {
+          "name": "X-CLIENT-TYPE"
+        },
+        {
+          "name": "sec-ch-ua"
+        },
+        {
+          "name": "sec-ch-ua-mobile"
+        },
+        {
+          "name": "sec-ch-ua-platform"
+        }
+      ],
+      "request_body_field_names": [],
+      "status": 200,
+      "response_headers": [
+        {
+          "name": "Content-Encoding"
+        },
+        {
+          "name": "Content-Length"
+        },
+        {
+          "name": "access-control-allow-credentials"
+        },
+        {
+          "name": "access-control-allow-origin"
+        },
+        {
+          "name": "cache-control"
+        },
+        {
+          "name": "content-security-policy"
+        },
+        {
+          "name": "content-type"
+        },
+        {
+          "name": "expires"
+        },
+        {
+          "name": "pragma"
+        },
+        {
+          "name": "referrer-policy"
+        },
+        {
+          "name": "strict-transport-security"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "x-content-type-options"
+        },
+        {
+          "name": "x-frame-options"
+        },
+        {
+          "name": "x-xss-protection"
+        }
+      ],
+      "response_time_fields": {}
+    },
+    {
+      "startedDateTime": "2026-11-10T09:29:33.530Z",
+      "duration_ms": 68.1890000006318,
+      "method": "OPTIONS",
+      "url": "https://mg.dayatrader.ir/market-data/instruments/[REDACTED]",
+      "request_headers": [
+        {
+          "name": "Accept"
+        },
+        {
+          "name": "Accept-Encoding"
+        },
+        {
+          "name": "Accept-Language"
+        },
+        {
+          "name": "Access-Control-Request-Headers"
+        },
+        {
+          "name": "Access-Control-Request-Method"
+        },
+        {
+          "name": "Cache-Control"
+        },
+        {
+          "name": "Connection"
+        },
+        {
+          "name": "Host"
+        },
+        {
+          "name": "Origin"
+        },
+        {
+          "name": "Pragma"
+        },
+        {
+          "name": "Referer"
+        },
+        {
+          "name": "Sec-Fetch-Dest"
+        },
+        {
+          "name": "Sec-Fetch-Mode"
+        },
+        {
+          "name": "Sec-Fetch-Site"
+        },
+        {
+          "name": "User-Agent"
+        }
+      ],
+      "request_body_field_names": [],
+      "status": 200,
+      "response_headers": [
+        {
+          "name": "access-control-allow-credentials"
+        },
+        {
+          "name": "access-control-allow-headers"
+        },
+        {
+          "name": "access-control-allow-methods"
+        },
+        {
+          "name": "access-control-allow-origin"
+        },
+        {
+          "name": "cache-control"
+        },
+        {
+          "name": "content-length"
+        },
+        {
+          "name": "content-security-policy"
+        },
+        {
+          "name": "expires"
+        },
+        {
+          "name": "pragma"
+        },
+        {
+          "name": "referrer-policy"
+        },
+        {
+          "name": "strict-transport-security"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "x-content-type-options"
+        },
+        {
+          "name": "x-frame-options"
+        },
+        {
+          "name": "x-xss-protection"
+        }
+      ],
+      "response_time_fields": {}
+    },
+    {
+      "startedDateTime": "2026-11-10T09:29:35.194Z",
+      "duration_ms": 242.55499999890162,
+      "method": "GET",
+      "url": "https://mg.dayatrader.ir/market-data/instruments/[REDACTED]",
+      "request_headers": [
+        {
+          "name": "Accept"
+        },
+        {
+          "name": "Accept-Encoding"
+        },
+        {
+          "name": "Accept-Language"
+        },
+        {
+          "name": "Cache-Control"
+        },
+        {
+          "name": "Connection"
+        },
+        {
+          "name": "Content-Type"
+        },
+        {
+          "name": "Host"
+        },
+        {
+          "name": "Origin"
+        },
+        {
+          "name": "Pragma"
+        },
+        {
+          "name": "Referer"
+        },
+        {
+          "name": "Sec-Fetch-Dest"
+        },
+        {
+          "name": "Sec-Fetch-Mode"
+        },
+        {
+          "name": "Sec-Fetch-Site"
+        },
+        {
+          "name": "User-Agent"
+        },
+        {
+          "name": "X-CLIENT-TYPE"
+        },
+        {
+          "name": "sec-ch-ua"
+        },
+        {
+          "name": "sec-ch-ua-mobile"
+        },
+        {
+          "name": "sec-ch-ua-platform"
+        }
+      ],
+      "request_body_field_names": [],
+      "status": 200,
+      "response_headers": [
+        {
+          "name": "Content-Encoding"
+        },
+        {
+          "name": "Content-Length"
+        },
+        {
+          "name": "access-control-allow-credentials"
+        },
+        {
+          "name": "access-control-allow-origin"
+        },
+        {
+          "name": "cache-control"
+        },
+        {
+          "name": "content-security-policy"
+        },
+        {
+          "name": "content-type"
+        },
+        {
+          "name": "expires"
+        },
+        {
+          "name": "pragma"
+        },
+        {
+          "name": "referrer-policy"
+        },
+        {
+          "name": "strict-transport-security"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "x-content-type-options"
+        },
+        {
+          "name": "x-frame-options"
+        },
+        {
+          "name": "x-xss-protection"
+        }
+      ],
+      "response_time_fields": {}
+    },
+    {
+      "startedDateTime": "2026-11-10T09:29:35.195Z",
+      "duration_ms": 240.23699999997916,
+      "method": "GET",
+      "url": "https://mg.dayatrader.ir/market-data/instruments/[REDACTED]",
+      "request_headers": [
+        {
+          "name": "Accept"
+        },
+        {
+          "name": "Accept-Encoding"
+        },
+        {
+          "name": "Accept-Language"
+        },
+        {
+          "name": "Cache-Control"
+        },
+        {
+          "name": "Connection"
+        },
+        {
+          "name": "Host"
+        },
+        {
+          "name": "Origin"
+        },
+        {
+          "name": "Pragma"
+        },
+        {
+          "name": "Referer"
+        },
+        {
+          "name": "Sec-Fetch-Dest"
+        },
+        {
+          "name": "Sec-Fetch-Mode"
+        },
+        {
+          "name": "Sec-Fetch-Site"
+        },
+        {
+          "name": "User-Agent"
+        },
+        {
+          "name": "X-CLIENT-TYPE"
+        },
+        {
+          "name": "sec-ch-ua"
+        },
+        {
+          "name": "sec-ch-ua-mobile"
+        },
+        {
+          "name": "sec-ch-ua-platform"
+        }
+      ],
+      "request_body_field_names": [],
+      "status": 200,
+      "response_headers": [
+        {
+          "name": "Content-Encoding"
+        },
+        {
+          "name": "Content-Length"
+        },
+        {
+          "name": "access-control-allow-credentials"
+        },
+        {
+          "name": "access-control-allow-origin"
+        },
+        {
+          "name": "cache-control"
+        },
+        {
+          "name": "content-security-policy"
+        },
+        {
+          "name": "content-type"
+        },
+        {
+          "name": "expires"
+        },
+        {
+          "name": "pragma"
+        },
+        {
+          "name": "referrer-policy"
+        },
+        {
+          "name": "strict-transport-security"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "x-content-type-options"
+        },
+        {
+          "name": "x-frame-options"
+        },
+        {
+          "name": "x-xss-protection"
+        }
+      ],
+      "response_time_fields": {
+        "timeStamp": "1402/04/18 - 11:56:28"
+      }
+    },
+    {
+      "startedDateTime": "2026-11-10T09:29:35.197Z",
+      "duration_ms": 59.27700000049663,
+      "method": "OPTIONS",
+      "url": "https://mg.dayatrader.ir/market-data/instruments/[REDACTED]",
+      "request_headers": [
+        {
+          "name": "Accept"
+        },
+        {
+          "name": "Accept-Encoding"
+        },
+        {
+          "name": "Accept-Language"
+        },
+        {
+          "name": "Access-Control-Request-Headers"
+        },
+        {
+          "name": "Access-Control-Request-Method"
+        },
+        {
+          "name": "Cache-Control"
+        },
+        {
+          "name": "Connection"
+        },
+        {
+          "name": "Host"
+        },
+        {
+          "name": "Origin"
+        },
+        {
+          "name": "Pragma"
+        },
+        {
+          "name": "Referer"
+        },
+        {
+          "name": "Sec-Fetch-Dest"
+        },
+        {
+          "name": "Sec-Fetch-Mode"
+        },
+        {
+          "name": "Sec-Fetch-Site"
+        },
+        {
+          "name": "User-Agent"
+        }
+      ],
+      "request_body_field_names": [],
+      "status": 200,
+      "response_headers": [
+        {
+          "name": "access-control-allow-credentials"
+        },
+        {
+          "name": "access-control-allow-headers"
+        },
+        {
+          "name": "access-control-allow-methods"
+        },
+        {
+          "name": "access-control-allow-origin"
+        },
+        {
+          "name": "cache-control"
+        },
+        {
+          "name": "content-length"
+        },
+        {
+          "name": "content-security-policy"
+        },
+        {
+          "name": "expires"
+        },
+        {
+          "name": "pragma"
+        },
+        {
+          "name": "referrer-policy"
+        },
+        {
+          "name": "strict-transport-security"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "x-content-type-options"
+        },
+        {
+          "name": "x-frame-options"
+        },
+        {
+          "name": "x-xss-protection"
+        }
+      ],
+      "response_time_fields": {}
+    },
+    {
+      "startedDateTime": "2026-11-10T09:29:35.198Z",
+      "duration_ms": 59.40899999970861,
+      "method": "OPTIONS",
+      "url": "https://mg.dayatrader.ir/market-data/instruments/[REDACTED]",
+      "request_headers": [
+        {
+          "name": "Accept"
+        },
+        {
+          "name": "Accept-Encoding"
+        },
+        {
+          "name": "Accept-Language"
+        },
+        {
+          "name": "Access-Control-Request-Headers"
+        },
+        {
+          "name": "Access-Control-Request-Method"
+        },
+        {
+          "name": "Cache-Control"
+        },
+        {
+          "name": "Connection"
+        },
+        {
+          "name": "Host"
+        },
+        {
+          "name": "Origin"
+        },
+        {
+          "name": "Pragma"
+        },
+        {
+          "name": "Referer"
+        },
+        {
+          "name": "Sec-Fetch-Dest"
+        },
+        {
+          "name": "Sec-Fetch-Mode"
+        },
+        {
+          "name": "Sec-Fetch-Site"
+        },
+        {
+          "name": "User-Agent"
+        }
+      ],
+      "request_body_field_names": [],
+      "status": 200,
+      "response_headers": [
+        {
+          "name": "access-control-allow-credentials"
+        },
+        {
+          "name": "access-control-allow-headers"
+        },
+        {
+          "name": "access-control-allow-methods"
+        },
+        {
+          "name": "access-control-allow-origin"
+        },
+        {
+          "name": "cache-control"
+        },
+        {
+          "name": "content-length"
+        },
+        {
+          "name": "content-security-policy"
+        },
+        {
+          "name": "expires"
+        },
+        {
+          "name": "pragma"
+        },
+        {
+          "name": "referrer-policy"
+        },
+        {
+          "name": "strict-transport-security"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "x-content-type-options"
+        },
+        {
+          "name": "x-frame-options"
+        },
+        {
+          "name": "x-xss-protection"
+        }
+      ],
+      "response_time_fields": {}
+    },
+    {
+      "startedDateTime": "2026-11-10T09:29:35.233Z",
+      "duration_ms": 159.19700000085868,
+      "method": "GET",
+      "url": "https://mg.dayatrader.ir/market-data/trading-view/[REDACTED]/baseline/on-minutes",
+      "request_headers": [
+        {
+          "name": "Accept"
+        },
+        {
+          "name": "Accept-Encoding"
+        },
+        {
+          "name": "Accept-Language"
+        },
+        {
+          "name": "Cache-Control"
+        },
+        {
+          "name": "Connection"
+        },
+        {
+          "name": "Content-Type"
+        },
+        {
+          "name": "Host"
+        },
+        {
+          "name": "Origin"
+        },
+        {
+          "name": "Pragma"
+        },
+        {
+          "name": "Referer"
+        },
+        {
+          "name": "Sec-Fetch-Dest"
+        },
+        {
+          "name": "Sec-Fetch-Mode"
+        },
+        {
+          "name": "Sec-Fetch-Site"
+        },
+        {
+          "name": "User-Agent"
+        },
+        {
+          "name": "X-CLIENT-TYPE"
+        },
+        {
+          "name": "sec-ch-ua"
+        },
+        {
+          "name": "sec-ch-ua-mobile"
+        },
+        {
+          "name": "sec-ch-ua-platform"
+        }
+      ],
+      "request_body_field_names": [],
+      "status": 200,
+      "response_headers": [
+        {
+          "name": "Content-Encoding"
+        },
+        {
+          "name": "Content-Length"
+        },
+        {
+          "name": "access-control-allow-credentials"
+        },
+        {
+          "name": "access-control-allow-origin"
+        },
+        {
+          "name": "cache-control"
+        },
+        {
+          "name": "content-security-policy"
+        },
+        {
+          "name": "content-type"
+        },
+        {
+          "name": "expires"
+        },
+        {
+          "name": "pragma"
+        },
+        {
+          "name": "referrer-policy"
+        },
+        {
+          "name": "strict-transport-security"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "x-content-type-options"
+        },
+        {
+          "name": "x-frame-options"
+        },
+        {
+          "name": "x-xss-protection"
+        }
+      ],
+      "response_time_fields": {}
+    },
+    {
+      "startedDateTime": "2026-11-10T09:29:35.234Z",
+      "duration_ms": 52.45599999935331,
+      "method": "OPTIONS",
+      "url": "https://mg.dayatrader.ir/market-data/trading-view/[REDACTED]/baseline/on-minutes",
+      "request_headers": [
+        {
+          "name": "Accept"
+        },
+        {
+          "name": "Accept-Encoding"
+        },
+        {
+          "name": "Accept-Language"
+        },
+        {
+          "name": "Access-Control-Request-Headers"
+        },
+        {
+          "name": "Access-Control-Request-Method"
+        },
+        {
+          "name": "Cache-Control"
+        },
+        {
+          "name": "Connection"
+        },
+        {
+          "name": "Host"
+        },
+        {
+          "name": "Origin"
+        },
+        {
+          "name": "Pragma"
+        },
+        {
+          "name": "Referer"
+        },
+        {
+          "name": "Sec-Fetch-Dest"
+        },
+        {
+          "name": "Sec-Fetch-Mode"
+        },
+        {
+          "name": "Sec-Fetch-Site"
+        },
+        {
+          "name": "User-Agent"
+        }
+      ],
+      "request_body_field_names": [],
+      "status": 200,
+      "response_headers": [
+        {
+          "name": "access-control-allow-credentials"
+        },
+        {
+          "name": "access-control-allow-headers"
+        },
+        {
+          "name": "access-control-allow-methods"
+        },
+        {
+          "name": "access-control-allow-origin"
+        },
+        {
+          "name": "cache-control"
+        },
+        {
+          "name": "content-length"
+        },
+        {
+          "name": "content-security-policy"
+        },
+        {
+          "name": "expires"
+        },
+        {
+          "name": "pragma"
+        },
+        {
+          "name": "referrer-policy"
+        },
+        {
+          "name": "strict-transport-security"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "x-content-type-options"
+        },
+        {
+          "name": "x-frame-options"
+        },
+        {
+          "name": "x-xss-protection"
+        }
+      ],
+      "response_time_fields": {}
+    },
+    {
+      "startedDateTime": "2026-11-10T09:29:35.492Z",
+      "duration_ms": 142.5550000003568,
+      "method": "GET",
+      "url": "https://mg.dayatrader.ir/market-data/market-view/trading-view/[REDACTED]/tradeVolumeAndCountOnCustomerType/on-minutes",
+      "request_headers": [
+        {
+          "name": "Accept"
+        },
+        {
+          "name": "Accept-Encoding"
+        },
+        {
+          "name": "Accept-Language"
+        },
+        {
+          "name": "Cache-Control"
+        },
+        {
+          "name": "Connection"
+        },
+        {
+          "name": "Host"
+        },
+        {
+          "name": "Origin"
+        },
+        {
+          "name": "Pragma"
+        },
+        {
+          "name": "Referer"
+        },
+        {
+          "name": "Sec-Fetch-Dest"
+        },
+        {
+          "name": "Sec-Fetch-Mode"
+        },
+        {
+          "name": "Sec-Fetch-Site"
+        },
+        {
+          "name": "User-Agent"
+        },
+        {
+          "name": "X-CLIENT-TYPE"
+        },
+        {
+          "name": "sec-ch-ua"
+        },
+        {
+          "name": "sec-ch-ua-mobile"
+        },
+        {
+          "name": "sec-ch-ua-platform"
+        }
+      ],
+      "request_body_field_names": [],
+      "status": 200,
+      "response_headers": [
+        {
+          "name": "Content-Encoding"
+        },
+        {
+          "name": "Content-Length"
+        },
+        {
+          "name": "access-control-allow-credentials"
+        },
+        {
+          "name": "access-control-allow-origin"
+        },
+        {
+          "name": "cache-control"
+        },
+        {
+          "name": "content-security-policy"
+        },
+        {
+          "name": "content-type"
+        },
+        {
+          "name": "expires"
+        },
+        {
+          "name": "pragma"
+        },
+        {
+          "name": "referrer-policy"
+        },
+        {
+          "name": "strict-transport-security"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "x-content-type-options"
+        },
+        {
+          "name": "x-frame-options"
+        },
+        {
+          "name": "x-xss-protection"
+        }
+      ],
+      "response_time_fields": {}
+    },
+    {
+      "startedDateTime": "2026-11-10T09:29:35.493Z",
+      "duration_ms": 46.1770000001872,
+      "method": "OPTIONS",
+      "url": "https://mg.dayatrader.ir/market-data/market-view/trading-view/[REDACTED]/tradeVolumeAndCountOnCustomerType/on-minutes",
+      "request_headers": [
+        {
+          "name": "Accept"
+        },
+        {
+          "name": "Accept-Encoding"
+        },
+        {
+          "name": "Accept-Language"
+        },
+        {
+          "name": "Access-Control-Request-Headers"
+        },
+        {
+          "name": "Access-Control-Request-Method"
+        },
+        {
+          "name": "Cache-Control"
+        },
+        {
+          "name": "Connection"
+        },
+        {
+          "name": "Host"
+        },
+        {
+          "name": "Origin"
+        },
+        {
+          "name": "Pragma"
+        },
+        {
+          "name": "Referer"
+        },
+        {
+          "name": "Sec-Fetch-Dest"
+        },
+        {
+          "name": "Sec-Fetch-Mode"
+        },
+        {
+          "name": "Sec-Fetch-Site"
+        },
+        {
+          "name": "User-Agent"
+        }
+      ],
+      "request_body_field_names": [],
+      "status": 200,
+      "response_headers": [
+        {
+          "name": "access-control-allow-credentials"
+        },
+        {
+          "name": "access-control-allow-headers"
+        },
+        {
+          "name": "access-control-allow-methods"
+        },
+        {
+          "name": "access-control-allow-origin"
+        },
+        {
+          "name": "cache-control"
+        },
+        {
+          "name": "content-length"
+        },
+        {
+          "name": "content-security-policy"
+        },
+        {
+          "name": "expires"
+        },
+        {
+          "name": "pragma"
+        },
+        {
+          "name": "referrer-policy"
+        },
+        {
+          "name": "strict-transport-security"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "x-content-type-options"
+        },
+        {
+          "name": "x-frame-options"
+        },
+        {
+          "name": "x-xss-protection"
+        }
+      ],
+      "response_time_fields": {}
+    },
+    {
+      "startedDateTime": "2026-11-10T09:29:35.522Z",
+      "duration_ms": 184.28300000050513,
+      "method": "GET",
+      "url": "https://mg.dayatrader.ir/market-data/instruments/[REDACTED]/codeAndSign",
+      "request_headers": [
+        {
+          "name": "Accept"
+        },
+        {
+          "name": "Accept-Encoding"
+        },
+        {
+          "name": "Accept-Language"
+        },
+        {
+          "name": "Cache-Control"
+        },
+        {
+          "name": "Connection"
+        },
+        {
+          "name": "Host"
+        },
+        {
+          "name": "Origin"
+        },
+        {
+          "name": "Pragma"
+        },
+        {
+          "name": "Referer"
+        },
+        {
+          "name": "Sec-Fetch-Dest"
+        },
+        {
+          "name": "Sec-Fetch-Mode"
+        },
+        {
+          "name": "Sec-Fetch-Site"
+        },
+        {
+          "name": "User-Agent"
+        },
+        {
+          "name": "X-CLIENT-TYPE"
+        },
+        {
+          "name": "sec-ch-ua"
+        },
+        {
+          "name": "sec-ch-ua-mobile"
+        },
+        {
+          "name": "sec-ch-ua-platform"
+        }
+      ],
+      "request_body_field_names": [],
+      "status": 200,
+      "response_headers": [
+        {
+          "name": "Content-Encoding"
+        },
+        {
+          "name": "Content-Length"
+        },
+        {
+          "name": "access-control-allow-credentials"
+        },
+        {
+          "name": "access-control-allow-origin"
+        },
+        {
+          "name": "cache-control"
+        },
+        {
+          "name": "content-security-policy"
+        },
+        {
+          "name": "content-type"
+        },
+        {
+          "name": "expires"
+        },
+        {
+          "name": "pragma"
+        },
+        {
+          "name": "referrer-policy"
+        },
+        {
+          "name": "strict-transport-security"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "x-content-type-options"
+        },
+        {
+          "name": "x-frame-options"
+        },
+        {
+          "name": "x-xss-protection"
+        }
+      ],
+      "response_time_fields": {}
+    },
+    {
+      "startedDateTime": "2026-11-10T09:29:35.523Z",
+      "duration_ms": 48.255999999371944,
+      "method": "OPTIONS",
+      "url": "https://mg.dayatrader.ir/market-data/instruments/[REDACTED]/codeAndSign",
+      "request_headers": [
+        {
+          "name": "Accept"
+        },
+        {
+          "name": "Accept-Encoding"
+        },
+        {
+          "name": "Accept-Language"
+        },
+        {
+          "name": "Access-Control-Request-Headers"
+        },
+        {
+          "name": "Access-Control-Request-Method"
+        },
+        {
+          "name": "Cache-Control"
+        },
+        {
+          "name": "Connection"
+        },
+        {
+          "name": "Host"
+        },
+        {
+          "name": "Origin"
+        },
+        {
+          "name": "Pragma"
+        },
+        {
+          "name": "Referer"
+        },
+        {
+          "name": "Sec-Fetch-Dest"
+        },
+        {
+          "name": "Sec-Fetch-Mode"
+        },
+        {
+          "name": "Sec-Fetch-Site"
+        },
+        {
+          "name": "User-Agent"
+        }
+      ],
+      "request_body_field_names": [],
+      "status": 200,
+      "response_headers": [
+        {
+          "name": "access-control-allow-credentials"
+        },
+        {
+          "name": "access-control-allow-headers"
+        },
+        {
+          "name": "access-control-allow-methods"
+        },
+        {
+          "name": "access-control-allow-origin"
+        },
+        {
+          "name": "cache-control"
+        },
+        {
+          "name": "content-length"
+        },
+        {
+          "name": "content-security-policy"
+        },
+        {
+          "name": "expires"
+        },
+        {
+          "name": "pragma"
+        },
+        {
+          "name": "referrer-policy"
+        },
+        {
+          "name": "strict-transport-security"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "x-content-type-options"
+        },
+        {
+          "name": "x-frame-options"
+        },
+        {
+          "name": "x-xss-protection"
+        }
+      ],
+      "response_time_fields": {}
+    },
+    {
+      "startedDateTime": "2026-11-10T09:29:40.237Z",
+      "duration_ms": 137.87500000034925,
+      "method": "GET",
+      "url": "https://mg.dayatrader.ir/market-data/market-view/trading-view/[REDACTED]/tradeVolumeAndCountOnCustomerType/on-minutes",
+      "request_headers": [
+        {
+          "name": "Accept"
+        },
+        {
+          "name": "Accept-Encoding"
+        },
+        {
+          "name": "Accept-Language"
+        },
+        {
+          "name": "Cache-Control"
+        },
+        {
+          "name": "Connection"
+        },
+        {
+          "name": "Host"
+        },
+        {
+          "name": "Origin"
+        },
+        {
+          "name": "Pragma"
+        },
+        {
+          "name": "Referer"
+        },
+        {
+          "name": "Sec-Fetch-Dest"
+        },
+        {
+          "name": "Sec-Fetch-Mode"
+        },
+        {
+          "name": "Sec-Fetch-Site"
+        },
+        {
+          "name": "User-Agent"
+        },
+        {
+          "name": "X-CLIENT-TYPE"
+        },
+        {
+          "name": "sec-ch-ua"
+        },
+        {
+          "name": "sec-ch-ua-mobile"
+        },
+        {
+          "name": "sec-ch-ua-platform"
+        }
+      ],
+      "request_body_field_names": [],
+      "status": 200,
+      "response_headers": [
+        {
+          "name": "Content-Encoding"
+        },
+        {
+          "name": "Content-Length"
+        },
+        {
+          "name": "access-control-allow-credentials"
+        },
+        {
+          "name": "access-control-allow-origin"
+        },
+        {
+          "name": "cache-control"
+        },
+        {
+          "name": "content-security-policy"
+        },
+        {
+          "name": "content-type"
+        },
+        {
+          "name": "expires"
+        },
+        {
+          "name": "pragma"
+        },
+        {
+          "name": "referrer-policy"
+        },
+        {
+          "name": "strict-transport-security"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "x-content-type-options"
+        },
+        {
+          "name": "x-frame-options"
+        },
+        {
+          "name": "x-xss-protection"
+        }
+      ],
+      "response_time_fields": {}
+    },
+    {
+      "startedDateTime": "2026-11-10T09:29:40.238Z",
+      "duration_ms": 48.57999999924621,
+      "method": "OPTIONS",
+      "url": "https://mg.dayatrader.ir/market-data/market-view/trading-view/[REDACTED]/tradeVolumeAndCountOnCustomerType/on-minutes",
+      "request_headers": [
+        {
+          "name": "Accept"
+        },
+        {
+          "name": "Accept-Encoding"
+        },
+        {
+          "name": "Accept-Language"
+        },
+        {
+          "name": "Access-Control-Request-Headers"
+        },
+        {
+          "name": "Access-Control-Request-Method"
+        },
+        {
+          "name": "Cache-Control"
+        },
+        {
+          "name": "Connection"
+        },
+        {
+          "name": "Host"
+        },
+        {
+          "name": "Origin"
+        },
+        {
+          "name": "Pragma"
+        },
+        {
+          "name": "Referer"
+        },
+        {
+          "name": "Sec-Fetch-Dest"
+        },
+        {
+          "name": "Sec-Fetch-Mode"
+        },
+        {
+          "name": "Sec-Fetch-Site"
+        },
+        {
+          "name": "User-Agent"
+        }
+      ],
+      "request_body_field_names": [],
+      "status": 200,
+      "response_headers": [
+        {
+          "name": "access-control-allow-credentials"
+        },
+        {
+          "name": "access-control-allow-headers"
+        },
+        {
+          "name": "access-control-allow-methods"
+        },
+        {
+          "name": "access-control-allow-origin"
+        },
+        {
+          "name": "cache-control"
+        },
+        {
+          "name": "content-length"
+        },
+        {
+          "name": "content-security-policy"
+        },
+        {
+          "name": "expires"
+        },
+        {
+          "name": "pragma"
+        },
+        {
+          "name": "referrer-policy"
+        },
+        {
+          "name": "strict-transport-security"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "x-content-type-options"
+        },
+        {
+          "name": "x-frame-options"
+        },
+        {
+          "name": "x-xss-protection"
+        }
+      ],
+      "response_time_fields": {}
+    },
+    {
+      "startedDateTime": "2026-11-10T09:29:41.257Z",
+      "duration_ms": 267.8059999998368,
+      "method": "POST",
+      "url": "https://mg.dayatrader.ir/orders",
+      "request_headers": [
+        {
+          "name": "Accept"
+        },
+        {
+          "name": "Accept-Encoding"
+        },
+        {
+          "name": "Accept-Language"
+        },
+        {
+          "name": "Cache-Control"
+        },
+        {
+          "name": "Connection"
+        },
+        {
+          "name": "Content-Length"
+        },
+        {
+          "name": "Content-Type"
+        },
+        {
+          "name": "Host"
+        },
+        {
+          "name": "Origin"
+        },
+        {
+          "name": "Pragma"
+        },
+        {
+          "name": "Referer"
+        },
+        {
+          "name": "Sec-Fetch-Dest"
+        },
+        {
+          "name": "Sec-Fetch-Mode"
+        },
+        {
+          "name": "Sec-Fetch-Site"
+        },
+        {
+          "name": "User-Agent"
+        },
+        {
+          "name": "X-CLIENT-TYPE"
+        },
+        {
+          "name": "sec-ch-ua"
+        },
+        {
+          "name": "sec-ch-ua-mobile"
+        },
+        {
+          "name": "sec-ch-ua-platform"
+        }
+      ],
+      "request_body_field_names": [
+        "orderSide",
+        "orderQuantity",
+        "orderPrice",
+        "instrumentId",
+        "orderValidityType",
+        "orderValidityDate"
+      ],
+      "status": 200,
+      "response_headers": [
+        {
+          "name": "Content-Encoding"
+        },
+        {
+          "name": "Content-Length"
+        },
+        {
+          "name": "access-control-allow-credentials"
+        },
+        {
+          "name": "access-control-allow-origin"
+        },
+        {
+          "name": "cache-control"
+        },
+        {
+          "name": "content-security-policy"
+        },
+        {
+          "name": "content-type"
+        },
+        {
+          "name": "expires"
+        },
+        {
+          "name": "pragma"
+        },
+        {
+          "name": "referrer-policy"
+        },
+        {
+          "name": "strict-transport-security"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "x-content-type-options"
+        },
+        {
+          "name": "x-frame-options"
+        },
+        {
+          "name": "x-xss-protection"
+        }
+      ],
+      "response_time_fields": {
+        "priorityDateTime": null,
+        "errorCode": null,
+        "errorText": null,
+        "timeStamp": "1405/08/19 - 12:59:40",
+        "orderEntryDate": null,
+        "tradeDate": null,
+        "orderStatus": "SENT_TO_TRADING_ENGINE",
+        "orderValidityDate": null,
+        "responseSequenceNumberDate": null,
+        "eventTimeStamp": "1794302980700"
+      }
+    },
+    {
+      "startedDateTime": "2026-11-10T09:29:41.258Z",
+      "duration_ms": 50.39700000043143,
+      "method": "OPTIONS",
+      "url": "https://mg.dayatrader.ir/orders",
+      "request_headers": [
+        {
+          "name": "Accept"
+        },
+        {
+          "name": "Accept-Encoding"
+        },
+        {
+          "name": "Accept-Language"
+        },
+        {
+          "name": "Access-Control-Request-Headers"
+        },
+        {
+          "name": "Access-Control-Request-Method"
+        },
+        {
+          "name": "Cache-Control"
+        },
+        {
+          "name": "Connection"
+        },
+        {
+          "name": "Host"
+        },
+        {
+          "name": "Origin"
+        },
+        {
+          "name": "Pragma"
+        },
+        {
+          "name": "Referer"
+        },
+        {
+          "name": "Sec-Fetch-Dest"
+        },
+        {
+          "name": "Sec-Fetch-Mode"
+        },
+        {
+          "name": "Sec-Fetch-Site"
+        },
+        {
+          "name": "User-Agent"
+        }
+      ],
+      "request_body_field_names": [],
+      "status": 200,
+      "response_headers": [
+        {
+          "name": "access-control-allow-credentials"
+        },
+        {
+          "name": "access-control-allow-headers"
+        },
+        {
+          "name": "access-control-allow-methods"
+        },
+        {
+          "name": "access-control-allow-origin"
+        },
+        {
+          "name": "cache-control"
+        },
+        {
+          "name": "content-length"
+        },
+        {
+          "name": "content-security-policy"
+        },
+        {
+          "name": "expires"
+        },
+        {
+          "name": "pragma"
+        },
+        {
+          "name": "referrer-policy"
+        },
+        {
+          "name": "strict-transport-security"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "x-content-type-options"
+        },
+        {
+          "name": "x-frame-options"
+        },
+        {
+          "name": "x-xss-protection"
+        }
+      ],
+      "response_time_fields": {}
+    },
+    {
+      "startedDateTime": "2026-11-10T09:29:41.528Z",
+      "duration_ms": 147.41399999911664,
+      "method": "GET",
+      "url": "https://mg.dayatrader.ir/financials/buying-power",
+      "request_headers": [
+        {
+          "name": "Accept"
+        },
+        {
+          "name": "Accept-Encoding"
+        },
+        {
+          "name": "Accept-Language"
+        },
+        {
+          "name": "Cache-Control"
+        },
+        {
+          "name": "Connection"
+        },
+        {
+          "name": "Content-Type"
+        },
+        {
+          "name": "Host"
+        },
+        {
+          "name": "Origin"
+        },
+        {
+          "name": "Pragma"
+        },
+        {
+          "name": "Referer"
+        },
+        {
+          "name": "Sec-Fetch-Dest"
+        },
+        {
+          "name": "Sec-Fetch-Mode"
+        },
+        {
+          "name": "Sec-Fetch-Site"
+        },
+        {
+          "name": "User-Agent"
+        },
+        {
+          "name": "X-CLIENT-TYPE"
+        },
+        {
+          "name": "sec-ch-ua"
+        },
+        {
+          "name": "sec-ch-ua-mobile"
+        },
+        {
+          "name": "sec-ch-ua-platform"
+        }
+      ],
+      "request_body_field_names": [],
+      "status": 200,
+      "response_headers": [
+        {
+          "name": "Content-Encoding"
+        },
+        {
+          "name": "Content-Length"
+        },
+        {
+          "name": "access-control-allow-credentials"
+        },
+        {
+          "name": "access-control-allow-origin"
+        },
+        {
+          "name": "cache-control"
+        },
+        {
+          "name": "content-security-policy"
+        },
+        {
+          "name": "content-type"
+        },
+        {
+          "name": "expires"
+        },
+        {
+          "name": "pragma"
+        },
+        {
+          "name": "referrer-policy"
+        },
+        {
+          "name": "strict-transport-security"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "x-content-type-options"
+        },
+        {
+          "name": "x-frame-options"
+        },
+        {
+          "name": "x-xss-protection"
+        }
+      ],
+      "response_time_fields": {}
+    },
+    {
+      "startedDateTime": "2026-11-10T09:29:41.529Z",
+      "duration_ms": 64.68499999957567,
+      "method": "OPTIONS",
+      "url": "https://mg.dayatrader.ir/financials/buying-power",
+      "request_headers": [
+        {
+          "name": "Accept"
+        },
+        {
+          "name": "Accept-Encoding"
+        },
+        {
+          "name": "Accept-Language"
+        },
+        {
+          "name": "Access-Control-Request-Headers"
+        },
+        {
+          "name": "Access-Control-Request-Method"
+        },
+        {
+          "name": "Cache-Control"
+        },
+        {
+          "name": "Connection"
+        },
+        {
+          "name": "Host"
+        },
+        {
+          "name": "Origin"
+        },
+        {
+          "name": "Pragma"
+        },
+        {
+          "name": "Referer"
+        },
+        {
+          "name": "Sec-Fetch-Dest"
+        },
+        {
+          "name": "Sec-Fetch-Mode"
+        },
+        {
+          "name": "Sec-Fetch-Site"
+        },
+        {
+          "name": "User-Agent"
+        }
+      ],
+      "request_body_field_names": [],
+      "status": 200,
+      "response_headers": [
+        {
+          "name": "access-control-allow-credentials"
+        },
+        {
+          "name": "access-control-allow-headers"
+        },
+        {
+          "name": "access-control-allow-methods"
+        },
+        {
+          "name": "access-control-allow-origin"
+        },
+        {
+          "name": "cache-control"
+        },
+        {
+          "name": "content-length"
+        },
+        {
+          "name": "content-security-policy"
+        },
+        {
+          "name": "expires"
+        },
+        {
+          "name": "pragma"
+        },
+        {
+          "name": "referrer-policy"
+        },
+        {
+          "name": "strict-transport-security"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "x-content-type-options"
+        },
+        {
+          "name": "x-frame-options"
+        },
+        {
+          "name": "x-xss-protection"
+        }
+      ],
+      "response_time_fields": {}
+    },
+    {
+      "startedDateTime": "2026-11-10T09:29:43.003Z",
+      "duration_ms": 134.0619999991759,
+      "method": "GET",
+      "url": "https://mg.dayatrader.ir/financials/buying-power",
+      "request_headers": [
+        {
+          "name": "Accept"
+        },
+        {
+          "name": "Accept-Encoding"
+        },
+        {
+          "name": "Accept-Language"
+        },
+        {
+          "name": "Cache-Control"
+        },
+        {
+          "name": "Connection"
+        },
+        {
+          "name": "Content-Type"
+        },
+        {
+          "name": "Host"
+        },
+        {
+          "name": "Origin"
+        },
+        {
+          "name": "Pragma"
+        },
+        {
+          "name": "Referer"
+        },
+        {
+          "name": "Sec-Fetch-Dest"
+        },
+        {
+          "name": "Sec-Fetch-Mode"
+        },
+        {
+          "name": "Sec-Fetch-Site"
+        },
+        {
+          "name": "User-Agent"
+        },
+        {
+          "name": "X-CLIENT-TYPE"
+        },
+        {
+          "name": "sec-ch-ua"
+        },
+        {
+          "name": "sec-ch-ua-mobile"
+        },
+        {
+          "name": "sec-ch-ua-platform"
+        }
+      ],
+      "request_body_field_names": [],
+      "status": 200,
+      "response_headers": [
+        {
+          "name": "Content-Encoding"
+        },
+        {
+          "name": "Content-Length"
+        },
+        {
+          "name": "access-control-allow-credentials"
+        },
+        {
+          "name": "access-control-allow-origin"
+        },
+        {
+          "name": "cache-control"
+        },
+        {
+          "name": "content-security-policy"
+        },
+        {
+          "name": "content-type"
+        },
+        {
+          "name": "expires"
+        },
+        {
+          "name": "pragma"
+        },
+        {
+          "name": "referrer-policy"
+        },
+        {
+          "name": "strict-transport-security"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "x-content-type-options"
+        },
+        {
+          "name": "x-frame-options"
+        },
+        {
+          "name": "x-xss-protection"
+        }
+      ],
+      "response_time_fields": {}
+    },
+    {
+      "startedDateTime": "2026-11-10T09:29:43.004Z",
+      "duration_ms": 47.9210000010794,
+      "method": "OPTIONS",
+      "url": "https://mg.dayatrader.ir/financials/buying-power",
+      "request_headers": [
+        {
+          "name": "Accept"
+        },
+        {
+          "name": "Accept-Encoding"
+        },
+        {
+          "name": "Accept-Language"
+        },
+        {
+          "name": "Access-Control-Request-Headers"
+        },
+        {
+          "name": "Access-Control-Request-Method"
+        },
+        {
+          "name": "Cache-Control"
+        },
+        {
+          "name": "Connection"
+        },
+        {
+          "name": "Host"
+        },
+        {
+          "name": "Origin"
+        },
+        {
+          "name": "Pragma"
+        },
+        {
+          "name": "Referer"
+        },
+        {
+          "name": "Sec-Fetch-Dest"
+        },
+        {
+          "name": "Sec-Fetch-Mode"
+        },
+        {
+          "name": "Sec-Fetch-Site"
+        },
+        {
+          "name": "User-Agent"
+        }
+      ],
+      "request_body_field_names": [],
+      "status": 200,
+      "response_headers": [
+        {
+          "name": "access-control-allow-credentials"
+        },
+        {
+          "name": "access-control-allow-headers"
+        },
+        {
+          "name": "access-control-allow-methods"
+        },
+        {
+          "name": "access-control-allow-origin"
+        },
+        {
+          "name": "cache-control"
+        },
+        {
+          "name": "content-length"
+        },
+        {
+          "name": "content-security-policy"
+        },
+        {
+          "name": "expires"
+        },
+        {
+          "name": "pragma"
+        },
+        {
+          "name": "referrer-policy"
+        },
+        {
+          "name": "strict-transport-security"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "x-content-type-options"
+        },
+        {
+          "name": "x-frame-options"
+        },
+        {
+          "name": "x-xss-protection"
+        }
+      ],
+      "response_time_fields": {}
+    },
+    {
+      "startedDateTime": "2026-11-10T09:29:44.004Z",
+      "duration_ms": 139.6100000001752,
+      "method": "GET",
+      "url": "https://mg.dayatrader.ir/financials/buying-power",
+      "request_headers": [
+        {
+          "name": "Accept"
+        },
+        {
+          "name": "Accept-Encoding"
+        },
+        {
+          "name": "Accept-Language"
+        },
+        {
+          "name": "Cache-Control"
+        },
+        {
+          "name": "Connection"
+        },
+        {
+          "name": "Content-Type"
+        },
+        {
+          "name": "Host"
+        },
+        {
+          "name": "Origin"
+        },
+        {
+          "name": "Pragma"
+        },
+        {
+          "name": "Referer"
+        },
+        {
+          "name": "Sec-Fetch-Dest"
+        },
+        {
+          "name": "Sec-Fetch-Mode"
+        },
+        {
+          "name": "Sec-Fetch-Site"
+        },
+        {
+          "name": "User-Agent"
+        },
+        {
+          "name": "X-CLIENT-TYPE"
+        },
+        {
+          "name": "sec-ch-ua"
+        },
+        {
+          "name": "sec-ch-ua-mobile"
+        },
+        {
+          "name": "sec-ch-ua-platform"
+        }
+      ],
+      "request_body_field_names": [],
+      "status": 200,
+      "response_headers": [
+        {
+          "name": "Content-Encoding"
+        },
+        {
+          "name": "Content-Length"
+        },
+        {
+          "name": "access-control-allow-credentials"
+        },
+        {
+          "name": "access-control-allow-origin"
+        },
+        {
+          "name": "cache-control"
+        },
+        {
+          "name": "content-security-policy"
+        },
+        {
+          "name": "content-type"
+        },
+        {
+          "name": "expires"
+        },
+        {
+          "name": "pragma"
+        },
+        {
+          "name": "referrer-policy"
+        },
+        {
+          "name": "strict-transport-security"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "x-content-type-options"
+        },
+        {
+          "name": "x-frame-options"
+        },
+        {
+          "name": "x-xss-protection"
+        }
+      ],
+      "response_time_fields": {}
+    },
+    {
+      "startedDateTime": "2026-11-10T09:29:44.005Z",
+      "duration_ms": 46.72500000035507,
+      "method": "OPTIONS",
+      "url": "https://mg.dayatrader.ir/financials/buying-power",
+      "request_headers": [
+        {
+          "name": "Accept"
+        },
+        {
+          "name": "Accept-Encoding"
+        },
+        {
+          "name": "Accept-Language"
+        },
+        {
+          "name": "Access-Control-Request-Headers"
+        },
+        {
+          "name": "Access-Control-Request-Method"
+        },
+        {
+          "name": "Cache-Control"
+        },
+        {
+          "name": "Connection"
+        },
+        {
+          "name": "Host"
+        },
+        {
+          "name": "Origin"
+        },
+        {
+          "name": "Pragma"
+        },
+        {
+          "name": "Referer"
+        },
+        {
+          "name": "Sec-Fetch-Dest"
+        },
+        {
+          "name": "Sec-Fetch-Mode"
+        },
+        {
+          "name": "Sec-Fetch-Site"
+        },
+        {
+          "name": "User-Agent"
+        }
+      ],
+      "request_body_field_names": [],
+      "status": 200,
+      "response_headers": [
+        {
+          "name": "access-control-allow-credentials"
+        },
+        {
+          "name": "access-control-allow-headers"
+        },
+        {
+          "name": "access-control-allow-methods"
+        },
+        {
+          "name": "access-control-allow-origin"
+        },
+        {
+          "name": "cache-control"
+        },
+        {
+          "name": "content-length"
+        },
+        {
+          "name": "content-security-policy"
+        },
+        {
+          "name": "expires"
+        },
+        {
+          "name": "pragma"
+        },
+        {
+          "name": "referrer-policy"
+        },
+        {
+          "name": "strict-transport-security"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "x-content-type-options"
+        },
+        {
+          "name": "x-frame-options"
+        },
+        {
+          "name": "x-xss-protection"
+        }
+      ],
+      "response_time_fields": {}
+    },
+    {
+      "startedDateTime": "2026-11-10T09:29:45.234Z",
+      "duration_ms": 145.2400000016496,
+      "method": "GET",
+      "url": "https://mg.dayatrader.ir/market-data/market-view/trading-view/[REDACTED]/tradeVolumeAndCountOnCustomerType/on-minutes",
+      "request_headers": [
+        {
+          "name": "Accept"
+        },
+        {
+          "name": "Accept-Encoding"
+        },
+        {
+          "name": "Accept-Language"
+        },
+        {
+          "name": "Cache-Control"
+        },
+        {
+          "name": "Connection"
+        },
+        {
+          "name": "Host"
+        },
+        {
+          "name": "Origin"
+        },
+        {
+          "name": "Pragma"
+        },
+        {
+          "name": "Referer"
+        },
+        {
+          "name": "Sec-Fetch-Dest"
+        },
+        {
+          "name": "Sec-Fetch-Mode"
+        },
+        {
+          "name": "Sec-Fetch-Site"
+        },
+        {
+          "name": "User-Agent"
+        },
+        {
+          "name": "X-CLIENT-TYPE"
+        },
+        {
+          "name": "sec-ch-ua"
+        },
+        {
+          "name": "sec-ch-ua-mobile"
+        },
+        {
+          "name": "sec-ch-ua-platform"
+        }
+      ],
+      "request_body_field_names": [],
+      "status": 200,
+      "response_headers": [
+        {
+          "name": "Content-Encoding"
+        },
+        {
+          "name": "Content-Length"
+        },
+        {
+          "name": "access-control-allow-credentials"
+        },
+        {
+          "name": "access-control-allow-origin"
+        },
+        {
+          "name": "cache-control"
+        },
+        {
+          "name": "content-security-policy"
+        },
+        {
+          "name": "content-type"
+        },
+        {
+          "name": "expires"
+        },
+        {
+          "name": "pragma"
+        },
+        {
+          "name": "referrer-policy"
+        },
+        {
+          "name": "strict-transport-security"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "x-content-type-options"
+        },
+        {
+          "name": "x-frame-options"
+        },
+        {
+          "name": "x-xss-protection"
+        }
+      ],
+      "response_time_fields": {}
+    },
+    {
+      "startedDateTime": "2026-11-10T09:29:45.236Z",
+      "duration_ms": 47.870000000533764,
+      "method": "OPTIONS",
+      "url": "https://mg.dayatrader.ir/market-data/market-view/trading-view/[REDACTED]/tradeVolumeAndCountOnCustomerType/on-minutes",
+      "request_headers": [
+        {
+          "name": "Accept"
+        },
+        {
+          "name": "Accept-Encoding"
+        },
+        {
+          "name": "Accept-Language"
+        },
+        {
+          "name": "Access-Control-Request-Headers"
+        },
+        {
+          "name": "Access-Control-Request-Method"
+        },
+        {
+          "name": "Cache-Control"
+        },
+        {
+          "name": "Connection"
+        },
+        {
+          "name": "Host"
+        },
+        {
+          "name": "Origin"
+        },
+        {
+          "name": "Pragma"
+        },
+        {
+          "name": "Referer"
+        },
+        {
+          "name": "Sec-Fetch-Dest"
+        },
+        {
+          "name": "Sec-Fetch-Mode"
+        },
+        {
+          "name": "Sec-Fetch-Site"
+        },
+        {
+          "name": "User-Agent"
+        }
+      ],
+      "request_body_field_names": [],
+      "status": 200,
+      "response_headers": [
+        {
+          "name": "access-control-allow-credentials"
+        },
+        {
+          "name": "access-control-allow-headers"
+        },
+        {
+          "name": "access-control-allow-methods"
+        },
+        {
+          "name": "access-control-allow-origin"
+        },
+        {
+          "name": "cache-control"
+        },
+        {
+          "name": "content-length"
+        },
+        {
+          "name": "content-security-policy"
+        },
+        {
+          "name": "expires"
+        },
+        {
+          "name": "pragma"
+        },
+        {
+          "name": "referrer-policy"
+        },
+        {
+          "name": "strict-transport-security"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "x-content-type-options"
+        },
+        {
+          "name": "x-frame-options"
+        },
+        {
+          "name": "x-xss-protection"
+        }
+      ],
+      "response_time_fields": {}
+    },
+    {
+      "startedDateTime": "2026-11-10T09:29:50.246Z",
+      "duration_ms": 138.6079999992944,
+      "method": "GET",
+      "url": "https://mg.dayatrader.ir/market-data/market-view/trading-view/[REDACTED]/tradeVolumeAndCountOnCustomerType/on-minutes",
+      "request_headers": [
+        {
+          "name": "Accept"
+        },
+        {
+          "name": "Accept-Encoding"
+        },
+        {
+          "name": "Accept-Language"
+        },
+        {
+          "name": "Cache-Control"
+        },
+        {
+          "name": "Connection"
+        },
+        {
+          "name": "Host"
+        },
+        {
+          "name": "Origin"
+        },
+        {
+          "name": "Pragma"
+        },
+        {
+          "name": "Referer"
+        },
+        {
+          "name": "Sec-Fetch-Dest"
+        },
+        {
+          "name": "Sec-Fetch-Mode"
+        },
+        {
+          "name": "Sec-Fetch-Site"
+        },
+        {
+          "name": "User-Agent"
+        },
+        {
+          "name": "X-CLIENT-TYPE"
+        },
+        {
+          "name": "sec-ch-ua"
+        },
+        {
+          "name": "sec-ch-ua-mobile"
+        },
+        {
+          "name": "sec-ch-ua-platform"
+        }
+      ],
+      "request_body_field_names": [],
+      "status": 200,
+      "response_headers": [
+        {
+          "name": "Content-Encoding"
+        },
+        {
+          "name": "Content-Length"
+        },
+        {
+          "name": "access-control-allow-credentials"
+        },
+        {
+          "name": "access-control-allow-origin"
+        },
+        {
+          "name": "cache-control"
+        },
+        {
+          "name": "content-security-policy"
+        },
+        {
+          "name": "content-type"
+        },
+        {
+          "name": "expires"
+        },
+        {
+          "name": "pragma"
+        },
+        {
+          "name": "referrer-policy"
+        },
+        {
+          "name": "strict-transport-security"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "x-content-type-options"
+        },
+        {
+          "name": "x-frame-options"
+        },
+        {
+          "name": "x-xss-protection"
+        }
+      ],
+      "response_time_fields": {}
+    },
+    {
+      "startedDateTime": "2026-11-10T09:29:50.248Z",
+      "duration_ms": 47.76299999887124,
+      "method": "OPTIONS",
+      "url": "https://mg.dayatrader.ir/market-data/market-view/trading-view/[REDACTED]/tradeVolumeAndCountOnCustomerType/on-minutes",
+      "request_headers": [
+        {
+          "name": "Accept"
+        },
+        {
+          "name": "Accept-Encoding"
+        },
+        {
+          "name": "Accept-Language"
+        },
+        {
+          "name": "Access-Control-Request-Headers"
+        },
+        {
+          "name": "Access-Control-Request-Method"
+        },
+        {
+          "name": "Cache-Control"
+        },
+        {
+          "name": "Connection"
+        },
+        {
+          "name": "Host"
+        },
+        {
+          "name": "Origin"
+        },
+        {
+          "name": "Pragma"
+        },
+        {
+          "name": "Referer"
+        },
+        {
+          "name": "Sec-Fetch-Dest"
+        },
+        {
+          "name": "Sec-Fetch-Mode"
+        },
+        {
+          "name": "Sec-Fetch-Site"
+        },
+        {
+          "name": "User-Agent"
+        }
+      ],
+      "request_body_field_names": [],
+      "status": 200,
+      "response_headers": [
+        {
+          "name": "access-control-allow-credentials"
+        },
+        {
+          "name": "access-control-allow-headers"
+        },
+        {
+          "name": "access-control-allow-methods"
+        },
+        {
+          "name": "access-control-allow-origin"
+        },
+        {
+          "name": "cache-control"
+        },
+        {
+          "name": "content-length"
+        },
+        {
+          "name": "content-security-policy"
+        },
+        {
+          "name": "expires"
+        },
+        {
+          "name": "pragma"
+        },
+        {
+          "name": "referrer-policy"
+        },
+        {
+          "name": "strict-transport-security"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "x-content-type-options"
+        },
+        {
+          "name": "x-frame-options"
+        },
+        {
+          "name": "x-xss-protection"
+        }
+      ],
+      "response_time_fields": {}
+    },
+    {
+      "startedDateTime": "2026-11-10T09:29:55.235Z",
+      "duration_ms": 156.78100000150152,
+      "method": "GET",
+      "url": "https://mg.dayatrader.ir/market-data/market-view/trading-view/[REDACTED]/tradeVolumeAndCountOnCustomerType/on-minutes",
+      "request_headers": [
+        {
+          "name": "Accept"
+        },
+        {
+          "name": "Accept-Encoding"
+        },
+        {
+          "name": "Accept-Language"
+        },
+        {
+          "name": "Cache-Control"
+        },
+        {
+          "name": "Connection"
+        },
+        {
+          "name": "Host"
+        },
+        {
+          "name": "Origin"
+        },
+        {
+          "name": "Pragma"
+        },
+        {
+          "name": "Referer"
+        },
+        {
+          "name": "Sec-Fetch-Dest"
+        },
+        {
+          "name": "Sec-Fetch-Mode"
+        },
+        {
+          "name": "Sec-Fetch-Site"
+        },
+        {
+          "name": "User-Agent"
+        },
+        {
+          "name": "X-CLIENT-TYPE"
+        },
+        {
+          "name": "sec-ch-ua"
+        },
+        {
+          "name": "sec-ch-ua-mobile"
+        },
+        {
+          "name": "sec-ch-ua-platform"
+        }
+      ],
+      "request_body_field_names": [],
+      "status": 200,
+      "response_headers": [
+        {
+          "name": "Content-Encoding"
+        },
+        {
+          "name": "Content-Length"
+        },
+        {
+          "name": "access-control-allow-credentials"
+        },
+        {
+          "name": "access-control-allow-origin"
+        },
+        {
+          "name": "cache-control"
+        },
+        {
+          "name": "content-security-policy"
+        },
+        {
+          "name": "content-type"
+        },
+        {
+          "name": "expires"
+        },
+        {
+          "name": "pragma"
+        },
+        {
+          "name": "referrer-policy"
+        },
+        {
+          "name": "strict-transport-security"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "x-content-type-options"
+        },
+        {
+          "name": "x-frame-options"
+        },
+        {
+          "name": "x-xss-protection"
+        }
+      ],
+      "response_time_fields": {}
+    },
+    {
+      "startedDateTime": "2026-11-10T09:29:55.237Z",
+      "duration_ms": 50.54199999924458,
+      "method": "OPTIONS",
+      "url": "https://mg.dayatrader.ir/market-data/market-view/trading-view/[REDACTED]/tradeVolumeAndCountOnCustomerType/on-minutes",
+      "request_headers": [
+        {
+          "name": "Accept"
+        },
+        {
+          "name": "Accept-Encoding"
+        },
+        {
+          "name": "Accept-Language"
+        },
+        {
+          "name": "Access-Control-Request-Headers"
+        },
+        {
+          "name": "Access-Control-Request-Method"
+        },
+        {
+          "name": "Cache-Control"
+        },
+        {
+          "name": "Connection"
+        },
+        {
+          "name": "Host"
+        },
+        {
+          "name": "Origin"
+        },
+        {
+          "name": "Pragma"
+        },
+        {
+          "name": "Referer"
+        },
+        {
+          "name": "Sec-Fetch-Dest"
+        },
+        {
+          "name": "Sec-Fetch-Mode"
+        },
+        {
+          "name": "Sec-Fetch-Site"
+        },
+        {
+          "name": "User-Agent"
+        }
+      ],
+      "request_body_field_names": [],
+      "status": 200,
+      "response_headers": [
+        {
+          "name": "access-control-allow-credentials"
+        },
+        {
+          "name": "access-control-allow-headers"
+        },
+        {
+          "name": "access-control-allow-methods"
+        },
+        {
+          "name": "access-control-allow-origin"
+        },
+        {
+          "name": "cache-control"
+        },
+        {
+          "name": "content-length"
+        },
+        {
+          "name": "content-security-policy"
+        },
+        {
+          "name": "expires"
+        },
+        {
+          "name": "pragma"
+        },
+        {
+          "name": "referrer-policy"
+        },
+        {
+          "name": "strict-transport-security"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "x-content-type-options"
+        },
+        {
+          "name": "x-frame-options"
+        },
+        {
+          "name": "x-xss-protection"
+        }
+      ],
+      "response_time_fields": {}
+    },
+    {
+      "startedDateTime": "2026-11-10T09:30:00.234Z",
+      "duration_ms": 140.76899999963643,
+      "method": "GET",
+      "url": "https://mg.dayatrader.ir/market-data/market-view/trading-view/[REDACTED]/tradeVolumeAndCountOnCustomerType/on-minutes",
+      "request_headers": [
+        {
+          "name": "Accept"
+        },
+        {
+          "name": "Accept-Encoding"
+        },
+        {
+          "name": "Accept-Language"
+        },
+        {
+          "name": "Cache-Control"
+        },
+        {
+          "name": "Connection"
+        },
+        {
+          "name": "Host"
+        },
+        {
+          "name": "Origin"
+        },
+        {
+          "name": "Pragma"
+        },
+        {
+          "name": "Referer"
+        },
+        {
+          "name": "Sec-Fetch-Dest"
+        },
+        {
+          "name": "Sec-Fetch-Mode"
+        },
+        {
+          "name": "Sec-Fetch-Site"
+        },
+        {
+          "name": "User-Agent"
+        },
+        {
+          "name": "X-CLIENT-TYPE"
+        },
+        {
+          "name": "sec-ch-ua"
+        },
+        {
+          "name": "sec-ch-ua-mobile"
+        },
+        {
+          "name": "sec-ch-ua-platform"
+        }
+      ],
+      "request_body_field_names": [],
+      "status": 200,
+      "response_headers": [
+        {
+          "name": "Content-Encoding"
+        },
+        {
+          "name": "Content-Length"
+        },
+        {
+          "name": "access-control-allow-credentials"
+        },
+        {
+          "name": "access-control-allow-origin"
+        },
+        {
+          "name": "cache-control"
+        },
+        {
+          "name": "content-security-policy"
+        },
+        {
+          "name": "content-type"
+        },
+        {
+          "name": "expires"
+        },
+        {
+          "name": "pragma"
+        },
+        {
+          "name": "referrer-policy"
+        },
+        {
+          "name": "strict-transport-security"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "x-content-type-options"
+        },
+        {
+          "name": "x-frame-options"
+        },
+        {
+          "name": "x-xss-protection"
+        }
+      ],
+      "response_time_fields": {}
+    },
+    {
+      "startedDateTime": "2026-11-10T09:30:00.236Z",
+      "duration_ms": 47.89600000024075,
+      "method": "OPTIONS",
+      "url": "https://mg.dayatrader.ir/market-data/market-view/trading-view/[REDACTED]/tradeVolumeAndCountOnCustomerType/on-minutes",
+      "request_headers": [
+        {
+          "name": "Accept"
+        },
+        {
+          "name": "Accept-Encoding"
+        },
+        {
+          "name": "Accept-Language"
+        },
+        {
+          "name": "Access-Control-Request-Headers"
+        },
+        {
+          "name": "Access-Control-Request-Method"
+        },
+        {
+          "name": "Cache-Control"
+        },
+        {
+          "name": "Connection"
+        },
+        {
+          "name": "Host"
+        },
+        {
+          "name": "Origin"
+        },
+        {
+          "name": "Pragma"
+        },
+        {
+          "name": "Referer"
+        },
+        {
+          "name": "Sec-Fetch-Dest"
+        },
+        {
+          "name": "Sec-Fetch-Mode"
+        },
+        {
+          "name": "Sec-Fetch-Site"
+        },
+        {
+          "name": "User-Agent"
+        }
+      ],
+      "request_body_field_names": [],
+      "status": 200,
+      "response_headers": [
+        {
+          "name": "access-control-allow-credentials"
+        },
+        {
+          "name": "access-control-allow-headers"
+        },
+        {
+          "name": "access-control-allow-methods"
+        },
+        {
+          "name": "access-control-allow-origin"
+        },
+        {
+          "name": "cache-control"
+        },
+        {
+          "name": "content-length"
+        },
+        {
+          "name": "content-security-policy"
+        },
+        {
+          "name": "expires"
+        },
+        {
+          "name": "pragma"
+        },
+        {
+          "name": "referrer-policy"
+        },
+        {
+          "name": "strict-transport-security"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "vary"
+        },
+        {
+          "name": "x-content-type-options"
+        },
+        {
+          "name": "x-frame-options"
+        },
+        {
+          "name": "x-xss-protection"
+        }
+      ],
+      "response_time_fields": {}
+    }
+  ]
+}
