@@ -46,10 +46,9 @@ if [[ ! -e /usr/share/zoneinfo/Asia/Tehran ]]; then
   apt-get update
   apt-get install -y tzdata
 fi
-if command -v timedatectl >/dev/null 2>&1; then
-  timedatectl set-timezone Asia/Tehran
-fi
-echo "منطقه زمانی سیستم: $(date '+%Y-%m-%d %H:%M:%S %Z')"
+# Daya uses an explicit Asia/Tehran location internally. Do not change the
+# host timezone: other services on the same machine may depend on it.
+echo "منطقه زمانی داخلی برنامه: Asia/Tehran (منطقه زمانی سیستم تغییر نمی‌کند)"
 
 if ! command -v go >/dev/null 2>&1; then
   apt-get update
@@ -142,5 +141,5 @@ echo "اطلاعات ورود: cat $CREDENTIALS_FILE"
 echo "تنظیمات: $CONF"
 echo "داده‌ها: $DATA"
 echo "کلید مستقل: $KEY"
-echo "منطقه زمانی: Asia/Tehran"
+echo "منطقه زمانی داخلی برنامه: Asia/Tehran (منطقه زمانی سیستم تغییر نکرد)"
 echo "پنل: http://SERVER_IP:$([[ "$MODE" == "preview" ]] && echo 8102 || echo 8100)"

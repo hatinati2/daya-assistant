@@ -513,7 +513,7 @@ th{font-size:10px;color:#667085}.tablewrap{overflow:auto}.tablewrap tbody td{fon
 .dry-run{width:100%;margin-top:7px;background:#eff8ff;color:#175cd3;border:1px solid #b2ddff}.dry-run-result{margin-top:7px;padding:9px 11px;border:1px solid #b2ddff;border-radius:9px;background:#f5faff;color:#1849a9;line-height:1.7;white-space:pre-wrap}.dry-run-result.error{background:#fef3f2;border-color:#fecdca;color:#b42318}
 @media(max-width:900px){.grid{grid-template-columns:1fr}.head{align-items:flex-start;gap:10px;flex-direction:column}}@media(max-width:560px){.form-grid{grid-template-columns:1fr}.form-field.wide,.form-grid>.wide{grid-column:auto}.batch-plan-controls{grid-template-columns:1fr}}
 </style></head><body data-jyear="{{.JYear}}" data-jmonth="{{.JMonth}}" data-jday="{{.JDay}}"><main class="wrap">
-<div class="head"><div><h1>دستیار دایا</h1><div class="muted" style="margin-top:7px">مدیریت سفارش‌ها · ساعت تهران</div></div><div class="nav"><a class="{{if not .History}}active{{end}}" href="/">سفارش‌های فعال</a><a class="{{if .History}}active{{end}}" href="/history">تاریخچه</a><a href="/settings">اتصال به دایا</a></div><span class="tag">{{if .APIAvailable}}ارسال واقعی API فعال است{{else}}ارسال واقعی API غیرفعال است{{end}}</span></div>
+<div class="head"><div><h1>دستیار دایا</h1><div class="muted" style="margin-top:7px">مدیریت سفارش‌ها · ساعت تهران</div></div><div class="nav"><a class="{{if not .History}}active{{end}}" href="/">سفارش‌های فعال</a><a class="{{if .History}}active{{end}}" href="/history">تاریخچه</a><a href="/settings">اتصال به دایا</a>{{if .PreviewMode}}<a href="/daya-api-test">تست API محلی</a>{{end}}</div><span class="tag">{{if .APIAvailable}}ارسال واقعی API فعال است{{else}}ارسال واقعی API غیرفعال است{{end}}</span></div>
 <div class="note"><b>دو مسیر اجرا:</b> مسیر «بدون API» سفارش را برای ثبت دستی آماده می‌کند. مسیر «با API» تا زمان تأیید endpoint و ساختار درخواست سفارش دایا غیرفعال است؛ مدل سفارش و زمان‌بندی آماده‌اند.</div>
 {{if .Error}}<div class="msg err">{{.Error}}</div>{{end}}{{if .Notice}}<div class="msg">{{.Notice}}</div>{{end}}
 <div class="grid{{if .History}} history{{end}}">{{if not .History}}<section class="card"><h2>تعریف سفارش</h2>
@@ -1183,6 +1183,8 @@ func main() {
 	}()
 
 	mux := http.NewServeMux()
+	previewMode := strings.EqualFold(env("DAYA_PREVIEW_MODE", "false"), "true")
+	registerDayaLocalOrderTestRoutes(mux, previewMode)
 	mux.HandleFunc("GET /api/server-time", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.Header().Set("Cache-Control", "no-store, no-cache, must-revalidate")
@@ -1247,7 +1249,7 @@ func main() {
 			orders = store.historySnapshot()
 		}
 		symbols, catalogStatus := marketSymbolCatalogStatus(symbolCatalog)
-		data := PageData{Orders: orders, Now: formatJalaliDateTime(now), JYear: year, JMonth: month, JDay: day, History: history, APIAvailable: dayaOrderAPICapable(), PreviewMode: strings.EqualFold(env("DAYA_PREVIEW_MODE", "false"), "true"), HasScheduledOrders: !history && hasScheduledOrders, Symbols: symbols, SymbolCatalogStatus: catalogStatus}
+		data := PageData{Orders: orders, Now: formatJalaliDateTime(now), JYear: year, JMonth: month, JDay: day, History: history, APIAvailable: dayaOrderAPICapable(), PreviewMode: previewMode, HasScheduledOrders: !history && hasScheduledOrders, Symbols: symbols, SymbolCatalogStatus: catalogStatus}
 		switch r.URL.Query().Get("notice") {
 		case "saved":
 			data.Notice = "سفارش ذخیره شد."
